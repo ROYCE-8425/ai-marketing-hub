@@ -1,0 +1,178 @@
+/* ─── Competitor Radar component styles ─────────────────────────────────── */
+
+.radar-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.section-desc {
+  font-size: 13px;
+  color: var(--text-dim);
+  margin-top: -8px;
+}
+.radar-container {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 16px 8px 8px;
+}
+
+/* Gap table */
+.gap-table-wrapper {
+  overflow-x: auto;
+}
+.gap-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.gap-table th {
+  text-align: left;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-dim);
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+}
+.gap-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(30, 39, 71, 0.5);
+  color: var(--text);
+  vertical-align: top;
+}
+.gap-table tr:last-child td { border-bottom: none; }
+.gap-table tr:hover td { background: rgba(139, 92, 246, 0.04); }
+
+.priority-badge {
+  font-size: 11px;
+  font-weight: 700;
+  font-family: "DM Mono", monospace;
+  letter-spacing: 0.05em;
+}
+.type-cell { text-transform: capitalize; color: var(--text-dim); }
+.location-cell { color: var(--accent); font-size: 12px; }
+.opportunity-cell { font-size: 12px; line-height: 1.5; }
+
+/* Blueprint */
+.blueprint-block { display: flex; flex-direction: column; gap: 16px; }
+.blueprint-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 12px;
+}
+.bp-card {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  position: relative;
+  overflow: hidden;
+}
+.bp-card::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--primary), var(--accent));
+  border-radius: 4px 4px 0 0;
+}
+.bp-card-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-h);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.bp-list { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+.bp-list-item {
+  font-size: 12px;
+  color: var(--text);
+  line-height: 1.5;
+  padding-left: 12px;
+  border-left: 2px solid rgba(139, 92, 246, 0.4);
+}
+.bp-list-empty { font-size: 12px; color: var(--text-dim); font-style: italic; }
+.bp-structure-item {
+  font-size: 12px;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.bp-check { color: var(--green); font-weight: 700; }
+.outdated-item { border-left-color: rgba(245, 158, 11, 0.5); }
+
+/* Differentiation */
+.differentiation-block { display: flex; flex-direction: column; gap: 8px; }
+.diff-tags { display: flex; flex-wrap: wrap; gap: 8px; }
+.diff-tag {
+  background: rgba(139, 92, 246, 0.1);
+  border: 1px solid rgba(139, 92, 246, 0.25);
+  color: var(--primary);
+  font-size: 12px;
+  padding: 4px 12px;
+  border-radius: 99px;
+}
+
+/* Sub-tab bar */
+.sub-tab-bar {
+  display: flex;
+  gap: 4px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 4px;
+  width: fit-content;
+}
+.sub-tab-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-dim);
+  font-family: "DM Sans", sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 5px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+.sub-tab-btn:hover { background: rgba(139, 92, 246, 0.1); color: var(--text); }
+.sub-tab-active { background: rgba(139, 92, 246, 0.2) !important; color: var(--primary) !important; }
+
+/* Scraping errors */
+.scraping-errors {
+  background: rgba(245, 158, 11, 0.06);
+  border: 1px solid rgba(245, 158, 11, 0.25);
+  border-radius: var(--radius-sm);
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.error-list { list-style: none; display: flex; flex-direction: column; gap: 4px; }
+.error-item { font-size: 12px; color: var(--amber); font-family: "DM Mono", monospace; }
+
+/* Header stat */
+.header-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  flex-shrink: 0;
+}
+.header-stat-num {
+  font-size: 32px;
+  font-weight: 700;
+  font-family: "DM Mono", monospace;
+  color: var(--primary);
+  line-height: 1;
+}
+.header-stat-label { font-size: 11px; color: var(--text-dim); }
+
+/* Empty state */
+.empty-state { font-size: 13px; color: var(--text-dim); font-style: italic; }
