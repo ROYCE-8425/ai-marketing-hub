@@ -9,7 +9,9 @@ import { CompetitorRadarPanel } from "./components/CompetitorRadar";
 import { ContentPlannerPanel } from "./components/ContentPlanner";
 import { CampaignTrackerPanel } from "./components/CampaignTracker";
 import { SerpResultsPanel } from "./components/SerpResultsPanel";
+import { DashboardOverview } from "./components/DashboardOverview";
 import { PublishModal } from "./components/PublishModal";
+import { addToHistory } from "./lib/history";
 import type { AuditResponse } from "./types/seo";
 import type { CompetitorGapResponse, PlanContentResponse } from "./types/content";
 import { API_BASE } from "./lib/apiConfig";
@@ -60,12 +62,24 @@ class ErrorBoundary extends React.Component<
 
 // ─── Tab types ─────────────────────────────────────────────────────────────────
 
-type TabId = "seo" | "cro" | "competitor" | "planner" | "tracker" | "serp";
+type TabId = "dashboard" | "seo" | "cro" | "competitor" | "planner" | "tracker" | "serp" | "aikeys";
 
 const TABS: { id: TabId; label: string; icon: JSX.Element }[] = [
   {
+    id: "dashboard",
+    label: "Tổng quan",
+    icon: (
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+        <rect x="3" y="3" width="7" height="7" rx="1" />
+        <rect x="14" y="3" width="7" height="7" rx="1" />
+        <rect x="3" y="14" width="7" height="7" rx="1" />
+        <rect x="14" y="14" width="7" height="7" rx="1" />
+      </svg>
+    ),
+  },
+  {
     id: "seo",
-    label: "SEO Audit",
+    label: "Kiểm tra SEO",
     icon: (
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
         <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" />
@@ -74,7 +88,7 @@ const TABS: { id: TabId; label: string; icon: JSX.Element }[] = [
   },
   {
     id: "cro",
-    label: "CRO & Trust",
+    label: "CRO & Uy tín",
     icon: (
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
         <polyline points="22 7 13.5 15.5 8.5 10.5 2 17" />
@@ -84,7 +98,7 @@ const TABS: { id: TabId; label: string; icon: JSX.Element }[] = [
   },
   {
     id: "competitor",
-    label: "Competitor Radar",
+    label: "Phân tích đối thủ",
     icon: (
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
         <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
@@ -93,7 +107,7 @@ const TABS: { id: TabId; label: string; icon: JSX.Element }[] = [
   },
   {
     id: "planner",
-    label: "AI Content Writer",
+    label: "Viết nội dung AI",
     icon: (
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
         <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
@@ -102,7 +116,7 @@ const TABS: { id: TabId; label: string; icon: JSX.Element }[] = [
   },
   {
     id: "tracker",
-    label: "Campaign Tracker",
+    label: "Theo dõi chiến dịch",
     icon: (
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
         <line x1="18" y1="20" x2="18" y2="10" />
@@ -113,12 +127,23 @@ const TABS: { id: TabId; label: string; icon: JSX.Element }[] = [
   },
   {
     id: "serp",
-    label: "SERP Live",
+    label: "SERP trực tiếp",
     icon: (
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
         <path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z" />
         <path d="M3.6 9h16.8M3.6 15h16.8" />
         <path d="M12 3a15 15 0 0 1 0 18 15 15 0 0 1 0-18z" />
+      </svg>
+    ),
+  },
+  {
+    id: "aikeys",
+    label: "\uD83E\uDD16 Phân tích từ khóa AI",
+    icon: (
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+        <path d="M12 2L2 7l10 5 10-5-10-5z" />
+        <path d="M2 17l10 5 10-5" />
+        <path d="M2 12l10 5 10-5" />
       </svg>
     ),
   },
@@ -349,7 +374,7 @@ function LoadingBtn({ type = "submit", loading, onClick, children, disabled }: {
 export default function App() {
   const [url, setUrl] = useState("");
   const [keyword, setKeyword] = useState("");
-  const [activeTab, setActiveTab] = useState<TabId>("seo");
+  const [activeTab, setActiveTab] = useState<TabId>("dashboard");
   const { data: auditData, loading: auditLoading, error: auditError, analyze, reset: resetAudit } = useSeoAudit();
 
   // Competitor state
@@ -386,6 +411,35 @@ export default function App() {
   const [serpNumResults, setSerpNumResults] = useState(10);
   const { data: serpData, loading: serpLoading, error: serpError, search: searchSerp, reset: resetSerp } = useSerpLive();
 
+  // AI Keywords state
+  const [aiKeysTarget, setAiKeysTarget] = useState("");
+  const [aiKeysData, setAiKeysData] = useState<any>(null);
+  const [aiKeysLoading, setAiKeysLoading] = useState(false);
+  const [aiKeysError, setAiKeysError] = useState<string | null>(null);
+
+  const handleAiKeysAnalyze = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setAiKeysLoading(true);
+    setAiKeysError(null);
+    setAiKeysData(null);
+    try {
+      const res = await fetch(`${API_BASE}/ai-keywords`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ target_keyword: aiKeysTarget.trim() || null }),
+      });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.detail ?? `HTTP ${res.status}`);
+      }
+      setAiKeysData(await res.json());
+    } catch (err) {
+      setAiKeysError(err instanceof Error ? err.message : "Error");
+    } finally {
+      setAiKeysLoading(false);
+    }
+  };
+
   // Data connection status (updated by AutoFill)
   const [trackGscStatus, setTrackGscStatus] = useState<"connected" | "disconnected" | "pending">("pending");
   const [trackDfsStatus, setTrackDfsStatus] = useState<"connected" | "disconnected" | "pending">("pending");
@@ -393,10 +447,45 @@ export default function App() {
   const [trackFallbackReason, setTrackFallbackReason] = useState<string | null>(null);
   const { loading: autofillLoading, error: autofillError, autoFill } = useAutoFill();
 
+  // GSC Config state (stored in localStorage)
+  const [gscConfigOpen, setGscConfigOpen] = useState(false);
+  const [gscClientId, setGscClientId] = useState(() => localStorage.getItem("gsc_client_id") || "");
+  const [gscSecret, setGscSecret] = useState(() => localStorage.getItem("gsc_secret") || "");
+  const [gscRefreshToken, setGscRefreshToken] = useState(() => localStorage.getItem("gsc_refresh_token") || "");
+  const [gscSiteUrl, setGscSiteUrl] = useState(() => localStorage.getItem("gsc_site_url") || "");
+  const [gscSaveMsg, setGscSaveMsg] = useState<string | null>(null);
+
+  const handleSaveGscConfig = async () => {
+    localStorage.setItem("gsc_client_id", gscClientId);
+    localStorage.setItem("gsc_secret", gscSecret);
+    localStorage.setItem("gsc_refresh_token", gscRefreshToken);
+    localStorage.setItem("gsc_site_url", gscSiteUrl);
+    // Also send to backend to update .env
+    try {
+      await fetch(`${API_BASE}/config/gsc`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          client_id: gscClientId,
+          client_secret: gscSecret,
+          refresh_token: gscRefreshToken,
+          site_url: gscSiteUrl,
+        }),
+      });
+      setGscSaveMsg("✅ Đã lưu thành công! Bấm 'Tự động điền' để lấy dữ liệu thật.");
+      setTimeout(() => setGscSaveMsg(null), 5000);
+    } catch {
+      setGscSaveMsg("✅ Đã lưu vào trình duyệt. Khởi động lại backend để áp dụng.");
+      setTimeout(() => setGscSaveMsg(null), 5000);
+    }
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!url.trim() || !keyword.trim()) return;
-    analyze({ url: url.trim(), primary_keyword: keyword.trim() });
+    analyze({ url: url.trim(), primary_keyword: keyword.trim() }).then(() => {
+      // Save to history after analysis completes (auditData will be set by then)
+    });
     setActiveTab("seo");
   };
 
@@ -466,7 +555,7 @@ export default function App() {
           <span>AI Marketing Hub</span>
         </div>
         <div className="nav-links">
-          <span className="nav-phase">Phase 8</span>
+          <span className="nav-phase">Phase 9</span>
         </div>
       </nav>
 
@@ -475,44 +564,52 @@ export default function App() {
         {activeTab === "seo" && (
           <div className="hero-block">
             <h1 className="hero-title">
-              Full <span className="hero-accent">Marketing Audit</span>
-              <br />from any URL
+              Kiểm tra <span className="hero-accent">Marketing</span> toàn diện
+              <br />từ bất kỳ URL nào
             </h1>
             <p className="hero-sub">
-              Paste a link, add your target keyword — get SEO quality, CRO insights,
-              and trust signal analysis in one click.
+              Dán liên kết, thêm từ khóa mục tiêu — nhận phân tích chất lượng SEO,
+              CRO và tín hiệu uy tín chỉ trong một cú nhấp.
             </p>
           </div>
         )}
 
         <TabBar active={activeTab} onChange={setActiveTab} />
 
+        {/* ── Dashboard Tab ── */}
+        {activeTab === "dashboard" && (
+          <DashboardOverview onNavigate={(tab) => setActiveTab(tab as TabId)} />
+        )}
+
         {/* ── SEO Audit Tab ── */}
         {activeTab === "seo" && (
           <>
             <form className="audit-form" onSubmit={handleSubmit} noValidate>
+              <div className="hint-box">
+                💡 <strong>Gợi ý:</strong> Nhập URL trang có nhiều nội dung (bài viết, sản phẩm chi tiết) để có phân tích chính xác nhất. Tránh dùng trang chủ hoặc trang chỉ có hình ảnh.
+              </div>
               <div className="input-row">
                 <div className="input-group">
-                  <label htmlFor="url-input" className="input-label">Page URL</label>
+                  <label htmlFor="url-input" className="input-label">Đường dẫn trang</label>
                   <div className="input-wrap">
                     <svg className="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
                       <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
                       <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
                     </svg>
                     <input id="url-input" type="url" className="text-input"
-                      placeholder="https://example.com/blog/post"
+                      placeholder="https://example.com/bai-viet"
                       value={url} onChange={(e) => setUrl(e.target.value)}
                       required autoComplete="off" />
                   </div>
                 </div>
                 <div className="input-group">
-                  <label htmlFor="keyword-input" className="input-label">Primary Keyword</label>
+                  <label htmlFor="keyword-input" className="input-label">Từ khóa chính</label>
                   <div className="input-wrap">
                     <svg className="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
                       <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" />
                     </svg>
                     <input id="keyword-input" type="text" className="text-input"
-                      placeholder="e.g. best podcast hosting 2025"
+                      placeholder="ví dụ: dịch vụ hosting tốt nhất 2025"
                       value={keyword} onChange={(e) => setKeyword(e.target.value)}
                       required autoComplete="off" />
                   </div>
@@ -521,7 +618,7 @@ export default function App() {
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" aria-hidden="true">
                     <path d="M5 12h14M12 5l7 7-7 7" />
                   </svg>
-                  Analyze
+                  Phân tích
                 </LoadingBtn>
               </div>
               {auditError && (
@@ -541,7 +638,7 @@ export default function App() {
                     <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
                     <path d="M3 3v5h5" />
                   </svg>
-                  New Audit
+                  Kiểm tra mới
                 </button>
                 <SeoPanel data={auditData} />
               </div>
@@ -554,7 +651,7 @@ export default function App() {
           <>
             {!auditData && (
               <div className="phase3-prompt">
-                <p>Run an SEO Audit first to see CRO &amp; Trust insights for that page.</p>
+                <p>Hãy chạy Kiểm tra SEO trước để xem phân tích CRO &amp; Uy tín cho trang đó.</p>
               </div>
             )}
             {auditData && (
@@ -564,7 +661,7 @@ export default function App() {
                     <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
                     <path d="M3 3v5h5" />
                   </svg>
-                  New Audit
+                  Kiểm tra mới
                 </button>
                 <CroDashboard cro={auditData.cro_analysis} />
               </div>
@@ -576,20 +673,23 @@ export default function App() {
         {activeTab === "competitor" && (
           <>
             <form className="audit-form" onSubmit={handleCompetitorSubmit} noValidate>
+              <div className="hint-box">
+                📊 <strong>Gợi ý:</strong> Nhập URL bài viết của bạn và 2–5 URL đối thủ cùng chủ đề để so sánh nội dung. Mỗi dòng một URL đối thủ.
+              </div>
               <div className="input-group">
-                <label htmlFor="comp-my-url" className="input-label">Your URL (optional — baseline)</label>
+                <label htmlFor="comp-my-url" className="input-label">URL trang của bạn (tùy chọn — làm cơ sở so sánh)</label>
                 <div className="input-wrap">
                   <svg className="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
                     <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><polyline points="9 22 9 12 15 12 15 22" />
                   </svg>
                   <input id="comp-my-url" type="url" className="text-input"
-                    placeholder="https://yoursite.com/blog/your-post"
+                    placeholder="https://trangcuaban.com/bai-viet"
                     value={compMyUrl} onChange={(e) => setCompMyUrl(e.target.value)}
                     autoComplete="off" />
                 </div>
               </div>
               <div className="input-group">
-                <label htmlFor="comp-urls" className="input-label">Competitor URLs (one per line)</label>
+                <label htmlFor="comp-urls" className="input-label">URL đối thủ (mỗi dòng một URL)</label>
                 <textarea
                   id="comp-urls"
                   className="text-input"
@@ -599,13 +699,13 @@ export default function App() {
                 />
               </div>
               <div className="input-group">
-                <label htmlFor="comp-keyword" className="input-label">Primary Keyword</label>
+                <label htmlFor="comp-keyword" className="input-label">Từ khóa chính</label>
                 <div className="input-wrap">
                   <svg className="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
                     <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" />
                   </svg>
                   <input id="comp-keyword" type="text" className="text-input"
-                    placeholder="e.g. best podcast hosting 2025"
+                    placeholder="ví dụ: dịch vụ hosting tốt nhất 2025"
                     value={compKeyword} onChange={(e) => setCompKeyword(e.target.value)}
                     autoComplete="off" />
                 </div>
@@ -614,7 +714,7 @@ export default function App() {
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" aria-hidden="true">
                   <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
                 </svg>
-                Analyze Competitors
+                Phân tích đối thủ
               </LoadingBtn>
               {compError && (
                 <p className="error-msg" role="alert">
@@ -640,26 +740,26 @@ export default function App() {
             <form className="audit-form" onSubmit={handlePlanSubmit} noValidate>
               <div className="input-row">
                 <div className="input-group">
-                  <label htmlFor="plan-keyword" className="input-label">Primary Keyword</label>
+                  <label htmlFor="plan-keyword" className="input-label">Từ khóa chính</label>
                   <div className="input-wrap">
                     <svg className="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
                       <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" />
                     </svg>
                     <input id="plan-keyword" type="text" className="text-input"
-                      placeholder="e.g. best podcast hosting 2025"
+                      placeholder="ví dụ: dịch vụ hosting tốt nhất 2025"
                       value={planKeyword} onChange={(e) => setPlanKeyword(e.target.value)}
                       required autoComplete="off" />
                   </div>
                 </div>
                 <div className="input-group">
-                  <label htmlFor="plan-audience" className="input-label">Target Audience</label>
+                  <label htmlFor="plan-audience" className="input-label">Đối tượng mục tiêu</label>
                   <div className="input-wrap">
                     <svg className="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
                       <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" />
                       <path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" />
                     </svg>
                     <input id="plan-audience" type="text" className="text-input"
-                      placeholder="e.g. podcast creators, 1K–50K listeners"
+                      placeholder="ví dụ: người làm podcast, 1K–50K lượt nghe"
                       value={planAudience} onChange={(e) => setPlanAudience(e.target.value)}
                       required autoComplete="off" />
                   </div>
@@ -668,7 +768,7 @@ export default function App() {
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" aria-hidden="true">
                     <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
                   </svg>
-                  Generate Plan
+                  Tạo kế hoạch
                 </LoadingBtn>
               </div>
               {compData && compData.blueprint.must_fill_gaps.length > 0 && (
@@ -676,7 +776,7 @@ export default function App() {
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
                     <circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" />
                   </svg>
-                  {compData.blueprint.must_fill_gaps.length} competitor gaps will be addressed in the outline.
+                  {compData.blueprint.must_fill_gaps.length} lỗ hổng đối thủ sẽ được xử lý trong dàn ý.
                 </p>
               )}
               {planError && (
@@ -769,12 +869,12 @@ export default function App() {
                 <span>
                   {trackFallbackReason ? (
                     <>
-                      <strong>Auto-fill failed:</strong> {trackFallbackReason} —{" "}
-                      Form was populated with estimated metrics. Configure GSC / DataForSEO credentials for live data.
+                      <strong>Tự động điền thất bại:</strong> {trackFallbackReason} —{" "}
+                      Biểu mẫu đã được điền bằng số liệu ước tính. Cấu hình GSC / DataForSEO để có dữ liệu thật.
                     </>
                   ) : (
                     <>
-                      <strong>Mock data:</strong> No GSC or DataForSEO credentials are configured — results are for preview only.
+                      <strong>Dữ liệu ước tính:</strong> Chưa cấu hình GSC hoặc DataForSEO — kết quả chỉ mang tính tham khảo.
                     </>
                   )}
                 </span>
@@ -786,34 +886,96 @@ export default function App() {
                   <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
                 </svg>
                 <span>
-                  <strong>Auto-fill error:</strong> {autofillError} — Form was populated with estimated metrics instead.
+                  <strong>Lỗi tự điền:</strong> {autofillError} — Biểu mẫu đã được điền bằng số liệu ước tính.
                 </span>
               </div>
             )}
 
+            {/* ── GSC Config Panel ── */}
+            <div className="gsc-config-section">
+              <button className="gsc-config-toggle" type="button" onClick={() => setGscConfigOpen(!gscConfigOpen)}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                </svg>
+                {gscConfigOpen ? "▲ Đóng cấu hình GSC" : "▼ Cấu hình Google Search Console (lấy dữ liệu thật)"}
+              </button>
+
+              {gscConfigOpen && (
+                <div className="gsc-config-panel">
+                  <div className="gsc-guide">
+                    <h4>📖 Hướng dẫn lấy thông tin:</h4>
+                    <ol>
+                      <li>Truy cập <a href="https://console.cloud.google.com" target="_blank" rel="noreferrer">Google Cloud Console</a> → tạo Project mới</li>
+                      <li>Vào <strong>APIs & Services</strong> → <strong>Library</strong> → tìm "Google Search Console API" → <strong>Enable</strong></li>
+                      <li>Vào <strong>OAuth consent screen</strong> → chọn External → điền tên app → thêm email vào Test users</li>
+                      <li>Vào <strong>Credentials</strong> → <strong>Create OAuth client ID</strong> → Web application</li>
+                      <li>Thêm Redirect URI: <code>http://localhost:8000/callback</code></li>
+                      <li>Copy <strong>Client ID</strong> và <strong>Client Secret</strong> điền vào bên dưới</li>
+                      <li>Để lấy <strong>Refresh Token</strong>: mở link OAuth (xem TECH_REPORT.md mục 11) → cấp quyền → đổi code</li>
+                    </ol>
+                  </div>
+
+                  <div className="gsc-fields">
+                    <div className="input-group">
+                      <label className="input-label">Client ID</label>
+                      <input className="text-input gsc-input" type="text"
+                        placeholder="xxxx.apps.googleusercontent.com"
+                        value={gscClientId} onChange={e => setGscClientId(e.target.value)} />
+                    </div>
+                    <div className="input-group">
+                      <label className="input-label">Client Secret</label>
+                      <input className="text-input gsc-input" type="password"
+                        placeholder="GOCSPX-xxxxxxxxxxxx"
+                        value={gscSecret} onChange={e => setGscSecret(e.target.value)} />
+                    </div>
+                    <div className="input-group">
+                      <label className="input-label">Refresh Token</label>
+                      <input className="text-input gsc-input" type="password"
+                        placeholder="1//xxxxxxxxxxxx"
+                        value={gscRefreshToken} onChange={e => setGscRefreshToken(e.target.value)} />
+                    </div>
+                    <div className="input-group">
+                      <label className="input-label">URL Website (từ GSC)</label>
+                      <input className="text-input gsc-input" type="url"
+                        placeholder="https://yourwebsite.com/"
+                        value={gscSiteUrl} onChange={e => setGscSiteUrl(e.target.value)} />
+                    </div>
+                    <button type="button" className="analyze-btn" style={{alignSelf:"flex-start"}} onClick={handleSaveGscConfig}
+                      disabled={!gscClientId || !gscSecret || !gscRefreshToken || !gscSiteUrl}>
+                      💾 Lưu cấu hình
+                    </button>
+                    {gscSaveMsg && <p className="gsc-save-msg">{gscSaveMsg}</p>}
+                  </div>
+                </div>
+              )}
+            </div>
+
             <form className="audit-form" onSubmit={handleTrackerSubmit} noValidate>
+              <div className="hint-box">
+                📍 <strong>Gợi ý:</strong> Nhập URL thuộc domain đã cấu hình trong GSC để lấy dữ liệu thật. Domain khác sẽ dùng số liệu ước tính.
+              </div>
               <div className="input-row">
                 <div className="input-group">
-                  <label htmlFor="track-url" className="input-label">Your URL</label>
+                  <label htmlFor="track-url" className="input-label">URL trang của bạn</label>
                   <div className="input-wrap">
                     <svg className="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
                       <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
                       <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
                     </svg>
                     <input id="track-url" type="url" className="text-input"
-                      placeholder="https://yoursite.com/blog/post"
+                      placeholder="https://trangcuaban.com/bai-viet"
                       value={trackUrl} onChange={(e) => setTrackUrl(e.target.value)}
                       required autoComplete="off" />
                   </div>
                 </div>
                 <div className="input-group">
-                  <label htmlFor="track-kw" className="input-label">Target Keyword</label>
+                  <label htmlFor="track-kw" className="input-label">Từ khóa mục tiêu</label>
                   <div className="input-wrap">
                     <svg className="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
                       <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" />
                     </svg>
                     <input id="track-kw" type="text" className="text-input"
-                      placeholder="e.g. best podcast hosting"
+                      placeholder="ví dụ: dịch vụ hosting tốt nhất"
                       value={trackKeyword} onChange={(e) => setTrackKeyword(e.target.value)}
                       required autoComplete="off" />
                   </div>
@@ -824,14 +986,14 @@ export default function App() {
                     <line x1="12" y1="20" x2="12" y2="4" />
                     <line x1="6"  y1="20" x2="6"  y2="14" />
                   </svg>
-                  Analyze Opportunity
+                  Phân tích cơ hội
                 </LoadingBtn>
                 <button
                   type="button"
                   className="autofill-btn"
                   onClick={handleAutoFill}
                   disabled={autofillLoading || !trackUrl.trim() || !trackKeyword.trim()}
-                  title="Fetch live metrics from GSC & DataForSEO, or mock data if not configured"
+                  title="Lấy số liệu thực từ GSC & DataForSEO, hoặc dữ liệu mẫu nếu chưa cấu hình"
                 >
                   {autofillLoading ? (
                     <span className="btn-spinner" aria-label="Auto-filling" />
@@ -840,34 +1002,34 @@ export default function App() {
                       <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
                     </svg>
                   )}
-                  Auto-Fill Metrics
+                  Tự động điền
                 </button>
               </div>
               {/* Optional GSC fields */}
               <div className="gsc-row">
                 <div className="input-group">
-                  <label htmlFor="track-pos" className="input-label-sm">Current Position (GSC)</label>
-                  <input id="track-pos" type="number" className="text-input" placeholder="e.g. 12"
+                  <label htmlFor="track-pos" className="input-label-sm">Vị trí hiện tại (GSC)</label>
+                  <input id="track-pos" type="number" className="text-input" placeholder="VD: 12"
                     value={trackPosition} onChange={(e) => setTrackPosition(e.target.value)} min="1" max="200" />
                 </div>
                 <div className="input-group">
-                  <label htmlFor="track-imp" className="input-label-sm">Monthly Impressions</label>
-                  <input id="track-imp" type="number" className="text-input" placeholder="e.g. 1500"
+                  <label htmlFor="track-imp" className="input-label-sm">Lượt hiển thị/tháng</label>
+                  <input id="track-imp" type="number" className="text-input" placeholder="VD: 1500"
                     value={trackImpressions} onChange={(e) => setTrackImpressions(e.target.value)} min="0" />
                 </div>
                 <div className="input-group">
-                  <label htmlFor="track-clk" className="input-label-sm">Monthly Clicks</label>
-                  <input id="track-clk" type="number" className="text-input" placeholder="e.g. 45"
+                  <label htmlFor="track-clk" className="input-label-sm">Lượt nhấp/tháng</label>
+                  <input id="track-clk" type="number" className="text-input" placeholder="VD: 45"
                     value={trackClicks} onChange={(e) => setTrackClicks(e.target.value)} min="0" />
                 </div>
                 <div className="input-group">
-                  <label htmlFor="track-vol" className="input-label-sm">Search Volume (optional)</label>
-                  <input id="track-vol" type="number" className="text-input" placeholder="e.g. 2400"
+                  <label htmlFor="track-vol" className="input-label-sm">Lượng tìm kiếm (tùy chọn)</label>
+                  <input id="track-vol" type="number" className="text-input" placeholder="VD: 2400"
                     value={trackVolume} onChange={(e) => setTrackVolume(e.target.value)} min="0" />
                 </div>
                 <div className="input-group">
-                  <label htmlFor="track-diff" className="input-label-sm">Difficulty 0–100 (optional)</label>
-                  <input id="track-diff" type="number" className="text-input" placeholder="e.g. 45"
+                  <label htmlFor="track-diff" className="input-label-sm">Độ khó 0–100 (tùy chọn)</label>
+                  <input id="track-diff" type="number" className="text-input" placeholder="VD: 45"
                     value={trackDifficulty} onChange={(e) => setTrackDifficulty(e.target.value)} min="0" max="100" />
                 </div>
               </div>
@@ -895,7 +1057,13 @@ export default function App() {
             <form className="audit-form" onSubmit={(e) => {
               e.preventDefault();
               if (!serpKeyword.trim()) return;
-              searchSerp(serpKeyword.trim(), serpLocation, serpNumResults);
+              searchSerp(serpKeyword.trim(), serpLocation, serpNumResults).then(() => {
+                addToHistory({
+                  type: "serp",
+                  keyword: serpKeyword.trim(),
+                  summary: `SERP search: ${serpKeyword.trim()} (${serpLocation})`,
+                });
+              });
             }} noValidate>
               <div className="input-row">
                 <div className="input-group">
@@ -964,10 +1132,172 @@ export default function App() {
             )}
           </>
         )}
+
+        {/* AI Keywords Tab */}
+        {activeTab === "aikeys" && (
+          <>
+            <form className="audit-form" onSubmit={handleAiKeysAnalyze} noValidate>
+              <div className="hint-box">
+                🤖 <strong>Phân tích từ khóa AI:</strong> Lấy toàn bộ từ khóa từ Google Search Console, phân tích hiệu suất và đề xuất chiến lược từ khóa mới.
+              </div>
+              <div className="input-row">
+                <div className="input-group">
+                  <label htmlFor="aikeys-target" className="input-label">Từ khóa mục tiêu (tùy chọn)</label>
+                  <div className="input-wrap">
+                    <svg className="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" /></svg>
+                    <input id="aikeys-target" type="text" className="text-input"
+                      placeholder="ví dụ: mitsubishi bình phước"
+                      value={aiKeysTarget} onChange={e => setAiKeysTarget(e.target.value)} />
+                  </div>
+                </div>
+                <LoadingBtn loading={aiKeysLoading}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M12 2L2 7l10 5 10-5-10-5z" /><path d="M2 17l10 5 10-5" /></svg>
+                  Phân tích GSC + AI
+                </LoadingBtn>
+              </div>
+              {aiKeysError && (
+                <p className="error-msg" role="alert">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" /></svg>
+                  {aiKeysError}
+                </p>
+              )}
+            </form>
+
+            {aiKeysData && (
+              <div className="result-wrapper">
+                <button className="reset-btn" onClick={() => setAiKeysData(null)}>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" /><path d="M3 3v5h5" /></svg>
+                  Phân tích mới
+                </button>
+
+                <ResultPanel>
+                  <div className="result-header">
+                    <div className="result-meta">
+                      <h2 className="result-title">📊 Phân tích từ khóa — {aiKeysData.site_url}</h2>
+                      <p className="result-keyword">Nguồn: <strong>{aiKeysData.data_source === "live_gsc" ? "✅ GSC thật" : "🟡 Ước tính"}</strong> | AI: <strong>{aiKeysData.ai_provider === "ai" ? "✅ AI" : "⚙️ Thuật toán"}</strong></p>
+                    </div>
+                  </div>
+                  <div className="result-grid">
+                    <ResultCard label="Từ khóa GSC" value={aiKeysData.gsc_keywords?.length || 0} />
+                    <ResultCard label="Tổng clicks" value={aiKeysData.total_clicks || 0} />
+                    <ResultCard label="Tổng hiển thị" value={aiKeysData.total_impressions || 0} />
+                    <ResultCard label="Quick wins" value={aiKeysData.quick_wins?.length || 0} />
+                  </div>
+                  {aiKeysData.summary && (
+                    <div className="section-block">
+                      <h3 className="section-title">Tóm tắt</h3>
+                      <p style={{fontSize:"13px",lineHeight:1.7,color:"var(--text)"}}>{aiKeysData.summary}</p>
+                    </div>
+                  )}
+                </ResultPanel>
+
+                {aiKeysData.gsc_keywords?.length > 0 && (
+                  <ResultPanel>
+                    <h3 className="section-title">📊 Từ khóa từ Google Search Console ({aiKeysData.gsc_keywords.length})</h3>
+                    <div style={{overflowX:"auto"}}>
+                      <table className="serp-table">
+                        <thead><tr><th>#</th><th>Từ khóa</th><th>Vị trí</th><th>Clicks</th><th>Hiển thị</th><th>CTR</th></tr></thead>
+                        <tbody>
+                          {aiKeysData.gsc_keywords.slice(0, 30).map((kw: any, i: number) => (
+                            <tr key={i}>
+                              <td>{i + 1}</td>
+                              <td style={{fontWeight:600,color:"var(--text-h)"}}>{kw.keyword}</td>
+                              <td style={{color: kw.position <= 10 ? "var(--green)" : kw.position <= 20 ? "var(--amber)" : "var(--red)"}}>{kw.position}</td>
+                              <td>{kw.clicks}</td>
+                              <td>{kw.impressions}</td>
+                              <td>{(kw.ctr * 100).toFixed(1)}%</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </ResultPanel>
+                )}
+
+                {aiKeysData.quick_wins?.length > 0 && (
+                  <ResultPanel>
+                    <h3 className="section-title">⚡ Quick Wins</h3>
+                    <div style={{display:"flex",flexDirection:"column",gap:"8px"}}>
+                      {aiKeysData.quick_wins.map((qw: any, i: number) => (
+                        <div key={i} className="rec-badge priority-important">
+                          <span className="rec-tag" style={{background:"rgba(245,158,11,0.3)",color:"var(--amber)"}}>pos {qw.current_position}</span>
+                          <div>
+                            <strong style={{color:"var(--text-h)"}}>{qw.keyword}</strong>
+                            <p style={{fontSize:"12px",margin:"4px 0 0",color:"var(--text)"}}>{qw.action}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </ResultPanel>
+                )}
+
+                {aiKeysData.keyword_clusters?.length > 0 && (
+                  <ResultPanel>
+                    <h3 className="section-title">🗂️ Nhóm từ khóa (Clusters)</h3>
+                    <div className="cro-grid">
+                      {aiKeysData.keyword_clusters.map((c: any, i: number) => (
+                        <div key={i} className="glass-card">
+                          <h4 className="glass-card-title">{c.cluster_name}</h4>
+                          <div className="lsi-tags">
+                            {(c.keywords || []).map((k: string, j: number) => (
+                              <span key={j} className="lsi-tag">{k}</span>
+                            ))}
+                          </div>
+                          {c.suggested_content && <p style={{fontSize:"12px",color:"var(--text)",marginTop:"4px"}}>📝 {c.suggested_content}</p>}
+                        </div>
+                      ))}
+                    </div>
+                  </ResultPanel>
+                )}
+
+                {aiKeysData.recommended_keywords?.length > 0 && (
+                  <ResultPanel>
+                    <h3 className="section-title">🎯 Từ khóa đề xuất mới</h3>
+                    <div style={{display:"flex",flexDirection:"column",gap:"8px"}}>
+                      {aiKeysData.recommended_keywords.map((r: any, i: number) => (
+                        <div key={i} className="rec-badge priority-nice_to_have">
+                          <span className="rec-tag">{r.priority}</span>
+                          <div>
+                            <strong style={{color:"var(--text-h)"}}>{r.keyword}</strong>
+                            <p style={{fontSize:"12px",margin:"4px 0 0",color:"var(--text)"}}>{r.reason}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </ResultPanel>
+                )}
+
+                {aiKeysData.content_strategy?.length > 0 && (
+                  <ResultPanel>
+                    <h3 className="section-title">📝 Chiến lược nội dung</h3>
+                    <div style={{display:"flex",flexDirection:"column",gap:"8px"}}>
+                      {aiKeysData.content_strategy.map((s: any, i: number) => (
+                        <div key={i} className="rec-badge priority-nice_to_have">
+                          <span className="rec-tag">{s.content_type || "blog"}</span>
+                          <div>
+                            <strong style={{color:"var(--text-h)"}}>{s.title}</strong>
+                            <p style={{fontSize:"12px",margin:"4px 0 0",color:"var(--text)"}}>{s.description}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </ResultPanel>
+                )}
+
+                {aiKeysData.ai_error && (
+                  <div className="mock-warning-banner">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                    <span><strong>AI không khả dụng:</strong> {aiKeysData.ai_error} — Đang dùng phân tích thuật toán.</span>
+                  </div>
+                )}
+              </div>
+            )}
+          </>
+        )}
       </main>
 
       <footer className="page-footer">
-        AI Marketing Hub — Phase 8 &nbsp;&middot;&nbsp; Built with FastAPI + React
+        AI Marketing Hub — Phiên bản 9 &nbsp;&middot;&nbsp; Xây dựng với FastAPI + React
       </footer>
 
       {publishModal && (

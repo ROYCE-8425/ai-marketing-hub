@@ -16,6 +16,10 @@ import httpx
 from bs4 import BeautifulSoup
 from datetime import datetime
 from typing import Any, Dict, Literal, Optional
+from dotenv import load_dotenv
+
+# Load .env from backend root
+load_dotenv(os.path.join(os.path.dirname(os.path.dirname(__file__)), ".env"))
 
 from fastapi import APIRouter, Query
 from pydantic import BaseModel, Field
@@ -68,8 +72,50 @@ class DataConnectorStatus(BaseModel):
 router = APIRouter(prefix="/api", tags=["Phase 6 — Live Data Connectors"])
 
 # ─────────────────────────────────────────────────────────────────────────────
+# POST /api/config/gsc — Save GSC credentials to .env from UI
+# ─────────────────────────────────────────────────────────────────────────────
+
+class GscConfigRequest(BaseModel):
+    client_id: str
+    client_secret: str
+    refresh_token: str
+    site_url: str
+
+@router.post("/config/gsc")
+async def save_gsc_config(body: GscConfigRequest):
+    """Save GSC credentials to backend .env file and reload."""
+    env_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), ".env")
+    lines = [
+        f"GOOGLE_SEARCH_CONSOLE_CLIENT_ID={body.client_id}",
+        f"GOOGLE_SEARCH_CONSOLE_CLIENT_SECRET={body.client_secret}",
+        f"GOOGLE_SEARCH_CONSOLE_REFRESH_TOKEN={body.refresh_token}",
+        f"GSC_SITE_URL={body.site_url}",
+    ]
+    with open(env_path, "w") as f:
+        f.write("\n".join(lines) + "\n")
+    # Reload env vars in current process
+    load_dotenv(env_path, override=True)
+    return {"status": "ok", "message": "GSC credentials saved"}
+
+# ─────────────────────────────────────────────────────────────────────────────
+# POST /api/ai-keywords — AI-powered keyword analysis using GSC data + Z.AI
+# ─────────────────────────────────────────────────────────────────────────────
+
+class AiKeywordsRequest(BaseModel):
+    target_keyword: Optional[str] = None
+
+@router.post("/ai-keywords")
+async def ai_keyword_analysis(body: AiKeywordsRequest):
+    """Fetch GSC keywords and analyze with AI to recommend new keyword opportunities."""
+    import asyncio
+    from core.ai_keyword_analyzer import analyze_keywords_with_ai
+    result = await asyncio.to_thread(analyze_keywords_with_ai, body.target_keyword)
+    return result
+
+
 # Mock data generators (fallback when credentials are missing)
 # ─────────────────────────────────────────────────────────────────────────────
+
 
 def _mock_gsc_data(keyword: str, _url: str) -> Dict[str, Any]:
     """Realistic GSC mock data based on keyword commercial intent."""
@@ -232,8 +278,85 @@ async def sync_gsc_data(
         "gsc": None, "ga4": None, "page_content": None,
     }
 
-    # ── GSC ────────────────────────────────────────────────────────────────────
-    if body.gsc_site_url and body.gsc_credentials_path:
+    # ── GSC — try .env credentials first, then request body ────────────────
+    gsc_client_id = os.getenv("GOOGLE_SEARCH_CONSOLE_CLIENT_ID", "")
+    gsc_secret = os.getenv("GOOGLE_SEARCH_CONSOLE_CLIENT_SECRET", "")
+    gsc_refresh = os.getenv("GOOGLE_SEARCH_CONSOLE_REFRESH_TOKEN", "")
+    gsc_site = body.gsc_site_url or os.getenv("GSC_SITE_URL", "")
+
+    gsc_connected = bool(gsc_client_id and gsc_secret and gsc_refresh and gsc_site)
+
+    if gsc_connected:
+        try:
+            # Get a fresh access token using the refresh token
+            token_resp = httpx.post("https://oauth2.googleapis.com/token", data={
+                "client_id": gsc_client_id,
+                "client_secret": gsc_secret,
+                "refresh_token": gsc_refresh,
+                "grant_type": "refresh_token",
+            }, timeout=10.0)
+            token_data = token_resp.json()
+            access_token = token_data.get("access_token", "")
+
+            if access_token:
+                # Query GSC API directly
+                api_url = "https://www.googleapis.com/webmasters/v3/sites/{}/searchAnalytics/query".format(
+                    httpx.URL(gsc_site).raw_path.decode() if hasattr(httpx.URL(gsc_site).raw_path, 'decode') else gsc_site.rstrip('/')
+                )
+                # Use encoded site URL
+                import urllib.parse
+                encoded_site = urllib.parse.quote(gsc_site, safe="")
+                api_url = f"https://www.googleapis.com/webmasters/v3/sites/{encoded_site}/searchAnalytics/query"
+
+                from datetime import timedelta
+                end_date = datetime.now().date() - timedelta(days=3)
+                start_date = end_date - timedelta(days=days)
+
+                gsc_resp = httpx.post(api_url, headers={
+                    "Authorization": f"Bearer {access_token}",
+                    "Content-Type": "application/json",
+                }, json={
+                    "startDate": start_date.isoformat(),
+                    "endDate": end_date.isoformat(),
+                    "dimensions": ["query"],
+                    "rowLimit": 500,
+                }, timeout=15.0)
+
+                if gsc_resp.status_code == 200:
+                    rows = gsc_resp.json().get("rows", [])
+                    kw_lower = body.keyword.lower()
+
+                    # Find matching keyword
+                    matched = [
+                        r for r in rows
+                        if kw_lower in r["keys"][0].lower() or r["keys"][0].lower() in kw_lower
+                    ]
+                    row = matched[0] if matched else (rows[0] if rows else None)
+
+                    if row:
+                        result["gsc"] = {
+                            "keyword": row["keys"][0],
+                            "clicks": int(row["clicks"]),
+                            "impressions": int(row["impressions"]),
+                            "ctr": round(row["ctr"], 4),
+                            "position": round(row["position"], 1),
+                            "source": "live_gsc",
+                        }
+                        result["source"] = "live"
+                    else:
+                        result["gsc"] = _mock_gsc_data(body.keyword, body.url)
+                        result["gsc"]["note"] = f"Không tìm thấy từ khóa '{body.keyword}' trong GSC. Dùng dữ liệu ước tính."
+                else:
+                    result["gsc"] = _mock_gsc_data(body.keyword, body.url)
+                    result["gsc"]["note"] = f"GSC API lỗi {gsc_resp.status_code}. Dùng dữ liệu ước tính."
+            else:
+                result["gsc"] = _mock_gsc_data(body.keyword, body.url)
+                result["gsc"]["note"] = "Không lấy được access token. Refresh token có thể hết hạn."
+        except Exception as exc:
+            result["gsc"] = _mock_gsc_data(body.keyword, body.url)
+            result["gsc"]["note"] = f"GSC error: {str(exc)[:100]}"
+    elif body.gsc_site_url and body.gsc_credentials_path:
+        # Legacy path: credentials file
         try:
             client = _gsc()(site_url=body.gsc_site_url, credentials_path=body.gsc_credentials_path)
             gsc_data = client.get_keyword_positions(days=days, limit=500)

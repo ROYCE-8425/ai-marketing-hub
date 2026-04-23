@@ -1,19 +1,20 @@
 import { useDeepAnalyze } from "../hooks/useSerpLive";
 import type { SerpLiveResponse, SerpResult, DeepAnalyzeResponse } from "../hooks/useSerpLive";
+import { exportSerpToCsv } from "../lib/history";
 import "./SerpResultsPanel.css";
 
 // ─── Feature label mapping ─────────────────────────────────────────────────────
 
 const FEATURE_LABELS: Record<string, string> = {
-  featured_snippet: "Featured Snippet",
-  people_also_ask: "People Also Ask",
-  knowledge_panel: "Knowledge Panel",
+  featured_snippet: "Nổi bật",
+  people_also_ask: "Câu hỏi liên quan",
+  knowledge_panel: "Bảng tri thức",
   video_carousel: "Video",
-  image_pack: "Images",
-  local_pack: "Local Pack",
-  shopping_results: "Shopping",
-  top_stories: "Top Stories",
-  related_searches: "Related",
+  image_pack: "Hình ảnh",
+  local_pack: "Địa điểm",
+  shopping_results: "Mua sắm",
+  top_stories: "Tin nổi bật",
+  related_searches: "Liên quan",
 };
 
 // ─── Sub-components ────────────────────────────────────────────────────────────
@@ -155,7 +156,7 @@ function DeepAnalyzePanel({
                 <polyline points="22 7 13.5 15.5 8.5 10.5 2 17" />
                 <polyline points="16 7 22 7 22 13" />
               </svg>
-              Deep Analyze ({urls.length} trang)
+              Phân tích sâu ({urls.length} trang)
             </>
           )}
         </button>
@@ -170,7 +171,7 @@ function DeepAnalyzePanel({
           <div className="deep-stats-row">
             {data.statistics.min != null && (
               <div className="deep-stat-card">
-                <div className="deep-stat-label">Min</div>
+                <div className="deep-stat-label">Tối thiểu</div>
                 <div className="deep-stat-value">{data.statistics.min.toLocaleString()}</div>
               </div>
             )}
@@ -188,7 +189,7 @@ function DeepAnalyzePanel({
             )}
             {data.statistics.max != null && (
               <div className="deep-stat-card">
-                <div className="deep-stat-label">Max</div>
+                <div className="deep-stat-label">Tối đa</div>
                 <div className="deep-stat-value">{data.statistics.max.toLocaleString()}</div>
               </div>
             )}
@@ -261,6 +262,19 @@ export function SerpResultsPanel({ data }: { data: SerpLiveResponse }) {
         <span className="serp-meta-pill">
           {data.results_count} kết quả
         </span>
+        {/* Export CSV button */}
+        <button
+          className="export-btn"
+          onClick={(e) => { e.stopPropagation(); exportSerpToCsv(data.keyword, data.organic_results); }}
+          title="Xuất CSV"
+        >
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+            <polyline points="7 10 12 15 17 10" />
+            <line x1="12" y1="15" x2="12" y2="3" />
+          </svg>
+          CSV
+        </button>
         {data.total_results > 0 && (
           <span className="serp-meta-pill">
             ~{data.total_results.toLocaleString()} tổng
@@ -303,7 +317,7 @@ export function SerpResultsPanel({ data }: { data: SerpLiveResponse }) {
         <RankingTable results={data.organic_results} />
       ) : (
         <p style={{ color: "rgba(255,255,255,0.4)", textAlign: "center", padding: "2rem" }}>
-          Không tìm thấy kết quả organic. Google có thể đang chặn request.
+          Không tìm thấy kết quả. Vui lòng thử lại.
         </p>
       )}
 

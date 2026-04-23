@@ -273,6 +273,28 @@ body {
   padding: 10px 14px;
 }
 
+/* Hint box */
+.hint-box {
+  font-size: 13px;
+  color: var(--text);
+  background: rgba(139,92,246,0.06);
+  border: 1px solid rgba(139,92,246,0.2);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  line-height: 1.6;
+}
+.hint-box strong {
+  color: var(--text-h);
+}
+.hint-box code {
+  background: rgba(139,92,246,0.15);
+  color: var(--accent);
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-family: "DM Mono", monospace;
+  font-size: 12px;
+}
+
 /* ── Results ─────────────────────────────────────────────────────────────────── */
 .result-wrapper {
   display: flex;
@@ -1126,6 +1148,101 @@ textarea.text-input {
 .mock-warning-banner strong {
   font-weight: 700;
 }
+
+/* ── GSC Config Panel ──────────────────────────────────────────────────────── */
+.gsc-config-section {
+  margin-bottom: 8px;
+}
+.gsc-config-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  background: rgba(139,92,246,0.06);
+  border: 1px solid rgba(139,92,246,0.2);
+  color: var(--text);
+  font-family: "DM Sans", sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 12px 16px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+}
+.gsc-config-toggle:hover {
+  background: rgba(139,92,246,0.12);
+  border-color: rgba(139,92,246,0.4);
+  color: var(--text-h);
+}
+.gsc-config-panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-top: none;
+  border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  animation: fade-up 0.3s ease both;
+}
+.gsc-guide {
+  background: rgba(34,211,238,0.04);
+  border: 1px solid rgba(34,211,238,0.15);
+  border-radius: var(--radius-sm);
+  padding: 16px;
+}
+.gsc-guide h4 {
+  color: var(--text-h);
+  font-size: 14px;
+  margin-bottom: 10px;
+}
+.gsc-guide ol {
+  padding-left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.gsc-guide li {
+  font-size: 12.5px;
+  color: var(--text);
+  line-height: 1.6;
+}
+.gsc-guide a {
+  color: var(--accent);
+  text-decoration: underline;
+}
+.gsc-guide code {
+  background: rgba(139,92,246,0.15);
+  color: var(--accent);
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-family: "DM Mono", monospace;
+  font-size: 11px;
+}
+.gsc-guide strong {
+  color: var(--text-h);
+}
+.gsc-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+@media (max-width: 640px) {
+  .gsc-fields { grid-template-columns: 1fr; }
+}
+.gsc-input {
+  padding-left: 14px !important;
+}
+.gsc-save-msg {
+  grid-column: 1 / -1;
+  font-size: 13px;
+  color: var(--green);
+  padding: 8px 12px;
+  background: rgba(16,185,129,0.08);
+  border: 1px solid rgba(16,185,129,0.25);
+  border-radius: var(--radius-sm);
+}
+
 /* ═══════════════════════════════════════════════════════════════════════════════
    🎨 THEME V2 — Modern Dashboard Overhaul
    Appended last so it wins specificity ties; lifts the whole UI visually.

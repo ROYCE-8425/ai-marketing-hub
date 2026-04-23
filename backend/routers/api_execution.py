@@ -499,7 +499,7 @@ async def score_opportunities(
     if len(page_content.strip()) < 100:
         raise HTTPException(
             status_code=422,
-            detail="Page content too thin to analyze.",
+            detail="Nội dung trang quá ít để phân tích. Hãy thử với trang có nhiều văn bản hơn (ví dụ: bài viết, blog).",
         )
 
     # ── Intent analysis ───────────────────────────────────────────────────────
