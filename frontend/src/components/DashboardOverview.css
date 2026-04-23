@@ -359,3 +359,68 @@
 .dash-empty-icon { font-size: 2.5rem; margin-bottom: 0.75rem; }
 .dash-empty-text { font-size: 0.9rem; margin-bottom: 0.5rem; }
 .dash-empty-sub { font-size: 0.78rem; color: rgba(255,255,255,0.25); }
+
+/* ── Live Banners ──────────────────────────────────────────────────────────── */
+
+.live-banners {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+}
+
+/* ── Top Pages Table ───────────────────────────────────────────────────────── */
+
+.top-pages-table {
+  overflow-x: auto;
+  max-height: 260px;
+  overflow-y: auto;
+}
+
+.top-pages-table table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.78rem;
+}
+
+.top-pages-table thead th {
+  text-align: left;
+  padding: 0.45rem 0.6rem;
+  color: rgba(255,255,255,0.45);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  font-size: 0.68rem;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  position: sticky;
+  top: 0;
+  background: rgba(15,23,42,0.95);
+}
+
+.top-pages-table tbody tr {
+  transition: background 0.2s;
+}
+
+.top-pages-table tbody tr:hover {
+  background: rgba(139,92,246,0.06);
+}
+
+.top-pages-table tbody td {
+  padding: 0.4rem 0.6rem;
+  color: #e2e8f0;
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+}
+
+.top-pages-table .rank {
+  color: rgba(255,255,255,0.35);
+  font-weight: 600;
+  width: 30px;
+}
+
+.top-pages-table .page-path {
+  max-width: 250px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #c4b5fd;
+}

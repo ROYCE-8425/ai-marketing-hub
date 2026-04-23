@@ -113,6 +113,52 @@ async def ai_keyword_analysis(body: AiKeywordsRequest):
     return result
 
 
+# ─────────────────────────────────────────────────────────────────────────────
+# POST /api/ga4-overview — GA4 analytics overview (sessions, traffic, pages)
+# ─────────────────────────────────────────────────────────────────────────────
+
+class Ga4OverviewRequest(BaseModel):
+    days: int = Field(30, description="Number of days to look back")
+
+@router.post("/ga4-overview")
+async def ga4_overview(body: Ga4OverviewRequest):
+    """Fetch GA4 site overview: sessions, users, traffic sources, top pages, daily timeline."""
+    import asyncio
+    from core.ga4_fetcher import get_ga4_overview
+    result = await asyncio.to_thread(get_ga4_overview, body.days)
+    return result
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# POST /api/config/ga4 — Save GA4 Property ID to .env
+# ─────────────────────────────────────────────────────────────────────────────
+
+class Ga4ConfigRequest(BaseModel):
+    property_id: str
+
+@router.post("/config/ga4")
+async def save_ga4_config(body: Ga4ConfigRequest):
+    """Save GA4 Property ID to .env."""
+    env_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), ".env")
+    # Read existing .env, update or add GA4_PROPERTY_ID
+    lines = []
+    found = False
+    if os.path.exists(env_path):
+        with open(env_path, "r") as f:
+            for line in f:
+                if line.startswith("GA4_PROPERTY_ID="):
+                    lines.append(f"GA4_PROPERTY_ID={body.property_id}\n")
+                    found = True
+                else:
+                    lines.append(line)
+    if not found:
+        lines.append(f"GA4_PROPERTY_ID={body.property_id}\n")
+    with open(env_path, "w") as f:
+        f.writelines(lines)
+    load_dotenv(env_path, override=True)
+    return {"status": "ok", "message": f"GA4 Property ID saved: {body.property_id}"}
+
+
 # Mock data generators (fallback when credentials are missing)
 # ─────────────────────────────────────────────────────────────────────────────
 
