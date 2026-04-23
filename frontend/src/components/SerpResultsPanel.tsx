@@ -287,11 +287,13 @@ export function SerpResultsPanel({ data }: { data: SerpLiveResponse }) {
         )}
         <span className={`serp-source-badge ${
           data.source === "dataforseo_live" ? "src-dataforseo" :
-          data.source === "mock_serp" ? "src-scraper" : "src-scraper"
+          data.source === "mock_serp" ? "src-scraper" : "src-dataforseo"
         }`}>
-          {data.source === "dataforseo_live" ? "DataForSEO" :
-           data.source === "duckduckgo_search" ? "🔍 DuckDuckGo Live" :
-           data.source === "mock_serp" ? "⚠️ Mock Data" : data.source}
+          {data.source === "dataforseo_live" ? "✅ DataForSEO" :
+           data.source === "duckduckgo_live" ? "🔍 Dữ liệu thật" :
+           data.source === "duckduckgo_search" ? "🔍 Dữ liệu thật" :
+           data.source === "google_scrape" ? "🔍 Google Live" :
+           data.source === "mock_serp" ? "⚠️ Dữ liệu mẫu" : data.source}
         </span>
       </div>
 

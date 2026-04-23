@@ -22,8 +22,9 @@ load_dotenv(os.path.join(os.path.dirname(os.path.dirname(__file__)), ".env"))
 GA4_API_URL = "https://analyticsdata.googleapis.com/v1beta"
 
 
-def _get_access_token() -> Optional[str]:
+async def _get_access_token_async() -> Optional[str]:
     """Get OAuth2 access token using the same credentials as GSC."""
+    load_dotenv(os.path.join(os.path.dirname(os.path.dirname(__file__)), ".env"), override=True)
     client_id = os.getenv("GOOGLE_SEARCH_CONSOLE_CLIENT_ID", "")
     secret = os.getenv("GOOGLE_SEARCH_CONSOLE_CLIENT_SECRET", "")
     refresh = os.getenv("GA4_REFRESH_TOKEN", "") or os.getenv("GOOGLE_SEARCH_CONSOLE_REFRESH_TOKEN", "")
@@ -32,35 +33,40 @@ def _get_access_token() -> Optional[str]:
         return None
 
     try:
-        resp = httpx.post("https://oauth2.googleapis.com/token", data={
-            "client_id": client_id,
-            "client_secret": secret,
-            "refresh_token": refresh,
-            "grant_type": "refresh_token",
-        }, timeout=10.0)
-        return resp.json().get("access_token")
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            resp = await client.post("https://oauth2.googleapis.com/token", data={
+                "client_id": client_id,
+                "client_secret": secret,
+                "refresh_token": refresh,
+                "grant_type": "refresh_token",
+            })
+            return resp.json().get("access_token")
     except Exception:
         return None
 
 
-def _run_report(property_id: str, access_token: str, body: Dict) -> Dict:
-    """Execute a GA4 Data API runReport request."""
+async def _run_report_async(property_id: str, access_token: str, body: Dict) -> Dict:
+    """Execute a GA4 Data API runReport request (async)."""
     url = f"{GA4_API_URL}/properties/{property_id}:runReport"
-    resp = httpx.post(url, headers={
-        "Authorization": f"Bearer {access_token}",
-        "Content-Type": "application/json",
-    }, json=body, timeout=15.0)
+    try:
+        async with httpx.AsyncClient(timeout=15.0) as client:
+            resp = await client.post(url, headers={
+                "Authorization": f"Bearer {access_token}",
+                "Content-Type": "application/json",
+            }, json=body)
+            if resp.status_code != 200:
+                raise ValueError(f"GA4 API error {resp.status_code}: {resp.text[:300]}")
+            return resp.json()
+    except httpx.TimeoutException:
+        raise ValueError("GA4 API timeout")
 
-    if resp.status_code != 200:
-        raise ValueError(f"GA4 API error {resp.status_code}: {resp.text[:300]}")
-    return resp.json()
 
-
-def get_ga4_overview(days: int = 30) -> Dict[str, Any]:
+async def get_ga4_overview(days: int = 30) -> Dict[str, Any]:
     """
     Fetch GA4 site overview: sessions, users, pageviews, engagement.
     Returns mock data if GA4 is not configured.
     """
+    load_dotenv(os.path.join(os.path.dirname(os.path.dirname(__file__)), ".env"), override=True)
     property_id = os.getenv("GA4_PROPERTY_ID", "")
     result: Dict[str, Any] = {
         "fetched_at": datetime.now().isoformat(),
@@ -81,7 +87,7 @@ def get_ga4_overview(days: int = 30) -> Dict[str, Any]:
         result["daily_sessions"] = _mock_daily_sessions(days)
         return result
 
-    access_token = _get_access_token()
+    access_token = await _get_access_token_async()
     if not access_token:
         result["error"] = "Không lấy được access token. Kiểm tra OAuth2 credentials."
         result["overview"] = _mock_overview()
@@ -94,7 +100,7 @@ def get_ga4_overview(days: int = 30) -> Dict[str, Any]:
 
     # 1. Overview metrics
     try:
-        resp = _run_report(property_id, access_token, {
+        resp = await _run_report_async(property_id, access_token, {
             "dateRanges": [{"startDate": f"{days}daysAgo", "endDate": "today"}],
             "metrics": [
                 {"name": "sessions"},
@@ -118,6 +124,14 @@ def get_ga4_overview(days: int = 30) -> Dict[str, Any]:
                 "avg_session_duration": round(float(mv[5]["value"]), 1) if len(mv) > 5 else 0,
                 "new_users": int(mv[6]["value"]) if len(mv) > 6 else 0,
             }
+        else:
+            # New property with no data yet
+            result["overview"] = {
+                "sessions": 0, "active_users": 0, "pageviews": 0,
+                "bounce_rate": 0, "engagement_rate": 0,
+                "avg_session_duration": 0, "new_users": 0,
+            }
+            result["note"] = "Property mới, chưa có dữ liệu. Cài Google Tag G-DFEE14V0T8 vào website để bắt đầu thu thập."
         result["data_source"] = "live_ga4"
     except Exception as e:
         errors.append(f"Overview: {e}")
@@ -125,7 +139,7 @@ def get_ga4_overview(days: int = 30) -> Dict[str, Any]:
 
     # 2. Traffic sources
     try:
-        resp = _run_report(property_id, access_token, {
+        resp = await _run_report_async(property_id, access_token, {
             "dateRanges": [{"startDate": f"{days}daysAgo", "endDate": "today"}],
             "dimensions": [{"name": "sessionDefaultChannelGroup"}],
             "metrics": [
@@ -153,7 +167,7 @@ def get_ga4_overview(days: int = 30) -> Dict[str, Any]:
 
     # 3. Top pages
     try:
-        resp = _run_report(property_id, access_token, {
+        resp = await _run_report_async(property_id, access_token, {
             "dateRanges": [{"startDate": f"{days}daysAgo", "endDate": "today"}],
             "dimensions": [{"name": "pagePath"}, {"name": "pageTitle"}],
             "metrics": [
@@ -184,7 +198,7 @@ def get_ga4_overview(days: int = 30) -> Dict[str, Any]:
 
     # 4. Daily sessions timeline
     try:
-        resp = _run_report(property_id, access_token, {
+        resp = await _run_report_async(property_id, access_token, {
             "dateRanges": [{"startDate": f"{days}daysAgo", "endDate": "today"}],
             "dimensions": [{"name": "date"}],
             "metrics": [

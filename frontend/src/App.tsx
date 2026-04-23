@@ -555,7 +555,7 @@ export default function App() {
           <span>AI Marketing Hub</span>
         </div>
         <div className="nav-links">
-          <span className="nav-phase">Phase 9</span>
+          <span className="nav-phase">Phiên bản 9</span>
         </div>
       </nav>
 
@@ -842,21 +842,21 @@ export default function App() {
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
                   <path d="M21 2H3v16h5v-4l4-4 4 4v-6h7V2z"/>
                 </svg>
-                Data Connections
+                Kết nối dữ liệu
               </div>
               <div className="connector-cards">
                 <div className={`connector-card ${trackGscStatus === "connected" ? "conn-ok" : trackGscStatus === "pending" ? "conn-pending" : "conn-off"}`}>
                   <div className="conn-dot" />
                   <span className="conn-name">Google Workspace</span>
                   <span className="conn-status">
-                    {trackGscStatus === "connected" ? "Live" : trackGscStatus === "pending" ? "Pending" : "Disconnected"}
+                    {trackGscStatus === "connected" ? "Hoạt động" : trackGscStatus === "pending" ? "Chờ kết nối" : "Ngắt"}
                   </span>
                 </div>
                 <div className={`connector-card ${trackDfsStatus === "connected" ? "conn-ok" : trackDfsStatus === "pending" ? "conn-pending" : "conn-off"}`}>
                   <div className="conn-dot" />
                   <span className="conn-name">DataForSEO</span>
                   <span className="conn-status">
-                    {trackDfsStatus === "connected" ? "Live" : trackDfsStatus === "pending" ? "Pending" : "Disconnected"}
+                    {trackDfsStatus === "connected" ? "Hoạt động" : trackDfsStatus === "pending" ? "Chờ kết nối" : "Ngắt"}
                   </span>
                 </div>
               </div>
@@ -1079,16 +1079,17 @@ export default function App() {
                   </div>
                 </div>
                 <div className="input-group" style={{ maxWidth: "160px" }}>
-                  <label htmlFor="serp-loc" className="input-label">Thị trường</label>
+                  <label htmlFor="serp-loc" className="input-label">Khu vực ưu tiên</label>
                   <select id="serp-loc" className="text-input" value={serpLocation}
-                    onChange={(e) => setSerpLocation(e.target.value)}>
+                    onChange={(e) => setSerpLocation(e.target.value)}
+                    title="DuckDuckGo ưu tiên kết quả theo khu vực. Từ khóa tiếng Việt luôn trả về kết quả VN.">
                     <option value="vn">🇻🇳 Việt Nam</option>
-                    <option value="us">🇺🇸 United States</option>
-                    <option value="uk">🇬🇧 United Kingdom</option>
-                    <option value="au">🇦🇺 Australia</option>
+                    <option value="us">🇺🇸 Hoa Kỳ</option>
+                    <option value="uk">🇬🇧 Anh</option>
+                    <option value="au">🇦🇺 Úc</option>
                     <option value="sg">🇸🇬 Singapore</option>
-                    <option value="in">🇮🇳 India</option>
-                    <option value="jp">🇯🇵 Japan</option>
+                    <option value="in">🇮🇳 Ấn Độ</option>
+                    <option value="jp">🇯🇵 Nhật Bản</option>
                   </select>
                 </div>
                 <div className="input-group" style={{ maxWidth: "100px" }}>

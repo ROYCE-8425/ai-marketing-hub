@@ -97,6 +97,90 @@ async def save_gsc_config(body: GscConfigRequest):
     load_dotenv(env_path, override=True)
     return {"status": "ok", "message": "GSC credentials saved"}
 
+
+# ─────────────────────────────────────────────────────────────────────────────
+# OAuth2 flow — Get a refresh token with GSC + GA4 scopes unified
+# ─────────────────────────────────────────────────────────────────────────────
+
+OAUTH_SCOPES = [
+    "https://www.googleapis.com/auth/webmasters.readonly",
+    "https://www.googleapis.com/auth/analytics.readonly",
+]
+
+@router.get("/oauth/authorize")
+async def oauth_authorize():
+    """Generate OAuth2 authorization URL to get GSC+GA4 scopes."""
+    client_id = os.getenv("GOOGLE_SEARCH_CONSOLE_CLIENT_ID", "")
+    if not client_id:
+        return {"error": "GOOGLE_SEARCH_CONSOLE_CLIENT_ID not set in .env"}
+    
+    import urllib.parse
+    params = {
+        "client_id": client_id,
+        "redirect_uri": "http://localhost:8000/api/oauth/callback",
+        "response_type": "code",
+        "scope": " ".join(OAUTH_SCOPES),
+        "access_type": "offline",
+        "prompt": "consent",  # Force consent to get new refresh token
+    }
+    url = f"https://accounts.google.com/o/oauth2/v2/auth?{urllib.parse.urlencode(params)}"
+    return {"authorize_url": url, "scopes": OAUTH_SCOPES}
+
+
+@router.get("/oauth/callback")
+async def oauth_callback(code: str = Query(None), error: str = Query(None)):
+    """Exchange OAuth2 code for refresh token, save to .env, return HTML."""
+    if error:
+        return {"error": error}
+    if not code:
+        return {"error": "No authorization code received"}
+    
+    client_id = os.getenv("GOOGLE_SEARCH_CONSOLE_CLIENT_ID", "")
+    client_secret = os.getenv("GOOGLE_SEARCH_CONSOLE_CLIENT_SECRET", "")
+    
+    # Exchange code for tokens
+    token_resp = httpx.post("https://oauth2.googleapis.com/token", data={
+        "code": code,
+        "client_id": client_id,
+        "client_secret": client_secret,
+        "redirect_uri": "http://localhost:8000/api/oauth/callback",
+        "grant_type": "authorization_code",
+    }, timeout=10.0)
+    token_data = token_resp.json()
+    
+    refresh_token = token_data.get("refresh_token")
+    if not refresh_token:
+        return {"error": "No refresh_token in response", "details": token_data}
+    
+    # Save to .env — update REFRESH_TOKEN
+    env_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), ".env")
+    env_lines = []
+    if os.path.exists(env_path):
+        with open(env_path, "r") as f:
+            for line in f:
+                if line.startswith("GOOGLE_SEARCH_CONSOLE_REFRESH_TOKEN="):
+                    env_lines.append(f"GOOGLE_SEARCH_CONSOLE_REFRESH_TOKEN={refresh_token}\n")
+                else:
+                    env_lines.append(line)
+    with open(env_path, "w") as f:
+        f.writelines(env_lines)
+    load_dotenv(env_path, override=True)
+    
+    # Return a simple HTML page
+    from fastapi.responses import HTMLResponse
+    return HTMLResponse(f"""
+    <html><head><title>OAuth Success</title></head>
+    <body style="font-family:system-ui;background:#0f172a;color:#e2e8f0;display:flex;justify-content:center;align-items:center;height:100vh">
+    <div style="text-align:center;max-width:500px">
+        <h1 style="color:#6ee7b7">✅ Đã kết nối thành công!</h1>
+        <p>Refresh token đã được lưu vào .env với cả GSC + GA4 scope.</p>
+        <p style="color:#a5b4fc">Token: {refresh_token[:20]}...{refresh_token[-10:]}</p>
+        <p>Quay lại Dashboard để xem dữ liệu GA4 thật.</p>
+        <a href="http://localhost:5173/" style="color:#c4b5fd;text-decoration:underline">← Quay về Dashboard</a>
+    </div>
+    </body></html>
+    """)
+
 # ─────────────────────────────────────────────────────────────────────────────
 # POST /api/ai-keywords — AI-powered keyword analysis using GSC data + Z.AI
 # ─────────────────────────────────────────────────────────────────────────────
@@ -123,9 +207,8 @@ class Ga4OverviewRequest(BaseModel):
 @router.post("/ga4-overview")
 async def ga4_overview(body: Ga4OverviewRequest):
     """Fetch GA4 site overview: sessions, users, traffic sources, top pages, daily timeline."""
-    import asyncio
     from core.ga4_fetcher import get_ga4_overview
-    result = await asyncio.to_thread(get_ga4_overview, body.days)
+    result = await get_ga4_overview(body.days)
     return result
 
 
