@@ -11,6 +11,9 @@ import { CampaignTrackerPanel } from "./components/CampaignTracker";
 import { SerpResultsPanel } from "./components/SerpResultsPanel";
 import { DashboardOverview } from "./components/DashboardOverview";
 import { PublishModal } from "./components/PublishModal";
+import { RankTracker } from "./components/RankTracker";
+import { SpinEditor } from "./components/SpinEditor";
+import { GeoOptimizer } from "./components/GeoOptimizer";
 import { addToHistory } from "./lib/history";
 import type { AuditResponse } from "./types/seo";
 import type { CompetitorGapResponse, PlanContentResponse } from "./types/content";
@@ -62,7 +65,7 @@ class ErrorBoundary extends React.Component<
 
 // ─── Tab types ─────────────────────────────────────────────────────────────────
 
-type TabId = "dashboard" | "seo" | "cro" | "competitor" | "planner" | "tracker" | "serp" | "aikeys";
+type TabId = "dashboard" | "seo" | "cro" | "competitor" | "planner" | "tracker" | "serp" | "aikeys" | "ranktracker" | "spineditor" | "geo";
 
 const TABS: { id: TabId; label: string; icon: JSX.Element }[] = [
   {
@@ -139,6 +142,37 @@ const TABS: { id: TabId; label: string; icon: JSX.Element }[] = [
   {
     id: "aikeys",
     label: "\uD83E\uDD16 Phân tích từ khóa AI",
+    icon: (
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+        <path d="M12 2L2 7l10 5 10-5-10-5z" />
+        <path d="M2 17l10 5 10-5" />
+        <path d="M2 12l10 5 10-5" />
+      </svg>
+    ),
+  },
+  {
+    id: "ranktracker" as TabId,
+    label: "Theo dõi Keyword",
+    icon: (
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+        <polyline points="22 7 13.5 15.5 8.5 10.5 2 17" />
+        <polyline points="16 7 22 7 22 13" />
+      </svg>
+    ),
+  },
+  {
+    id: "spineditor" as TabId,
+    label: "Spin Editor",
+    icon: (
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+        <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+        <path d="M3 3v5h5" />
+      </svg>
+    ),
+  },
+  {
+    id: "geo" as TabId,
+    label: "🤖 Tối ưu GEO",
     icon: (
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
         <path d="M12 2L2 7l10 5 10-5-10-5z" />
@@ -1295,10 +1329,20 @@ export default function App() {
             )}
           </>
         )}
+
+        {/* Rank Tracker Tab */}
+        {activeTab === "ranktracker" && <RankTracker />}
+
+        {/* Spin Editor Tab */}
+        {activeTab === "spineditor" && <SpinEditor />}
+
+        {/* GEO Optimizer Tab */}
+        {activeTab === "geo" && <GeoOptimizer />}
+
       </main>
 
       <footer className="page-footer">
-        AI Marketing Hub — Phiên bản 9 &nbsp;&middot;&nbsp; Xây dựng với FastAPI + React
+        AI Marketing Hub — Phiên bản 13 &nbsp;&middot;&nbsp; Xây dựng với FastAPI + React
       </footer>
 
       {publishModal && (
