@@ -1,14 +1,20 @@
 """
-Keyword Rank Tracker — Phase 10
+Keyword Rank Tracker — Phase 10 (Upgraded)
 
 Tracks keyword ranking positions over time using:
 1. Google Search Console API (free, already configured)
 2. DataForSEO API (optional, when configured)
 
-Stores history in SQLite for trend charts.
+Features:
+- SQLite history with trend charts
+- Tag/group keywords by campaign
+- CSV import/export
+- Ranking drop alerts
 """
 
 import os
+import io
+import csv
 import json
 import sqlite3
 from datetime import datetime, timedelta
@@ -26,10 +32,17 @@ def _get_db() -> sqlite3.Connection:
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             keyword TEXT NOT NULL,
             site_url TEXT NOT NULL,
+            tag TEXT DEFAULT '',
             created_at TEXT DEFAULT (datetime('now')),
             UNIQUE(keyword, site_url)
         )
     """)
+    # Add tag column if missing (migration for existing DBs)
+    try:
+        conn.execute("ALTER TABLE tracked_keywords ADD COLUMN tag TEXT DEFAULT ''")
+        conn.commit()
+    except sqlite3.OperationalError:
+        pass  # column already exists
     conn.execute("""
         CREATE TABLE IF NOT EXISTS ranking_history (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -51,16 +64,30 @@ def _get_db() -> sqlite3.Connection:
     return conn
 
 
-def add_keyword(keyword: str, site_url: str) -> Dict[str, Any]:
+def add_keyword(keyword: str, site_url: str, tag: str = "") -> Dict[str, Any]:
     """Add a keyword to track."""
     conn = _get_db()
     try:
         conn.execute(
-            "INSERT OR IGNORE INTO tracked_keywords (keyword, site_url) VALUES (?, ?)",
-            (keyword.strip().lower(), site_url),
+            "INSERT OR IGNORE INTO tracked_keywords (keyword, site_url, tag) VALUES (?, ?, ?)",
+            (keyword.strip().lower(), site_url, tag.strip()),
         )
         conn.commit()
-        return {"status": "ok", "keyword": keyword.strip().lower()}
+        return {"status": "ok", "keyword": keyword.strip().lower(), "tag": tag.strip()}
+    finally:
+        conn.close()
+
+
+def update_keyword_tag(keyword: str, site_url: str, tag: str) -> Dict[str, Any]:
+    """Update tag for a tracked keyword."""
+    conn = _get_db()
+    try:
+        conn.execute(
+            "UPDATE tracked_keywords SET tag = ? WHERE keyword = ? AND site_url = ?",
+            (tag.strip(), keyword.strip().lower(), site_url),
+        )
+        conn.commit()
+        return {"status": "ok", "keyword": keyword.strip().lower(), "tag": tag.strip()}
     finally:
         conn.close()
 
@@ -84,13 +111,12 @@ def remove_keyword(keyword: str, site_url: str) -> Dict[str, Any]:
         conn.close()
 
 
-def get_tracked_keywords(site_url: str) -> List[Dict[str, Any]]:
+def get_tracked_keywords(site_url: str, tag_filter: str = "") -> List[Dict[str, Any]]:
     """Get all tracked keywords with latest ranking."""
     conn = _get_db()
     try:
-        rows = conn.execute(
-            """
-            SELECT tk.keyword, tk.created_at,
+        query = """
+            SELECT tk.keyword, tk.tag, tk.created_at,
                    rh.position, rh.clicks, rh.impressions, rh.ctr, rh.source, rh.checked_at,
                    prev.position as prev_position
             FROM tracked_keywords tk
@@ -105,10 +131,14 @@ def get_tracked_keywords(site_url: str) -> List[Dict[str, Any]]:
                 FROM ranking_history
             ) prev ON prev.keyword = tk.keyword AND prev.site_url = tk.site_url AND prev.rn = 2
             WHERE tk.site_url = ?
-            ORDER BY rh.position ASC NULLS LAST
-            """,
-            (site_url,),
-        ).fetchall()
+        """
+        params: list = [site_url]
+        if tag_filter:
+            query += " AND tk.tag = ?"
+            params.append(tag_filter)
+        query += " ORDER BY rh.position ASC NULLS LAST"
+
+        rows = conn.execute(query, params).fetchall()
 
         results = []
         for r in rows:
@@ -120,6 +150,7 @@ def get_tracked_keywords(site_url: str) -> List[Dict[str, Any]]:
 
             results.append({
                 "keyword": r["keyword"],
+                "tag": r["tag"] or "",
                 "position": pos,
                 "previous_position": prev_pos,
                 "change": change,
@@ -133,6 +164,81 @@ def get_tracked_keywords(site_url: str) -> List[Dict[str, Any]]:
         return results
     finally:
         conn.close()
+
+
+def get_all_tags(site_url: str) -> List[str]:
+    """Get all unique tags."""
+    conn = _get_db()
+    try:
+        rows = conn.execute(
+            "SELECT DISTINCT tag FROM tracked_keywords WHERE site_url = ? AND tag != ''",
+            (site_url,),
+        ).fetchall()
+        return [r["tag"] for r in rows]
+    finally:
+        conn.close()
+
+
+def import_keywords_csv(csv_text: str, site_url: str) -> Dict[str, Any]:
+    """Import keywords from CSV text. Columns: keyword, tag (optional)."""
+    conn = _get_db()
+    try:
+        reader = csv.reader(io.StringIO(csv_text.strip()))
+        added = 0
+        skipped = 0
+        for row in reader:
+            if not row or not row[0].strip():
+                continue
+            kw = row[0].strip().lower()
+            tag = row[1].strip() if len(row) > 1 else ""
+            # Skip header row
+            if kw in ("keyword", "từ khóa", "tu khoa"):
+                continue
+            try:
+                conn.execute(
+                    "INSERT OR IGNORE INTO tracked_keywords (keyword, site_url, tag) VALUES (?, ?, ?)",
+                    (kw, site_url, tag),
+                )
+                added += 1
+            except Exception:
+                skipped += 1
+        conn.commit()
+        return {"status": "ok", "added": added, "skipped": skipped}
+    finally:
+        conn.close()
+
+
+def export_keywords_csv(site_url: str) -> str:
+    """Export tracked keywords with latest rankings as CSV."""
+    keywords = get_tracked_keywords(site_url)
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow(["Keyword", "Tag", "Vị trí", "Thay đổi", "Clicks", "Hiển thị", "CTR", "Nguồn", "Cập nhật"])
+    for kw in keywords:
+        writer.writerow([
+            kw["keyword"], kw.get("tag", ""),
+            kw["position"] or "—", kw["change"] or "—",
+            kw["clicks"], kw["impressions"],
+            f"{kw['ctr']}%" if kw["ctr"] else "—",
+            kw["source"], kw["last_checked"] or "—",
+        ])
+    return output.getvalue()
+
+
+def check_ranking_alerts(site_url: str, threshold: int = 5) -> List[Dict[str, Any]]:
+    """Check for keywords that dropped more than threshold positions."""
+    keywords = get_tracked_keywords(site_url)
+    alerts = []
+    for kw in keywords:
+        if kw["change"] is not None and kw["change"] < -threshold:
+            alerts.append({
+                "keyword": kw["keyword"],
+                "current_position": kw["position"],
+                "previous_position": kw["previous_position"],
+                "drop": abs(kw["change"]),
+                "severity": "critical" if kw["change"] < -10 else "warning",
+            })
+    return alerts
 
 
 def get_keyword_history(keyword: str, site_url: str, days: int = 30) -> List[Dict[str, Any]]:

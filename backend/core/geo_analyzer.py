@@ -318,3 +318,148 @@ async def analyze_geo(url: str, keyword: str = "") -> Dict[str, Any]:
         "recommendations": all_recommendations,
         "total_recommendations": len(all_recommendations),
     }
+
+
+def generate_faq_schema(questions: List[Dict[str, str]]) -> str:
+    """
+    Generate FAQ Schema JSON-LD from Q&A pairs.
+
+    Args:
+        questions: List of {"question": "...", "answer": "..."} dicts
+    Returns:
+        JSON-LD string ready to paste into <script> tag
+    """
+    faq_items = []
+    for qa in questions:
+        faq_items.append({
+            "@type": "Question",
+            "name": qa.get("question", ""),
+            "acceptedAnswer": {
+                "@type": "Answer",
+                "text": qa.get("answer", ""),
+            },
+        })
+
+    schema = {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": faq_items,
+    }
+    return json.dumps(schema, ensure_ascii=False, indent=2)
+
+
+def generate_local_business_schema(
+    name: str,
+    address: str,
+    phone: str,
+    url: str,
+    business_type: str = "AutoDealer",
+    description: str = "",
+    opening_hours: str = "Mo-Sa 08:00-17:30",
+    latitude: float = 0,
+    longitude: float = 0,
+    image: str = "",
+    price_range: str = "",
+) -> str:
+    """
+    Generate LocalBusiness Schema JSON-LD.
+
+    Returns:
+        JSON-LD string ready to paste into <script> tag
+    """
+    schema: Dict[str, Any] = {
+        "@context": "https://schema.org",
+        "@type": business_type,
+        "name": name,
+        "url": url,
+        "telephone": phone,
+        "address": {
+            "@type": "PostalAddress",
+            "streetAddress": address,
+            "addressCountry": "VN",
+        },
+    }
+
+    if description:
+        schema["description"] = description
+    if image:
+        schema["image"] = image
+    if price_range:
+        schema["priceRange"] = price_range
+    if opening_hours:
+        schema["openingHours"] = opening_hours
+    if latitude and longitude:
+        schema["geo"] = {
+            "@type": "GeoCoordinates",
+            "latitude": latitude,
+            "longitude": longitude,
+        }
+
+    return json.dumps(schema, ensure_ascii=False, indent=2)
+
+
+async def generate_faq_from_content(url: str) -> Dict[str, Any]:
+    """Extract potential FAQ pairs from a webpage using AI."""
+    import os
+
+    try:
+        async with httpx.AsyncClient(timeout=15, follow_redirects=True) as client:
+            resp = await client.get(url, headers={
+                "User-Agent": "Mozilla/5.0 (compatible; AI-Marketing-Hub/1.0)"
+            })
+            html = resp.text
+    except Exception as e:
+        return {"error": f"Không thể truy cập: {str(e)}"}
+
+    soup = BeautifulSoup(html, "html.parser")
+
+    # Extract text content
+    for tag in soup(["script", "style", "nav", "footer", "header"]):
+        tag.decompose()
+    text = soup.get_text(separator="\n", strip=True)[:3000]
+
+    groq_key = os.getenv("GROQ_API_KEY", "")
+    if not groq_key:
+        return {"error": "Chưa cấu hình GROQ_API_KEY"}
+
+    prompt = f"""Dựa trên nội dung website sau, tạo 5-8 câu hỏi FAQ phổ biến mà khách hàng thường hỏi.
+Trả lời bằng tiếng Việt. Format JSON array:
+[{{"question": "...", "answer": "..."}}]
+
+Chỉ trả về JSON, không giải thích.
+
+NỘI DUNG:
+{text}"""
+
+    try:
+        async with httpx.AsyncClient(timeout=30) as client:
+            resp = await client.post(
+                "https://api.groq.com/openai/v1/chat/completions",
+                headers={
+                    "Authorization": f"Bearer {groq_key}",
+                    "Content-Type": "application/json",
+                },
+                json={
+                    "model": "llama-3.3-70b-versatile",
+                    "messages": [{"role": "user", "content": prompt}],
+                    "temperature": 0.5,
+                    "max_tokens": 2048,
+                },
+            )
+            if resp.status_code != 200:
+                return {"error": f"AI lỗi: {resp.status_code}"}
+
+            ai_text = resp.json()["choices"][0]["message"]["content"].strip()
+            # Extract JSON from response
+            match = re.search(r'\[.*\]', ai_text, re.DOTALL)
+            if match:
+                faqs = json.loads(match.group())
+                schema_code = generate_faq_schema(faqs)
+                return {
+                    "faqs": faqs,
+                    "schema_code": schema_code,
+                    "total_faqs": len(faqs),
+                }
+            return {"error": "AI không trả về format JSON hợp lệ"}
+    except Exception as e:
+        return {"error": f"Lỗi: {str(e)}"}
