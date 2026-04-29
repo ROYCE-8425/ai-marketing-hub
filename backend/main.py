@@ -1,18 +1,18 @@
 """
-AI Marketing Hub — FastAPI Backend (Phase 17)
+AI Marketing Hub — FastAPI Backend (Phase 19)
 
 Phase 5: Publish to WordPress + Opportunity & Performance Scoring
 Phase 6: Live Data Connectors — GSC, GA4, DataForSEO
 Phase 7: Anti-Detection & Content Polish — Humanize AI text
 Phase 8: Live SERP Results — Real Google rankings
 Phase 9: Dashboard Overview, History & Export
-Phase 10: Keyword Rank Tracker (Upgraded: tags, CSV, alerts)
-Phase 11: Spin Editor (Upgraded: multi-version, tone, paragraph)
-Phase 12: DataForSEO Integration
-Phase 13: GEO Optimizer (Upgraded: FAQ/Schema generators)
+Phase 10-13: Rank Tracker, Spin Editor, DataForSEO, GEO Optimizer
 Phase 14: Backlink Analyzer
+Phase 15: Content Calendar
 Phase 16: Technical SEO Scanner
 Phase 17: AI Report Generator
+Phase 18: Multi-site Manager
+Phase 19: SEO A/B Testing
 """
 
 from fastapi import FastAPI
@@ -26,10 +26,11 @@ from routers import api_polish
 from routers import api_serp
 from routers import api_new_features
 from routers import api_phase2
+from routers import api_phase3
 
 app = FastAPI(
     title="AI Marketing Hub — Backend",
-    version="2.0.0",
+    version="3.0.0",
     description=(
         "AI Marketing Hub API — Phase 9: SEO Audit, CRO, Competitor Gap, "
         "Content Planning, Publish, Opportunity Scoring, Live Data Connectors, "
@@ -54,8 +55,9 @@ app.include_router(api_polish.router)
 app.include_router(api_serp.router)
 app.include_router(api_new_features.router)
 app.include_router(api_phase2.router)
+app.include_router(api_phase3.router)
 
 
 @app.get("/health")
 async def health():
-    return {"status": "ok", "phase": 17, "version": "2.0.0"}
+    return {"status": "ok", "phase": 19, "version": "3.0.0"}

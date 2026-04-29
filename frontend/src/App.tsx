@@ -17,6 +17,9 @@ import { GeoOptimizer } from "./components/GeoOptimizer";
 import { TechnicalSeo } from "./components/TechnicalSeo";
 import { ReportGenerator } from "./components/ReportGenerator";
 import { BacklinkAnalyzer } from "./components/BacklinkAnalyzer";
+import { ContentCalendar } from "./components/ContentCalendarPanel";
+import { SiteManager } from "./components/SiteManager";
+import { AbTesting } from "./components/AbTesting";
 import { addToHistory } from "./lib/history";
 import type { AuditResponse } from "./types/seo";
 import type { CompetitorGapResponse, PlanContentResponse } from "./types/content";
@@ -68,7 +71,7 @@ class ErrorBoundary extends React.Component<
 
 // ─── Tab types ─────────────────────────────────────────────────────────────────
 
-type TabId = "dashboard" | "seo" | "cro" | "competitor" | "planner" | "tracker" | "serp" | "aikeys" | "ranktracker" | "spineditor" | "geo" | "techseo" | "report" | "backlinks";
+type TabId = "dashboard" | "seo" | "cro" | "competitor" | "planner" | "tracker" | "serp" | "aikeys" | "ranktracker" | "spineditor" | "geo" | "techseo" | "report" | "backlinks" | "calendar" | "sites" | "abtest";
 
 const TABS: { id: TabId; label: string; icon: JSX.Element }[] = [
   {
@@ -212,6 +215,33 @@ const TABS: { id: TabId; label: string; icon: JSX.Element }[] = [
         <polyline points="14 2 14 8 20 8" />
         <line x1="16" y1="13" x2="8" y2="13" />
         <line x1="16" y1="17" x2="8" y2="17" />
+      </svg>
+    ),
+  },
+  {
+    id: "calendar" as TabId,
+    label: "📅 Lịch nội dung",
+    icon: (
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+        <rect x="3" y="4" width="18" height="18" rx="2" ry="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" />
+      </svg>
+    ),
+  },
+  {
+    id: "sites" as TabId,
+    label: "🏢 Multi-site",
+    icon: (
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+        <path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z" /><path d="M3.6 9h16.8M3.6 15h16.8" /><path d="M12 3a15.3 15.3 0 0 1 4 9 15.3 15.3 0 0 1-4 9 15.3 15.3 0 0 1-4-9 15.3 15.3 0 0 1 4-9z" />
+      </svg>
+    ),
+  },
+  {
+    id: "abtest" as TabId,
+    label: "🧪 A/B Test",
+    icon: (
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+        <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
       </svg>
     ),
   },
@@ -1382,10 +1412,19 @@ export default function App() {
         {/* AI Report Generator Tab */}
         {activeTab === "report" && <ReportGenerator />}
 
+        {/* Content Calendar Tab */}
+        {activeTab === "calendar" && <ContentCalendar />}
+
+        {/* Multi-site Manager Tab */}
+        {activeTab === "sites" && <SiteManager />}
+
+        {/* SEO A/B Testing Tab */}
+        {activeTab === "abtest" && <AbTesting />}
+
       </main>
 
       <footer className="page-footer">
-        AI Marketing Hub — Phiên bản 17 &nbsp;&middot;&nbsp; Xây dựng với FastAPI + React
+        AI Marketing Hub — Phiên bản 19 &nbsp;&middot;&nbsp; Xây dựng với FastAPI + React
       </footer>
 
       {publishModal && (
