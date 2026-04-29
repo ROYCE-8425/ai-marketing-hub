@@ -316,18 +316,19 @@ body {
 
 /* ── Form ─────────────────────────────────────────────────────────────────────── */
 .audit-form {
-  background: var(--surface);
-  border: 1px solid var(--border);
+  background: linear-gradient(145deg, rgba(15,19,36,0.9), rgba(22,27,46,0.7));
+  border: 1px solid rgba(139,92,246,0.12);
   border-radius: var(--radius);
   padding: 28px 28px 24px;
   display: flex;
   flex-direction: column;
   gap: 16px;
-  animation: fade-up 0.6s 0.2s ease both;
-  transition: border-color 0.3s;
+  animation: fade-up 0.5s ease both;
+  transition: border-color 0.3s, box-shadow 0.3s;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.2);
 }
 .audit-form:focus-within {
-  border-color: rgba(139,92,246,0.5);
+  border-color: rgba(139,92,246,0.4);
   box-shadow: 0 0 0 4px rgba(139,92,246,0.08);
 }
 
@@ -484,13 +485,15 @@ body {
 
 /* ── Result Panel ───────────────────────────────────────────────────────────── */
 .result-panel {
-  background: var(--surface);
-  border: 1px solid var(--border);
+  background: linear-gradient(145deg, rgba(15,19,36,0.85), rgba(22,27,46,0.6));
+  border: 1px solid rgba(139,92,246,0.1);
   border-radius: var(--radius);
-  padding: 32px;
+  padding: 28px;
   display: flex;
   flex-direction: column;
-  gap: 28px;
+  gap: 24px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+  animation: fade-up 0.4s ease both;
 }
 
 .result-header {
@@ -2343,13 +2346,71 @@ body {
   appearance: auto; cursor: pointer;
 }
 
+/* ── Submit Button (Phase 2 components) ────────────────────────────────── */
+.submit-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 50%, #5b21b6 100%);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 12px 28px;
+  font-family: "DM Sans", sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 15px rgba(124,58,237,0.3), inset 0 1px 0 rgba(255,255,255,0.1);
+  position: relative;
+  overflow: hidden;
+}
+.submit-btn::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.1), transparent);
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.submit-btn:hover:not(:disabled)::before { opacity: 1; }
+.submit-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 25px rgba(124,58,237,0.45), inset 0 1px 0 rgba(255,255,255,0.15);
+}
+.submit-btn:active:not(:disabled) { transform: translateY(0); }
+.submit-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+.submit-btn.loading {
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+/* ── Premium card enhancements ─────────────────────────────────────────── */
+.geo-score-hero, .geo-breakdown, .geo-recs, .geo-schema-gen {
+  background: linear-gradient(145deg, rgba(15,19,36,0.85), rgba(22,27,46,0.6));
+  border: 1px solid rgba(139,92,246,0.1);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+}
+
+.result-card {
+  background: linear-gradient(145deg, rgba(22,27,46,0.8), rgba(15,19,36,0.6));
+  border: 1px solid rgba(139,92,246,0.08);
+}
+.result-card:hover {
+  border-color: rgba(139,92,246,0.2);
+  transform: translateY(-1px);
+}
+
 /* ── Responsive ─────────────────────────────────────────────────────────── */
 @media (max-width: 768px) {
-  .top-nav { padding: 14px 20px; }
   .main-content { padding: 20px 16px 60px; }
   .input-row { grid-template-columns: 1fr !important; }
   .result-panel { padding: 20px; }
-  .hero-title { font-size: 34px; }
   .rt-add-row { flex-direction: column; }
   .spin-panels { grid-template-columns: 1fr; }
   .geo-score-hero { flex-direction: column; text-align: center; }
