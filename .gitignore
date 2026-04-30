@@ -43,23 +43,14 @@ Thumbs.db
 *.json.key
 service-account*.json
 
-everything-claude-code/
-seomachine/
-
-everything-claude-code/
-seomachine/
-.claude/
-.codebuddy/
-.mcp.json
-
+# External tools (cloned repos)
+.superpowers/
+.skills/
 everything-claude-code/
 seomachine/
 .claude/
 .codebuddy/
 .mcp.json
 
-everything-claude-code/
-seomachine/
-.claude/
-.codebuddy/
-.mcp.json
+# SQLite databases (local data)
+*.db

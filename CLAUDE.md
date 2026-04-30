@@ -1,72 +1,39 @@
-# CLAUDE.md
+# AI Marketing Hub — Vibe Coding Configuration
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+## Project Context
+This is a full-stack SEO platform:
+- **Backend**: FastAPI (Python) — `backend/`
+- **Frontend**: React + TypeScript (Vite) — `frontend/`
+- **AI Engine**: Groq LLaMA 3.3 70B
+- **Database**: SQLite (4 databases)
+- **Style**: Dark mode glassmorphism, premium SaaS aesthetic
 
-## Project Overview
+## Coding Standards
+- Use Vietnamese for UI text/labels
+- Use English for code comments and variable names  
+- Follow existing CSS design system in `frontend/src/index.css`
+- All API endpoints go in `backend/routers/`
+- All business logic goes in `backend/core/`
+- Components use functional React with hooks
+- Use `fetch()` for API calls (no axios)
 
-This is a **Claude Code plugin** - a collection of production-ready agents, skills, hooks, commands, rules, and MCP configurations. The project provides battle-tested workflows for software development using Claude Code.
-
-## Running Tests
-
-```bash
-# Run all tests
-node tests/run-all.js
-
-# Run individual test files
-node tests/lib/utils.test.js
-node tests/lib/package-manager.test.js
-node tests/hooks/hooks.test.js
+## Key Design Tokens
+```css
+--bg: #080b14
+--surface: rgba(255,255,255,0.03)
+--primary: #8b5cf6
+--accent: #06b6d4
+--text-h: #f1f5f9
 ```
 
-## Architecture
+## Skills & Tools Installed
+- `.superpowers/` — obra/superpowers (agentic skills framework)
+- `.skills/` — mattpocock/skills (engineering skills)
+- Backend uses `markitdown` for file conversion
 
-The project is organized into several core components:
-
-- **agents/** - Specialized subagents for delegation (planner, code-reviewer, tdd-guide, etc.)
-- **skills/** - Workflow definitions and domain knowledge (coding standards, patterns, testing)
-- **commands/** - Slash commands invoked by users (/tdd, /plan, /e2e, etc.)
-- **hooks/** - Trigger-based automations (session persistence, pre/post-tool hooks)
-- **rules/** - Always-follow guidelines (security, coding style, testing requirements)
-- **mcp-configs/** - MCP server configurations for external integrations
-- **scripts/** - Cross-platform Node.js utilities for hooks and setup
-- **tests/** - Test suite for scripts and utilities
-
-## Key Commands
-
-- `/tdd` - Test-driven development workflow
-- `/plan` - Implementation planning
-- `/e2e` - Generate and run E2E tests
-- `/code-review` - Quality review
-- `/build-fix` - Fix build errors
-- `/learn` - Extract patterns from sessions
-- `/skill-create` - Generate skills from git history
-
-## Development Notes
-
-- Package manager detection: npm, pnpm, yarn, bun (configurable via `CLAUDE_PACKAGE_MANAGER` env var or project config)
-- Cross-platform: Windows, macOS, Linux support via Node.js scripts
-- Agent format: Markdown with YAML frontmatter (name, description, tools, model)
-- Skill format: Markdown with clear sections for when to use, how it works, examples
-- Skill placement: Curated in skills/; generated/imported under ~/.claude/skills/. See docs/SKILL-PLACEMENT-POLICY.md
-- Hook format: JSON with matcher conditions and command/notification hooks
-
-## Contributing
-
-Follow the formats in CONTRIBUTING.md:
-- Agents: Markdown with frontmatter (name, description, tools, model)
-- Skills: Clear sections (When to Use, How It Works, Examples)
-- Commands: Markdown with description frontmatter
-- Hooks: JSON with matcher and hooks array
-
-File naming: lowercase with hyphens (e.g., `python-reviewer.md`, `tdd-workflow.md`)
-
-## Skills
-
-Use the following skills when working on related files:
-
-| File(s) | Skill |
-|---------|-------|
-| `README.md` | `/readme` |
-| `.github/workflows/*.yml` | `/ci-workflow` |
-
-When spawning subagents, always pass conventions from the respective skill into the agent's prompt.
+## Architecture Rules
+1. Lazy-import core modules in routers (keeps startup fast)
+2. Use `asyncio.to_thread()` for CPU-heavy analysis
+3. SQLite databases stored in `backend/` directory
+4. Frontend max-width: 1100px, sidebar: 240px
+5. All forms use glassmorphism gradient backgrounds

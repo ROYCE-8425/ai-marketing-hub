@@ -39,3 +39,7 @@ duckduckgo-search>=7.0.0    # real search results (free, no API key)
 # DataForSEO SERP data:
 #   DATAFORSEO_LOGIN, DATAFORSEO_PASSWORD
 # dataforseo>=1.0.0
+
+# ── Phase 20 — MarkItDown File Converter ────────────────────────────────────────
+markitdown[all]>=0.1.5       # Microsoft's file-to-markdown converter (PDF/Word/Excel/PPT)
+python-multipart>=0.0.9       # Required for FastAPI file uploads
