@@ -20,6 +20,7 @@ import { BacklinkAnalyzer } from "./components/BacklinkAnalyzer";
 import { ContentCalendar } from "./components/ContentCalendarPanel";
 import { SiteManager } from "./components/SiteManager";
 import { AbTesting } from "./components/AbTesting";
+import FileConverter from "./components/FileConverter";
 import { addToHistory } from "./lib/history";
 import type { AuditResponse } from "./types/seo";
 import type { CompetitorGapResponse, PlanContentResponse } from "./types/content";
@@ -71,7 +72,7 @@ class ErrorBoundary extends React.Component<
 
 // ─── Tab types ─────────────────────────────────────────────────────────────────
 
-type TabId = "dashboard" | "seo" | "cro" | "competitor" | "planner" | "tracker" | "serp" | "aikeys" | "ranktracker" | "spineditor" | "geo" | "techseo" | "report" | "backlinks" | "calendar" | "sites" | "abtest";
+type TabId = "dashboard" | "seo" | "cro" | "competitor" | "planner" | "tracker" | "serp" | "aikeys" | "ranktracker" | "spineditor" | "geo" | "techseo" | "report" | "backlinks" | "calendar" | "sites" | "abtest" | "fileconvert";
 
 interface NavItem { id: TabId; label: string; icon: string }
 interface NavGroup { group: string; icon: string; items: NavItem[] }
@@ -102,6 +103,7 @@ const NAV_GROUPS: NavGroup[] = [
     { id: "abtest", label: "A/B Testing", icon: "🧪" },
     { id: "report", label: "Báo cáo AI", icon: "📋" },
     { id: "tracker", label: "Chiến dịch", icon: "📈" },
+    { id: "fileconvert", label: "File Converter", icon: "📎" },
   ]},
   { group: "Quản lý", icon: "⚙️", items: [
     { id: "sites", label: "Multi-site", icon: "🏢" },
@@ -1315,11 +1317,14 @@ export default function App() {
         {/* SEO A/B Testing Tab */}
         {activeTab === "abtest" && <AbTesting />}
 
+        {/* File Converter Tab */}
+        {activeTab === "fileconvert" && <FileConverter />}
+
       </main>
       </div>
 
       <footer className="page-footer">
-        AI Marketing Hub — Phiên bản 19 &nbsp;&middot;&nbsp; Xây dựng với FastAPI + React
+        AI Marketing Hub — Phiên bản 20 &nbsp;&middot;&nbsp; Xây dựng với FastAPI + React
       </footer>
 
       {publishModal && (
