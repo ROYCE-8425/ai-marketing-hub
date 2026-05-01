@@ -164,3 +164,52 @@ async def generate_schema_api(
     from core.geo_analyzer import generate_local_business_schema
     code = generate_local_business_schema(name, address, phone, url, business_type, description, opening_hours)
     return {"schema_code": code, "type": business_type}
+
+
+@router.post("/api/geo/generate-product-schema")
+async def generate_product_schema_api(
+    name: str = Body(..., embed=True),
+    description: str = Body("", embed=True),
+    brand: str = Body("", embed=True),
+    price: float = Body(0, embed=True),
+    currency: str = Body("VND", embed=True),
+    url: str = Body("", embed=True),
+    image: str = Body("", embed=True),
+    sku: str = Body("", embed=True),
+):
+    from core.geo_analyzer import generate_product_schema
+    code = generate_product_schema(name, description, image, brand, price, currency, url=url, sku=sku)
+    return {"schema_code": code, "type": "Product"}
+
+
+@router.post("/api/geo/generate-article-schema")
+async def generate_article_schema_api(
+    headline: str = Body(..., embed=True),
+    author: str = Body("", embed=True),
+    date_published: str = Body("", embed=True),
+    description: str = Body("", embed=True),
+    url: str = Body("", embed=True),
+    publisher_name: str = Body("", embed=True),
+    article_type: str = Body("Article", embed=True),
+):
+    from core.geo_analyzer import generate_article_schema
+    code = generate_article_schema(headline, author, date_published, description=description, url=url, publisher_name=publisher_name, article_type=article_type)
+    return {"schema_code": code, "type": article_type}
+
+
+@router.post("/api/geo/generate-breadcrumb-schema")
+async def generate_breadcrumb_schema_api(
+    items: List[dict] = Body(..., embed=True),
+):
+    from core.geo_analyzer import generate_breadcrumb_schema
+    code = generate_breadcrumb_schema(items)
+    return {"schema_code": code, "type": "BreadcrumbList"}
+
+
+@router.post("/api/geo/validate-schema")
+async def validate_schema_api(
+    url: str = Body(..., embed=True),
+):
+    from core.geo_analyzer import validate_schema_on_page
+    return await validate_schema_on_page(url)
+

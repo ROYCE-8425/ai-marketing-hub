@@ -1,555 +1,215 @@
 """
-Google Search Console Data Integration
+Google Search Console Data Integration — Phase 20 (Rewritten)
 
+Uses httpx + OAuth2 refresh tokens directly (no googleapiclient dependency).
 Fetches search performance, keyword rankings, and SERP data.
 """
 
 import os
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Any
-from googleapiclient.discovery import build
-from google.oauth2 import service_account
+from urllib.parse import quote
+
+import httpx
+
+
+GSC_API = "https://www.googleapis.com/webmasters/v3"
+
 
 class GoogleSearchConsole:
-    """Google Search Console data fetcher"""
+    """Google Search Console data fetcher using httpx + OAuth2."""
 
-    def __init__(self, site_url: Optional[str] = None, credentials_path: Optional[str] = None):
-        """
-        Initialize GSC client
-
-        Args:
-            site_url: Site URL (e.g., "https://castos.com")
-            credentials_path: Path to credentials JSON
-        """
-        self.site_url = site_url or os.getenv('GSC_SITE_URL')
-        credentials_path = credentials_path or os.getenv('GSC_CREDENTIALS_PATH')
+    def __init__(self, site_url: Optional[str] = None):
+        self.site_url = site_url or os.getenv("GSC_SITE_URL", "")
+        self._client_id = os.getenv("GOOGLE_SEARCH_CONSOLE_CLIENT_ID", "")
+        self._client_secret = os.getenv("GOOGLE_SEARCH_CONSOLE_CLIENT_SECRET", "")
+        self._refresh_token = os.getenv("GOOGLE_SEARCH_CONSOLE_REFRESH_TOKEN", "")
+        self._access_token: Optional[str] = None
 
         if not self.site_url:
-            raise ValueError("GSC_SITE_URL must be provided or set in environment")
+            raise ValueError("GSC_SITE_URL must be set in environment")
+        if not all([self._client_id, self._client_secret, self._refresh_token]):
+            raise ValueError("GSC OAuth credentials not configured")
 
-        if not credentials_path or not os.path.exists(credentials_path):
-            raise ValueError(f"Credentials file not found: {credentials_path}")
+    async def _get_access_token(self) -> str:
+        """Refresh the OAuth2 access token."""
+        if self._access_token:
+            return self._access_token
 
-        # Initialize client
-        credentials = service_account.Credentials.from_service_account_file(
-            credentials_path,
-            scopes=['https://www.googleapis.com/auth/webmasters.readonly']
-        )
+        async with httpx.AsyncClient(timeout=10) as client:
+            resp = await client.post(
+                "https://oauth2.googleapis.com/token",
+                data={
+                    "client_id": self._client_id,
+                    "client_secret": self._client_secret,
+                    "refresh_token": self._refresh_token,
+                    "grant_type": "refresh_token",
+                },
+            )
+            data = resp.json()
+            if "access_token" not in data:
+                raise ValueError(f"GSC token refresh failed: {data.get('error_description', data)}")
+            self._access_token = data["access_token"]
+            return self._access_token
 
-        self.service = build('searchconsole', 'v1', credentials=credentials)
+    async def _query(self, body: Dict[str, Any]) -> Dict[str, Any]:
+        """Execute a Search Analytics query."""
+        token = await self._get_access_token()
+        encoded = quote(self.site_url, safe="")
+        url = f"{GSC_API}/sites/{encoded}/searchAnalytics/query"
 
-    def get_keyword_positions(
-        self,
-        days: int = 30,
-        limit: int = 1000
-    ) -> List[Dict[str, Any]]:
-        """
-        Get keyword rankings and performance
+        async with httpx.AsyncClient(timeout=15) as client:
+            resp = await client.post(
+                url,
+                headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json"},
+                json=body,
+            )
+            if resp.status_code == 401:
+                self._access_token = None
+                token = await self._get_access_token()
+                resp = await client.post(
+                    url,
+                    headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json"},
+                    json=body,
+                )
+            if resp.status_code != 200:
+                return {"error": f"GSC API error {resp.status_code}: {resp.text[:200]}"}
+            return resp.json()
 
-        Args:
-            days: Number of days to analyze
-            limit: Max number of keywords to return
+    async def get_keyword_positions(self, days: int = 28, limit: int = 100) -> List[Dict[str, Any]]:
+        """Get keyword rankings and performance."""
+        start = (datetime.now() - timedelta(days=days)).strftime("%Y-%m-%d")
+        end = datetime.now().strftime("%Y-%m-%d")
 
-        Returns:
-            List of keywords with position, clicks, impressions
-        """
-        start_date = (datetime.now() - timedelta(days=days)).strftime('%Y-%m-%d')
-        end_date = datetime.now().strftime('%Y-%m-%d')
+        response = await self._query({
+            "startDate": start,
+            "endDate": end,
+            "dimensions": ["query"],
+            "rowLimit": limit,
+        })
 
-        request = {
-            'startDate': start_date,
-            'endDate': end_date,
-            'dimensions': ['query'],
-            'rowLimit': limit,
-            'dimensionFilterGroups': []
-        }
-
-        response = self.service.searchanalytics().query(
-            siteUrl=self.site_url,
-            body=request
-        ).execute()
+        if "error" in response:
+            return []
 
         results = []
-        for row in response.get('rows', []):
-            query = row['keys'][0]
+        for row in response.get("rows", []):
             results.append({
-                'keyword': query,
-                'clicks': row['clicks'],
-                'impressions': row['impressions'],
-                'ctr': row['ctr'],
-                'position': round(row['position'], 1)
+                "keyword": row["keys"][0],
+                "clicks": row.get("clicks", 0),
+                "impressions": row.get("impressions", 0),
+                "ctr": round(row.get("ctr", 0) * 100, 2),
+                "position": round(row.get("position", 0), 1),
             })
 
-        # Sort by impressions (potential)
-        results.sort(key=lambda x: x['impressions'], reverse=True)
-
+        results.sort(key=lambda x: x["impressions"], reverse=True)
         return results
 
-    def get_quick_wins(
+    async def get_quick_wins(
         self,
-        days: int = 30,
+        days: int = 28,
         position_min: int = 11,
         position_max: int = 20,
-        min_impressions: int = 50,
-        prioritize_commercial: bool = True
+        min_impressions: int = 5,
     ) -> List[Dict[str, Any]]:
-        """
-        Find "quick win" opportunities - keywords ranking 11-20
-
-        These are closest to page 1 and easiest to improve.
-
-        Args:
-            days: Number of days to analyze
-            position_min: Minimum position (default 11)
-            position_max: Maximum position (default 20)
-            min_impressions: Minimum impressions threshold
-            prioritize_commercial: Weight score by commercial intent (default True)
-
-        Returns:
-            List of quick win opportunities
-        """
-        all_keywords = self.get_keyword_positions(days=days)
+        """Find keywords ranking 11-20 (close to page 1)."""
+        all_kw = await self.get_keyword_positions(days=days, limit=500)
 
         quick_wins = []
-        for kw in all_keywords:
-            if (position_min <= kw['position'] <= position_max and
-                kw['impressions'] >= min_impressions):
-
-                keyword = kw['keyword'].lower()
-
-                # Calculate commercial intent score (0.1 to 3.0)
-                commercial_intent = self._calculate_commercial_intent(keyword)
-
-                # Calculate opportunity score
-                # Factors: impressions, proximity to page 1, commercial intent
-                distance_from_10 = kw['position'] - 10
-                base_score = kw['impressions'] / (distance_from_10 + 1)
-
-                if prioritize_commercial:
-                    opportunity_score = base_score * commercial_intent
-                else:
-                    opportunity_score = base_score
-
+        for kw in all_kw:
+            if position_min <= kw["position"] <= position_max and kw["impressions"] >= min_impressions:
+                distance = kw["position"] - 10
+                score = kw["impressions"] / max(distance, 0.5)
+                intent = self._commercial_intent(kw["keyword"])
                 quick_wins.append({
                     **kw,
-                    'commercial_intent': commercial_intent,
-                    'commercial_intent_category': self._get_intent_category(commercial_intent),
-                    'opportunity_score': round(opportunity_score, 2),
-                    'priority': 'high' if kw['position'] <= 15 else 'medium'
+                    "commercial_intent": intent,
+                    "opportunity_score": round(score * intent, 2),
+                    "priority": "high" if kw["position"] <= 15 else "medium",
                 })
 
-        # Sort by opportunity score
-        quick_wins.sort(key=lambda x: x['opportunity_score'], reverse=True)
-
+        quick_wins.sort(key=lambda x: x["opportunity_score"], reverse=True)
         return quick_wins
 
-    def _calculate_commercial_intent(self, keyword: str) -> float:
-        """
-        Calculate commercial intent score for a keyword
+    async def get_page_performance(self, page_url: str, days: int = 28) -> Dict[str, Any]:
+        """Get search performance for a specific page."""
+        start = (datetime.now() - timedelta(days=days)).strftime("%Y-%m-%d")
+        end = datetime.now().strftime("%Y-%m-%d")
 
-        Returns:
-            Float between 0.1 (informational) and 3.0 (transactional)
-        """
-        keyword = keyword.lower()
-
-        # HIGH INTENT (3.0): Transactional - ready to buy
-        high_intent_terms = [
-            'pricing', 'price', 'cost', 'buy', 'purchase', 'vs', 'versus',
-            'alternative', 'alternatives', 'best', 'top', 'review', 'reviews',
-            'comparison', 'compare', 'plan', 'plans', 'trial', 'free trial',
-            'discount', 'coupon', 'deal', 'hosting', 'service', 'services',
-            'platform', 'software', 'tool', 'tools', 'solution', 'solutions',
-            'provider', 'providers'
-        ]
-
-        # MEDIUM-HIGH INTENT (2.0): Commercial investigation
-        medium_high_intent = [
-            'how to', 'guide', 'tutorial', 'tips', 'strategies', 'examples',
-            'ideas', 'ways to', 'for business', 'for companies', 'professional',
-            'analytics', 'monetization', 'monetize', 'grow', 'increase',
-            'improve', 'optimize', 'setup', 'set up'
-        ]
-
-        # MEDIUM INTENT (1.0): Informational with potential
-        medium_intent = [
-            'what is', 'how does', 'why', 'benefits', 'features',
-            'podcast', 'podcasting', 'audio', 'video', 'rss', 'marketing'
-        ]
-
-        # LOW INTENT (0.1): Pure informational/celebrity/news
-        low_intent_terms = [
-            'who is', 'biography', 'age', 'net worth', 'height', 'wife',
-            'husband', 'dating', 'married', 'death', 'died', 'born',
-            'pewdiepie', 'youtube stars', 'celebrity', 'famous'
-        ]
-
-        # Check for low intent first (these override everything)
-        for term in low_intent_terms:
-            if term in keyword:
-                return 0.1
-
-        # Check for high intent
-        for term in high_intent_terms:
-            if term in keyword:
-                return 3.0
-
-        # Check for medium-high intent
-        for term in medium_high_intent:
-            if term in keyword:
-                return 2.0
-
-        # Check for medium intent
-        for term in medium_intent:
-            if term in keyword:
-                return 1.0
-
-        # Default: low-medium intent
-        return 0.5
-
-    def _get_intent_category(self, score: float) -> str:
-        """Get human-readable intent category"""
-        if score >= 2.5:
-            return 'Transactional'
-        elif score >= 1.5:
-            return 'Commercial Investigation'
-        elif score >= 0.8:
-            return 'Informational (Relevant)'
-        else:
-            return 'Informational (Low Value)'
-
-    def get_page_performance(
-        self,
-        url: str,
-        days: int = 30
-    ) -> Dict[str, Any]:
-        """
-        Get search performance for a specific page
-
-        Args:
-            url: Page URL or path
-            days: Number of days to analyze
-
-        Returns:
-            Dict with page performance data
-        """
-        start_date = (datetime.now() - timedelta(days=days)).strftime('%Y-%m-%d')
-        end_date = datetime.now().strftime('%Y-%m-%d')
-
-        # Get page-level data
-        request = {
-            'startDate': start_date,
-            'endDate': end_date,
-            'dimensions': ['page'],
-            'dimensionFilterGroups': [{
-                'filters': [{
-                    'dimension': 'page',
-                    'operator': 'equals' if url.startswith('http') else 'contains',
-                    'expression': url
-                }]
-            }]
-        }
-
-        response = self.service.searchanalytics().query(
-            siteUrl=self.site_url,
-            body=request
-        ).execute()
-
-        if not response.get('rows'):
-            return {'url': url, 'error': 'No data found'}
-
-        row = response['rows'][0]
-
-        page_data = {
-            'url': row['keys'][0],
-            'clicks': row['clicks'],
-            'impressions': row['impressions'],
-            'ctr': round(row['ctr'] * 100, 2),
-            'avg_position': round(row['position'], 1)
-        }
-
-        # Get keywords for this page
-        keywords_request = {
-            'startDate': start_date,
-            'endDate': end_date,
-            'dimensions': ['query'],
-            'dimensionFilterGroups': [{
-                'filters': [{
-                    'dimension': 'page',
-                    'operator': 'equals' if url.startswith('http') else 'contains',
-                    'expression': url
-                }]
+        response = await self._query({
+            "startDate": start,
+            "endDate": end,
+            "dimensions": ["page"],
+            "dimensionFilterGroups": [{
+                "filters": [{"dimension": "page", "operator": "contains", "expression": page_url}]
             }],
-            'rowLimit': 50
+        })
+
+        if "error" in response or not response.get("rows"):
+            return {"url": page_url, "error": "No data found"}
+
+        row = response["rows"][0]
+        return {
+            "url": row["keys"][0],
+            "clicks": row["clicks"],
+            "impressions": row["impressions"],
+            "ctr": round(row["ctr"] * 100, 2),
+            "avg_position": round(row["position"], 1),
         }
 
-        keywords_response = self.service.searchanalytics().query(
-            siteUrl=self.site_url,
-            body=keywords_request
-        ).execute()
+    async def get_trending_queries(self, days_recent: int = 7, days_total: int = 28) -> List[Dict[str, Any]]:
+        """Find queries gaining traction."""
+        recent = await self.get_keyword_positions(days=days_recent, limit=500)
+        previous = await self.get_keyword_positions(days=days_total, limit=500)
 
-        keywords = []
-        for kw_row in keywords_response.get('rows', []):
-            keywords.append({
-                'keyword': kw_row['keys'][0],
-                'clicks': kw_row['clicks'],
-                'impressions': kw_row['impressions'],
-                'position': round(kw_row['position'], 1)
-            })
-
-        keywords.sort(key=lambda x: x['clicks'], reverse=True)
-        page_data['top_keywords'] = keywords[:10]
-
-        return page_data
-
-    def get_low_ctr_pages(
-        self,
-        days: int = 30,
-        ctr_threshold: float = 0.03,  # 3%
-        min_impressions: int = 100,
-        path_filter: Optional[str] = "/blog/"
-    ) -> List[Dict[str, Any]]:
-        """
-        Find pages with high impressions but low CTR
-
-        These need better titles/descriptions.
-
-        Args:
-            days: Number of days to analyze
-            ctr_threshold: CTR below this is considered low
-            min_impressions: Minimum impressions to consider
-            path_filter: Filter by path
-
-        Returns:
-            List of pages with low CTR
-        """
-        start_date = (datetime.now() - timedelta(days=days)).strftime('%Y-%m-%d')
-        end_date = datetime.now().strftime('%Y-%m-%d')
-
-        request = {
-            'startDate': start_date,
-            'endDate': end_date,
-            'dimensions': ['page'],
-            'rowLimit': 1000
-        }
-
-        if path_filter:
-            request['dimensionFilterGroups'] = [{
-                'filters': [{
-                    'dimension': 'page',
-                    'operator': 'contains',
-                    'expression': path_filter
-                }]
-            }]
-
-        response = self.service.searchanalytics().query(
-            siteUrl=self.site_url,
-            body=request
-        ).execute()
-
-        low_ctr = []
-        for row in response.get('rows', []):
-            impressions = row['impressions']
-            ctr = row['ctr']
-
-            if impressions >= min_impressions and ctr < ctr_threshold:
-                # Calculate potential clicks if CTR improved
-                target_ctr = 0.05  # 5% target
-                potential_clicks = int(impressions * target_ctr)
-                missed_clicks = potential_clicks - row['clicks']
-
-                low_ctr.append({
-                    'url': row['keys'][0],
-                    'impressions': impressions,
-                    'clicks': row['clicks'],
-                    'ctr': round(ctr * 100, 2),
-                    'avg_position': round(row['position'], 1),
-                    'potential_clicks': potential_clicks,
-                    'missed_clicks': missed_clicks,
-                    'priority': 'high' if missed_clicks > 50 else 'medium'
-                })
-
-        # Sort by missed opportunity
-        low_ctr.sort(key=lambda x: x['missed_clicks'], reverse=True)
-
-        return low_ctr
-
-    def get_trending_queries(
-        self,
-        days_recent: int = 7,
-        days_comparison: int = 30,
-        min_impressions: int = 20
-    ) -> List[Dict[str, Any]]:
-        """
-        Find queries gaining traction (rising impressions)
-
-        Args:
-            days_recent: Recent period to analyze
-            days_comparison: Previous period to compare against
-            min_impressions: Minimum impressions in recent period
-
-        Returns:
-            List of trending queries
-        """
-        # Get recent data
-        recent_end = datetime.now().strftime('%Y-%m-%d')
-        recent_start = (datetime.now() - timedelta(days=days_recent)).strftime('%Y-%m-%d')
-
-        recent_request = {
-            'startDate': recent_start,
-            'endDate': recent_end,
-            'dimensions': ['query'],
-            'rowLimit': 1000
-        }
-
-        recent_response = self.service.searchanalytics().query(
-            siteUrl=self.site_url,
-            body=recent_request
-        ).execute()
-
-        # Get comparison data
-        comparison_end = (datetime.now() - timedelta(days=days_recent)).strftime('%Y-%m-%d')
-        comparison_start = (datetime.now() - timedelta(days=days_comparison)).strftime('%Y-%m-%d')
-
-        comparison_request = {
-            'startDate': comparison_start,
-            'endDate': comparison_end,
-            'dimensions': ['query'],
-            'rowLimit': 1000
-        }
-
-        comparison_response = self.service.searchanalytics().query(
-            siteUrl=self.site_url,
-            body=comparison_request
-        ).execute()
-
-        # Create lookup for comparison data
-        comparison_lookup = {
-            row['keys'][0]: row['impressions']
-            for row in comparison_response.get('rows', [])
-        }
-
+        prev_lookup = {kw["keyword"]: kw["impressions"] for kw in previous}
         trending = []
-        for row in recent_response.get('rows', []):
-            query = row['keys'][0]
-            recent_impressions = row['impressions']
 
-            if recent_impressions < min_impressions:
-                continue
-
-            previous_impressions = comparison_lookup.get(query, 0)
-
-            if previous_impressions > 0:
-                change_percent = ((recent_impressions - previous_impressions) / previous_impressions) * 100
+        for kw in recent:
+            prev_impr = prev_lookup.get(kw["keyword"], 0)
+            if prev_impr > 0:
+                change = ((kw["impressions"] - prev_impr) / prev_impr) * 100
             else:
-                change_percent = 100  # New query
+                change = 100.0
 
-            # Only include queries showing growth
-            if change_percent > 20:
+            if change > 20:
                 trending.append({
-                    'query': query,
-                    'recent_impressions': recent_impressions,
-                    'previous_impressions': previous_impressions,
-                    'change_percent': round(change_percent, 1),
-                    'clicks': row['clicks'],
-                    'position': round(row['position'], 1)
+                    **kw,
+                    "previous_impressions": prev_impr,
+                    "change_percent": round(change, 1),
                 })
 
-        # Sort by growth percentage
-        trending.sort(key=lambda x: x['change_percent'], reverse=True)
-
+        trending.sort(key=lambda x: x["change_percent"], reverse=True)
         return trending
 
-    def get_position_changes(
-        self,
-        days_recent: int = 7,
-        days_comparison: int = 30
-    ) -> Dict[str, List[Dict[str, Any]]]:
-        """
-        Track keyword position changes
+    @staticmethod
+    def _commercial_intent(keyword: str) -> float:
+        """Score commercial intent (0.1–3.0)."""
+        kw = keyword.lower()
+        high = ["giá", "mua", "bán", "trả góp", "đại lý", "pricing", "buy", "price", "cost", "review"]
+        mid = ["so sánh", "tốt nhất", "đánh giá", "compare", "best", "vs", "alternative"]
+        for t in high:
+            if t in kw:
+                return 3.0
+        for t in mid:
+            if t in kw:
+                return 2.0
+        return 0.5
 
-        Args:
-            days_recent: Recent period
-            days_comparison: Previous period to compare
 
-        Returns:
-            Dict with 'improved', 'declined', and 'stable' lists
-        """
-        # Get recent positions
-        recent_data = self.get_keyword_positions(days=days_recent)
+# ── Standalone helper for quick access without class ──────────────────────────
 
-        # Get comparison positions
-        comparison_data = self.get_keyword_positions(days=days_comparison)
 
-        # Create lookup
-        comparison_lookup = {
-            kw['keyword']: kw['position']
-            for kw in comparison_data
-        }
-
-        improved = []
-        declined = []
-        stable = []
-
-        for kw in recent_data:
-            keyword = kw['keyword']
-            current_pos = kw['position']
-            previous_pos = comparison_lookup.get(keyword)
-
-            if not previous_pos:
-                continue  # New keyword
-
-            position_change = previous_pos - current_pos  # Positive = improved
-
-            result = {
-                **kw,
-                'previous_position': previous_pos,
-                'position_change': round(position_change, 1)
-            }
-
-            if position_change >= 2:  # Improved by 2+ positions
-                improved.append(result)
-            elif position_change <= -2:  # Declined by 2+ positions
-                declined.append(result)
-            else:
-                stable.append(result)
-
-        # Sort by magnitude of change
-        improved.sort(key=lambda x: x['position_change'], reverse=True)
-        declined.sort(key=lambda x: x['position_change'])
-
+async def fetch_gsc_keywords(days: int = 28, limit: int = 50) -> Dict[str, Any]:
+    """Quick helper — fetch GSC keyword data. Returns real data or error."""
+    try:
+        gsc = GoogleSearchConsole()
+        keywords = await gsc.get_keyword_positions(days=days, limit=limit)
         return {
-            'improved': improved,
-            'declined': declined,
-            'stable': stable
+            "source": "gsc_real",
+            "site_url": gsc.site_url,
+            "keywords": keywords,
+            "total": len(keywords),
+            "period_days": days,
         }
-
-
-# Example usage
-if __name__ == "__main__":
-    from dotenv import load_dotenv
-    load_dotenv('data_sources/config/.env')
-
-    gsc = GoogleSearchConsole()
-
-    print("Quick Win Opportunities (Position 11-20):")
-    quick_wins = gsc.get_quick_wins()
-    for i, kw in enumerate(quick_wins[:10], 1):
-        print(f"{i}. {kw['keyword']}")
-        print(f"   Position: {kw['position']} | Impressions: {kw['impressions']:,}")
-        print(f"   Opportunity Score: {kw['opportunity_score']:.1f}")
-        print()
-
-    print("\nLow CTR Pages (Need Better Meta):")
-    low_ctr = gsc.get_low_ctr_pages()
-    for page in low_ctr[:5]:
-        print(f"- {page['url']}")
-        print(f"  {page['impressions']:,} impressions | {page['ctr']:.2f}% CTR")
-        print(f"  Missing {page['missed_clicks']} potential clicks")
-        print()
-
-    print("\nTrending Queries:")
-    trending = gsc.get_trending_queries()
-    for query in trending[:5]:
-        print(f"- {query['query']}")
-        print(f"  +{query['change_percent']:.1f}% impressions")
-        print()
+    except Exception as e:
+        return {"source": "gsc_error", "error": str(e), "keywords": []}

@@ -463,3 +463,208 @@ NỘI DUNG:
             return {"error": "AI không trả về format JSON hợp lệ"}
     except Exception as e:
         return {"error": f"Lỗi: {str(e)}"}
+
+
+# ── New Schema Generators (Phase 20) ──────────────────────────────────────────
+
+
+def generate_product_schema(
+    name: str,
+    description: str = "",
+    image: str = "",
+    brand: str = "",
+    price: float = 0,
+    currency: str = "VND",
+    availability: str = "InStock",
+    url: str = "",
+    sku: str = "",
+    rating_value: float = 0,
+    rating_count: int = 0,
+) -> str:
+    """
+    Generate Product Schema JSON-LD.
+
+    Returns:
+        JSON-LD string ready to paste into <script> tag
+    """
+    schema: Dict[str, Any] = {
+        "@context": "https://schema.org",
+        "@type": "Product",
+        "name": name,
+    }
+    if description:
+        schema["description"] = description
+    if image:
+        schema["image"] = image
+    if brand:
+        schema["brand"] = {"@type": "Brand", "name": brand}
+    if sku:
+        schema["sku"] = sku
+    if url:
+        schema["url"] = url
+    if price > 0:
+        schema["offers"] = {
+            "@type": "Offer",
+            "price": price,
+            "priceCurrency": currency,
+            "availability": f"https://schema.org/{availability}",
+        }
+    if rating_value > 0:
+        schema["aggregateRating"] = {
+            "@type": "AggregateRating",
+            "ratingValue": rating_value,
+            "reviewCount": max(1, rating_count),
+        }
+    return json.dumps(schema, ensure_ascii=False, indent=2)
+
+
+def generate_article_schema(
+    headline: str,
+    author: str = "",
+    date_published: str = "",
+    date_modified: str = "",
+    description: str = "",
+    image: str = "",
+    publisher_name: str = "",
+    publisher_logo: str = "",
+    url: str = "",
+    article_type: str = "Article",
+) -> str:
+    """
+    Generate Article Schema JSON-LD.
+
+    Args:
+        article_type: "Article", "NewsArticle", "BlogPosting"
+
+    Returns:
+        JSON-LD string ready to paste into <script> tag
+    """
+    schema: Dict[str, Any] = {
+        "@context": "https://schema.org",
+        "@type": article_type,
+        "headline": headline,
+    }
+    if description:
+        schema["description"] = description
+    if author:
+        schema["author"] = {"@type": "Person", "name": author}
+    if date_published:
+        schema["datePublished"] = date_published
+    if date_modified:
+        schema["dateModified"] = date_modified
+    if image:
+        schema["image"] = image
+    if url:
+        schema["url"] = url
+        schema["mainEntityOfPage"] = {"@type": "WebPage", "@id": url}
+    if publisher_name:
+        publisher: Dict[str, Any] = {"@type": "Organization", "name": publisher_name}
+        if publisher_logo:
+            publisher["logo"] = {"@type": "ImageObject", "url": publisher_logo}
+        schema["publisher"] = publisher
+
+    return json.dumps(schema, ensure_ascii=False, indent=2)
+
+
+def generate_breadcrumb_schema(
+    items: List[Dict[str, str]],
+) -> str:
+    """
+    Generate BreadcrumbList Schema JSON-LD.
+
+    Args:
+        items: List of {"name": "Trang chủ", "url": "https://..."} ordered from root to current
+    Returns:
+        JSON-LD string ready to paste into <script> tag
+    """
+    elements = []
+    for i, item in enumerate(items, 1):
+        elements.append({
+            "@type": "ListItem",
+            "position": i,
+            "name": item.get("name", ""),
+            "item": item.get("url", ""),
+        })
+
+    schema = {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": elements,
+    }
+    return json.dumps(schema, ensure_ascii=False, indent=2)
+
+
+async def validate_schema_on_page(url: str) -> Dict[str, Any]:
+    """
+    Fetch a page and validate all Schema.org JSON-LD found.
+
+    Returns detailed analysis of each schema block.
+    """
+    try:
+        async with httpx.AsyncClient(timeout=15, follow_redirects=True) as client:
+            resp = await client.get(url, headers={
+                "User-Agent": "Mozilla/5.0 (compatible; AI-Marketing-Hub/1.0)"
+            })
+            html = resp.text
+    except Exception as e:
+        return {"error": f"Không thể truy cập: {str(e)}"}
+
+    soup = BeautifulSoup(html, "html.parser")
+    schemas_found = []
+    errors = []
+    missing_schemas = []
+
+    for script in soup.find_all("script", {"type": "application/ld+json"}):
+        try:
+            raw = script.string or ""
+            data = json.loads(raw)
+            items = data if isinstance(data, list) else [data]
+            for item in items:
+                schema_type = item.get("@type", "Unknown")
+                required_fields = _SCHEMA_REQUIRED_FIELDS.get(schema_type, [])
+                present = [f for f in required_fields if f in item or any(f in str(v) for v in item.values())]
+                missing = [f for f in required_fields if f not in present]
+                schemas_found.append({
+                    "type": schema_type,
+                    "valid": len(missing) == 0,
+                    "fields_present": list(item.keys()),
+                    "required_missing": missing,
+                    "char_count": len(raw),
+                })
+        except json.JSONDecodeError as e:
+            errors.append({"raw_preview": (script.string or "")[:100], "error": str(e)})
+
+    # Check for commonly expected schemas
+    found_types = {s["type"] for s in schemas_found}
+    for expected, label in [
+        ("FAQPage", "FAQ Schema — giúp hiển thị FAQ snippet trên Google"),
+        ("BreadcrumbList", "Breadcrumb Schema — cải thiện navigation trên SERP"),
+        ("Article", "Article Schema — giúp Google hiểu bài viết"),
+    ]:
+        if expected not in found_types:
+            missing_schemas.append({"type": expected, "reason": label})
+
+    return {
+        "url": url,
+        "schemas_found": schemas_found,
+        "total_schemas": len(schemas_found),
+        "json_errors": errors,
+        "missing_recommended": missing_schemas,
+        "score": min(100, len(schemas_found) * 15 + sum(10 for s in schemas_found if s["valid"])),
+    }
+
+
+_SCHEMA_REQUIRED_FIELDS: Dict[str, List[str]] = {
+    "Product": ["name", "offers"],
+    "Article": ["headline", "author", "datePublished"],
+    "NewsArticle": ["headline", "author", "datePublished"],
+    "BlogPosting": ["headline", "author", "datePublished"],
+    "FAQPage": ["mainEntity"],
+    "LocalBusiness": ["name", "address"],
+    "AutoDealer": ["name", "address"],
+    "Organization": ["name", "url"],
+    "BreadcrumbList": ["itemListElement"],
+    "WebSite": ["name", "url"],
+    "HowTo": ["name", "step"],
+}
+

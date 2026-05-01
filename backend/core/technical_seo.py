@@ -243,18 +243,38 @@ async def _check_links(soup: BeautifulSoup, base_url: str, max_check: int = 20) 
 
 
 async def _check_sitemap_robots(base_url: str) -> Dict[str, Any]:
-    """Check sitemap.xml and robots.txt."""
+    """Check sitemap.xml and robots.txt with detailed parsing."""
     issues = []
     score = 0
     domain_base = f"{urlparse(base_url).scheme}://{urlparse(base_url).netloc}"
+    robots_data: Dict[str, Any] = {}
+    sitemap_data: Dict[str, Any] = {}
 
     async with httpx.AsyncClient(timeout=8, follow_redirects=True) as client:
-        # robots.txt
+        # ── robots.txt ─────────────────────────────────────────────
         try:
             r = await client.get(f"{domain_base}/robots.txt")
             if r.status_code == 200 and len(r.text) > 10:
                 score += 5
                 has_robots = True
+                # Parse robots.txt directives
+                lines = r.text.strip().splitlines()
+                disallow = [l.split(":", 1)[1].strip() for l in lines if l.lower().startswith("disallow:")]
+                allow = [l.split(":", 1)[1].strip() for l in lines if l.lower().startswith("allow:")]
+                sitemaps_ref = [l.split(":", 1)[1].strip() for l in lines if l.lower().startswith("sitemap:")]
+                crawl_delay = next((l.split(":", 1)[1].strip() for l in lines if l.lower().startswith("crawl-delay:")), None)
+                robots_data = {
+                    "disallow_rules": disallow[:10],
+                    "allow_rules": allow[:10],
+                    "sitemap_refs": sitemaps_ref,
+                    "crawl_delay": crawl_delay,
+                    "total_lines": len(lines),
+                }
+                if not sitemaps_ref:
+                    issues.append({"severity": "info", "message": "robots.txt không khai báo Sitemap URL", "fix": "Thêm Sitemap: https://domain.com/sitemap.xml vào robots.txt"})
+                if any(d == "/" for d in disallow):
+                    issues.append({"severity": "critical", "message": "robots.txt chặn toàn bộ trang (Disallow: /)", "fix": "Xóa dòng 'Disallow: /' nếu muốn Google index"})
+                    score -= 5
             else:
                 has_robots = False
                 issues.append({"severity": "warning", "message": "robots.txt không tồn tại hoặc rỗng", "fix": "Tạo file robots.txt ở root domain"})
@@ -262,15 +282,29 @@ async def _check_sitemap_robots(base_url: str) -> Dict[str, Any]:
             has_robots = False
             issues.append({"severity": "warning", "message": "Không thể truy cập robots.txt", "fix": "Tạo file robots.txt"})
 
-        # sitemap.xml
+        # ── sitemap.xml ────────────────────────────────────────────
         try:
             r = await client.get(f"{domain_base}/sitemap.xml")
-            if r.status_code == 200 and "xml" in r.headers.get("content-type", "").lower():
+            content = r.text.lower()
+            if r.status_code == 200 and ("<url>" in content or "<sitemap>" in content):
                 score += 5
                 has_sitemap = True
-            elif r.status_code == 200 and "<url>" in r.text.lower():
-                score += 5
-                has_sitemap = True
+                # Parse sitemap
+                url_count = content.count("<url>")
+                sitemap_count = content.count("<sitemap>")
+                has_lastmod = "<lastmod>" in content
+                is_index = sitemap_count > 0
+                sitemap_data = {
+                    "url_count": url_count,
+                    "sitemap_count": sitemap_count,
+                    "is_index": is_index,
+                    "has_lastmod": has_lastmod,
+                    "size_kb": round(len(r.text) / 1024, 1),
+                }
+                if not has_lastmod:
+                    issues.append({"severity": "info", "message": "Sitemap thiếu <lastmod> dates", "fix": "Thêm lastmod để Google ưu tiên crawl trang mới"})
+                if url_count > 50000:
+                    issues.append({"severity": "warning", "message": f"Sitemap có {url_count} URLs (giới hạn 50,000)", "fix": "Chia thành sitemap index với nhiều sub-sitemaps"})
             else:
                 has_sitemap = False
                 issues.append({"severity": "warning", "message": "sitemap.xml không tồn tại", "fix": "Tạo sitemap.xml và submit lên Google Search Console"})
@@ -278,7 +312,12 @@ async def _check_sitemap_robots(base_url: str) -> Dict[str, Any]:
             has_sitemap = False
             issues.append({"severity": "warning", "message": "Không thể truy cập sitemap.xml", "fix": "Tạo sitemap.xml"})
 
-    return {"score": score, "max": 10, "has_robots": has_robots, "has_sitemap": has_sitemap, "issues": issues}
+    return {
+        "score": max(0, score), "max": 10,
+        "has_robots": has_robots, "has_sitemap": has_sitemap,
+        "robots_details": robots_data, "sitemap_details": sitemap_data,
+        "issues": issues,
+    }
 
 
 def _check_performance(load_time: float, html: str, headers: dict) -> Dict[str, Any]:
