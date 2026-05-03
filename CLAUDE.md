@@ -1,39 +1,42 @@
-# AI Marketing Hub — Vibe Coding Configuration
+# AI Marketing Hub — Project Rules
 
-## Project Context
-This is a full-stack SEO platform:
-- **Backend**: FastAPI (Python) — `backend/`
-- **Frontend**: React + TypeScript (Vite) — `frontend/`
-- **AI Engine**: Groq LLaMA 3.3 70B
-- **Database**: SQLite (4 databases)
-- **Style**: Dark mode glassmorphism, premium SaaS aesthetic
+> **Full context:** Đọc `CODEX_CONTEXT.md` để hiểu toàn bộ dự án.
 
-## Coding Standards
-- Use Vietnamese for UI text/labels
-- Use English for code comments and variable names  
-- Follow existing CSS design system in `frontend/src/index.css`
-- All API endpoints go in `backend/routers/`
-- All business logic goes in `backend/core/`
-- Components use functional React with hooks
-- Use `fetch()` for API calls (no axios)
+## Quick Facts
+- **Stack:** FastAPI (Python) + React/TypeScript (Vite) + Groq AI + SQLite
+- **Phase:** 20 | **Version:** 3.1.0 | **LOC:** ~27,600
+- **Site:** binhphuocmitsubishi.com (đại lý Mitsubishi Bình Phước)
+- **AI Engine:** Groq LLaMA 3.3 70B (NOT Gemini — quota exceeded)
+- **Design:** Dark glassmorphism, `#8b5cf6` purple, `#06b6d4` cyan
 
-## Key Design Tokens
-```css
---bg: #080b14
---surface: rgba(255,255,255,0.03)
---primary: #8b5cf6
---accent: #06b6d4
---text-h: #f1f5f9
+## Critical Rules
+1. UI text → **Tiếng Việt**. Code comments → English
+2. **No mock data** — User wants 100% real. See `MOCK_DATA_NOTE.md`
+3. **No Tailwind** — Use vanilla CSS, follow `frontend/src/index.css`
+4. **No axios** — Use `fetch()` for API calls
+5. Lazy-import in routers: `from core.xxx import yyy` inside endpoint functions
+6. CPU-heavy → `asyncio.to_thread()`
+7. New features: `core/` → `routers/` → `components/` → `App.tsx` sidebar
+
+## API Keys Status
+- ✅ `GROQ_API_KEY` — Working (main AI)
+- ✅ `GSC_*` — Real data (OAuth2 token refreshed 01/05/2026)
+- 🟡 `GA4_PROPERTY_ID` — Needs Service Account JSON file
+- 🟡 `GEMINI_API_KEY` — Quota exceeded, skip
+- ⚪ `ZAI_API_KEY` — Not integrated yet
+
+## Architecture
+```
+backend/core/    → 37 business logic modules
+backend/routers/ → 10 API routers
+frontend/src/components/ → 19 page components
+backend/*.db     → 4 SQLite databases
 ```
 
-## Skills & Tools Installed
-- `.superpowers/` — obra/superpowers (agentic skills framework)
-- `.skills/` — mattpocock/skills (engineering skills)
-- Backend uses `markitdown` for file conversion
-
-## Architecture Rules
-1. Lazy-import core modules in routers (keeps startup fast)
-2. Use `asyncio.to_thread()` for CPU-heavy analysis
-3. SQLite databases stored in `backend/` directory
-4. Frontend max-width: 1100px, sidebar: 240px
-5. All forms use glassmorphism gradient backgrounds
+## Key Files
+- `CODEX_CONTEXT.md` — Full project context (READ THIS FIRST)
+- `MOCK_DATA_NOTE.md` — What's mock vs real
+- `PHAN_TICH_PHAT_TRIEN.md` — Development breakdown (8 parts, 52 tasks)
+- `backend/.env` — API keys
+- `frontend/src/App.tsx` — Main app (sidebar, tabs, routing)
+- `frontend/src/index.css` — Design system (2419 LOC)
