@@ -3,7 +3,7 @@ API Router — Phase 10-13 (Upgraded): Rank Tracker, Spin Editor, GEO Optimizer
 """
 
 from fastapi import APIRouter, Body
-from fastapi.responses import PlainTextResponse
+from fastapi.responses import PlainTextResponse, Response
 from typing import List, Optional
 import os
 
@@ -84,6 +84,17 @@ async def export_csv(site_url: str = None):
         content=csv_data,
         media_type="text/csv",
         headers={"Content-Disposition": "attachment; filename=rank_tracker_export.csv"},
+    )
+
+
+@router.get("/api/rank-tracker/export-excel")
+async def export_excel(site_url: str = None):
+    from core.rank_tracker import export_keywords_excel
+    xlsx_bytes = export_keywords_excel(site_url or _DEFAULT_SITE())
+    return Response(
+        content=xlsx_bytes,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": "attachment; filename=rank_tracker_export.xlsx"},
     )
 
 

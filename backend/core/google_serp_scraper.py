@@ -1,10 +1,10 @@
 """
-SERP Scraper — Phase 9
+SERP Scraper — Phase 9 (Upgraded: Google Custom Search API)
 
 Strategy:
-1. DataForSEO API (if configured) — most reliable
-2. DuckDuckGo HTML scraping via lite.duckduckgo.com
-3. Google scraping fallback
+1. DataForSEO API (if configured) — most reliable, premium
+2. Google Custom Search JSON API (if configured) — official Google results
+3. DuckDuckGo HTML scraping via lite.duckduckgo.com — free fallback
 4. Mock data with clear Vietnamese notice
 
 All searches are async-safe and never hang.
@@ -17,6 +17,7 @@ import json
 import subprocess
 from typing import Any, Dict, List
 from urllib.parse import urlparse, quote_plus
+import os
 
 import httpx
 
@@ -59,8 +60,64 @@ def _mock_serp(keyword: str, loc_label: str) -> Dict[str, Any]:
         "total_results": 10,
         "results_count": 10,
         "source": "mock_serp",
-        "note": "⚠️ Dữ liệu mẫu — server không thể kết nối tới search engine (bị chặn bởi captcha). Cấu hình DataForSEO API hoặc deploy lên hosting production để có dữ liệu thật.",
+        "note": "⚠️ Dữ liệu mẫu — Cấu hình GOOGLE_SEARCH_API_KEY + GOOGLE_SEARCH_CX hoặc DataForSEO để có dữ liệu Google thật.",
     }
+
+
+async def _google_custom_search(keyword: str, location: str, num_results: int) -> List[Dict]:
+    """
+    Use Google Custom Search JSON API.
+    Free: 100 queries/day. Paid: $5 per 1000 queries.
+    Requires: GOOGLE_SEARCH_API_KEY + GOOGLE_SEARCH_CX env vars.
+
+    Docs: https://developers.google.com/custom-search/v1/overview
+    """
+    api_key = os.getenv("GOOGLE_SEARCH_API_KEY")
+    cx = os.getenv("GOOGLE_SEARCH_CX")
+    if not api_key or not cx:
+        return []
+
+    loc = LOCATION_MAP.get(location.lower(), LOCATION_MAP["vn"])
+    # Google CSE supports max 10 results per request
+    num = min(num_results, 10)
+
+    params = {
+        "key": api_key,
+        "cx": cx,
+        "q": keyword,
+        "num": num,
+        "gl": loc["gl"],
+        "hl": loc["hl"],
+    }
+
+    try:
+        async with httpx.AsyncClient(timeout=12.0) as client:
+            resp = await client.get(
+                "https://www.googleapis.com/customsearch/v1",
+                params=params,
+            )
+            resp.raise_for_status()
+            data = resp.json()
+
+        items = data.get("items", [])
+        results = []
+        for i, item in enumerate(items, 1):
+            link = item.get("link", "")
+            try:
+                domain = urlparse(link).netloc.replace("www.", "")
+            except Exception:
+                domain = ""
+            results.append({
+                "position": i,
+                "title": item.get("title", ""),
+                "url": link,
+                "domain": domain,
+                "snippet": item.get("snippet", ""),
+                "breadcrumb": item.get("formattedUrl", ""),
+            })
+        return results
+    except Exception:
+        return []
 
 
 def _ddg_subprocess(keyword: str, region: str, max_results: int) -> List[Dict]:
@@ -91,30 +148,54 @@ except Exception as e:
 
 
 class GoogleSerpScraper:
-    """SERP scraper with multiple fallbacks."""
+    """SERP scraper with multiple fallbacks: Google API → DuckDuckGo → Mock."""
 
     async def search(self, keyword: str, location: str = "vn", num_results: int = 10) -> Dict[str, Any]:
         loc = LOCATION_MAP.get(location.lower(), LOCATION_MAP["vn"])
         kl = loc.get("kl", "vn-vi")
         num = max(5, min(20, num_results))
 
-        # Strategy 1: Try DuckDuckGo via subprocess (avoids event loop conflicts)
+        # Strategy 1: Google Custom Search API (official Google results)
+        google_results = await _google_custom_search(keyword, location, num)
+        if google_results:
+            features = self._detect_features(google_results)
+            return {
+                "keyword": keyword,
+                "location": loc.get("label", ""),
+                "organic_results": google_results,
+                "serp_features": features,
+                "total_results": len(google_results),
+                "results_count": len(google_results),
+                "source": "google_custom_search",
+            }
+
+        # Strategy 2: DuckDuckGo fallback (free, no key needed)
         try:
             raw = await asyncio.wait_for(
                 asyncio.to_thread(_ddg_subprocess, keyword, kl, num),
                 timeout=15.0,
             )
             if raw:
-                return self._format(raw, keyword, loc)
+                return self._format_ddg(raw, keyword, loc)
         except Exception:
             pass
 
-        # Strategy 2: Fallback to mock data
+        # Strategy 3: Mock data
         result = _mock_serp(keyword, loc.get("label", ""))
-        result["error"] = "Search engine không phản hồi — hiển thị dữ liệu mẫu. Cấu hình DataForSEO để có kết quả thật."
+        result["error"] = "Search engine không phản hồi — hiển thị dữ liệu mẫu. Cấu hình GOOGLE_SEARCH_API_KEY + GOOGLE_SEARCH_CX để có kết quả Google thật."
         return result
 
-    def _format(self, raw: List[Dict], keyword: str, loc: Dict) -> Dict[str, Any]:
+    def _detect_features(self, results: List[Dict]) -> List[str]:
+        """Detect SERP features from result domains."""
+        features = []
+        domains = [r.get("domain", "") for r in results]
+        if any("youtube.com" in d for d in domains):
+            features.append("video_carousel")
+        if any("wikipedia.org" in d for d in domains):
+            features.append("knowledge_panel")
+        return features
+
+    def _format_ddg(self, raw: List[Dict], keyword: str, loc: Dict) -> Dict[str, Any]:
         organic = []
         for i, item in enumerate(raw, 1):
             href = item.get("href", "") or item.get("link", "")
@@ -131,12 +212,7 @@ class GoogleSerpScraper:
                 "domain": domain, "snippet": body, "breadcrumb": "",
             })
 
-        features = []
-        domains = [r["domain"] for r in organic]
-        if any("youtube.com" in d for d in domains):
-            features.append("video_carousel")
-        if any("wikipedia.org" in d for d in domains):
-            features.append("knowledge_panel")
+        features = self._detect_features(organic)
 
         return {
             "keyword": keyword,

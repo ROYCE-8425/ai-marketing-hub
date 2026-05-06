@@ -146,6 +146,10 @@ export function RankTracker() {
     window.open(`${API_BASE}/rank-tracker/export-csv`, "_blank");
   };
 
+  const exportExcel = () => {
+    window.open(`${API_BASE}/rank-tracker/export-excel`, "_blank");
+  };
+
   const posColor = (pos: number | null) => {
     if (pos === null || pos === 0) return "var(--text-dim)";
     if (pos <= 3) return "#22c55e";
@@ -230,7 +234,11 @@ export function RankTracker() {
         </button>
         <button className="rt-btn" style={{ background: "rgba(34,197,94,0.12)", color: "#22c55e", border: "1px solid rgba(34,197,94,0.2)" }}
           onClick={exportCsv} disabled={keywords.length === 0}>
-          📤 Export
+          📤 CSV
+        </button>
+        <button className="rt-btn" style={{ background: "rgba(16,185,129,0.12)", color: "#10b981", border: "1px solid rgba(16,185,129,0.2)" }}
+          onClick={exportExcel} disabled={keywords.length === 0} title="Xuất file Excel (.xlsx)">
+          📊 Excel
         </button>
       </div>
 

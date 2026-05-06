@@ -56,7 +56,6 @@ export function ContentCalendar() {
   const [loading, setLoading] = useState(false);
   const [suggestLoading, setSuggestLoading] = useState(false);
   const [suggestions, setSuggestions] = useState<TopicSuggestion[]>([]);
-  const [editId, setEditId] = useState<number | null>(null);
 
   const fetchItems = useCallback(async () => {
     try {

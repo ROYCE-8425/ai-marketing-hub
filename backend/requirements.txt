@@ -43,3 +43,6 @@ duckduckgo-search>=7.0.0    # real search results (free, no API key)
 # ── Phase 20 — MarkItDown File Converter ────────────────────────────────────────
 markitdown[all]>=0.1.5       # Microsoft's file-to-markdown converter (PDF/Word/Excel/PPT)
 python-multipart>=0.0.9       # Required for FastAPI file uploads
+
+# ── Phase 21 — Excel Export ─────────────────────────────────────────────────────
+openpyxl>=3.1.0              # XLSX writer for rank tracker / reports export

@@ -188,11 +188,12 @@ Tất cả SEO analysis, AI features, databases, file converter, WordPress publi
 
 ### Ưu tiên cao — Cần làm sớm
 - [ ] **GA4 real data** — Cần tạo Service Account JSON trên Google Cloud
-- [ ] **Export PDF/Excel** — Báo cáo xuất file
-- [ ] **Ranking chart** — Line graph cho keyword history
+- [x] **Export Excel (Rank Tracker)** — ✅ Đã xong Phase 21 (`/api/rank-tracker/export-excel`, openpyxl)
+- [ ] **Export PDF** — Báo cáo xuất file PDF (reportlab)
+- [ ] **Ranking chart** — Line graph cho keyword history (đã có sẵn trong `RankTracker.tsx` dùng Recharts)
 
 ### Ưu tiên trung bình
-- [ ] **AI viết full bài** — Từ outline → full article
+- [ ] **AI viết full bài** — Từ outline → full article (đã có một phần qua `PolishPanel`)
 - [ ] **Plagiarism check** — Kiểm tra đạo văn
 - [ ] **Calendar view** — Month grid cho content calendar
 - [ ] **Core Web Vitals** — PageSpeed API integration

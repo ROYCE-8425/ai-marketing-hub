@@ -1,4 +1,4 @@
-import { useState, type JSX } from "react";
+import { useState } from "react";
 import { useSeoAudit } from "./hooks/useSeoAudit";
 import { useOpportunities } from "./hooks/useOpportunities";
 import { useAutoFill } from "./hooks/useAutoFill";
@@ -158,7 +158,7 @@ function Sidebar({ active, onChange, collapsed, onToggle }: {
 
         {!collapsed && (
           <div className="sidebar-footer">
-            <div className="sidebar-version">v3.0 · Phase 19</div>
+            <div className="sidebar-version">v3.1 · Phase 20</div>
           </div>
         )}
       </aside>
