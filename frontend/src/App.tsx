@@ -1075,7 +1075,7 @@ export default function App() {
                   <label htmlFor="serp-loc" className="input-label">Khu vực ưu tiên</label>
                   <select id="serp-loc" className="text-input" value={serpLocation}
                     onChange={(e) => setSerpLocation(e.target.value)}
-                    title="DuckDuckGo ưu tiên kết quả theo khu vực. Từ khóa tiếng Việt luôn trả về kết quả VN.">
+                    title="Google Search ưu tiên kết quả theo khu vực. Từ khóa tiếng Việt luôn trả về kết quả VN.">
                     <option value="vn">🇻🇳 Việt Nam</option>
                     <option value="us">🇺🇸 Hoa Kỳ</option>
                     <option value="uk">🇬🇧 Anh</option>

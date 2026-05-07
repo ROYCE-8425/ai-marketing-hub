@@ -148,10 +148,10 @@ Dự án chia thành **8 phần phát triển độc lập**, mỗi phần có t
 ### 3.4 Live SERP
 | Task | File | Size | Status |
 |------|------|------|--------|
-| DuckDuckGo scraper | `google_serp_scraper.py` | 7KB | ✅ Done |
+| Google SERP via DataForSEO | `google_serp_scraper.py` | 5KB | ✅ Done |
 | Top 10 results | `api_serp.py` | 10KB | ✅ Done |
 | Deep content analysis | `api_serp.py` | — | ✅ Done |
-| **TODO:** Google SERP real-time | — | — | ❌ Anti-bot |
+| Error state khi thiếu credentials | `google_serp_scraper.py` | — | ✅ Done |
 | **TODO:** SERP feature detection | — | — | ❌ Chưa |
 
 ---
@@ -328,7 +328,7 @@ Dự án chia thành **8 phần phát triển độc lập**, mỗi phần có t
 | **Backend modules** | 37 | 14 | 51 |
 | **API endpoints** | 45+ | 10 | 55+ |
 | **Frontend components** | 25 | 1 | 26 |
-| **Data connectors** | 3 real + 1 mock | 1 cần real (GA4 scope) | 4 |
+| **Data connectors** | 4 real (GSC, GA4, DataForSEO, SERP) | 1 cần real (GA4 scope) | 4 |
 | **TODO items** | — | **~45 tasks** | — |
 
 ---

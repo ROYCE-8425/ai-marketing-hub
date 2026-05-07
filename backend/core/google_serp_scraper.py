@@ -6,7 +6,7 @@ Strategy:
 2. Error state with clear message when credentials are missing (no fallback)
 
 All searches are async-safe and never hang.
-No DuckDuckGo fallback — Google-only architecture.
+Google-only architecture — no third-party search engine fallback.
 """
 
 import asyncio
