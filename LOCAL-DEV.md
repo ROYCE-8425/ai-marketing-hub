@@ -67,13 +67,21 @@ GA4_PROPERTY_ID=123456789
 GA4_CREDENTIALS_PATH=/path/to/service-account.json
 ```
 
-#### DataForSEO (SERP data)
+#### DataForSEO (SERP data — ưu tiên #1)
 
 ```env
 DATAFORSEO_LOGIN=your_login
 DATAFORSEO_PASSWORD=your_password
 ```
 
+#### Google Custom Search JSON API (SERP data — fallback #2, free 100/day)
+
+```env
+GOOGLE_CUSTOM_SEARCH_API_KEY=AIza...
+GOOGLE_CUSTOM_SEARCH_ENGINE_ID=017...
+```
+
+> **Lưu ý:** Google Custom Search trả kết quả từ Programmable Search Engine, không có SEO metrics (volume, CPC). DataForSEO trả Google organic SERP thật + metrics.
 #### WordPress Publishing
 
 ```env
@@ -90,7 +98,7 @@ WORDPRESS_APP_PASSWORD=xxxx_xxxx_xxxx_xxxx
 | CRO & Trust Analysis | Live (from scraped content) | Live |
 | Competitor Radar | Live (scrapes competitor URLs) | Live |
 | Content Planner | Live (rule-based outline) | Live |
-| SERP Live (Google) | **Error state** + cần cấu hình | **Live data** (DataForSEO) |
+| SERP Live (Google) | **Error state** + cần cấu hình | **Live data** (DataForSEO hoặc Custom Search API) |
 | Google Search Console | **Error state** + red banner | **Live data** (OAuth2) |
 | Google Analytics 4 | **Error state** + red banner | **Live data** (needs OAuth scope) |
 | Campaign Tracker Auto-Fill | **Error state** + warning | **Live data** |

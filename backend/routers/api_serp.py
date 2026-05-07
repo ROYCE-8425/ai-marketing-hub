@@ -5,9 +5,9 @@ Provides live SERP data endpoints:
 - POST /api/serp/live          — Get real Google SERP results for a keyword
 - POST /api/serp/deep-analyze  — Deep-analyze content of top-ranking pages
 
-SERP Strategy (Google-first):
-1. DataForSEO API (premium, real Google SERP) — if credentials configured
-2. GoogleSerpScraper fallback — also uses DataForSEO internally
+SERP Strategy (waterfall):
+1. DataForSEO API (premium, real Google organic SERP + SEO metrics)
+2. Google Custom Search JSON API (free 100/day, Programmable Search)
 3. Explicit error state when no credentials — NO silent fallback
 """
 

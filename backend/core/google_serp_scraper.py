@@ -1,9 +1,10 @@
 """
-SERP Scraper — Google-first via DataForSEO
+SERP Scraper — Multi-source Google SERP
 
-Strategy:
-1. DataForSEO API (if configured) — returns real Google SERP data
-2. Error state with clear message when credentials are missing (no fallback)
+Strategy (waterfall):
+1. DataForSEO API (if configured) — real Google organic SERP + SEO metrics
+2. Google Custom Search JSON API (if configured) — Programmable Search, 100 free/day
+3. Error state with clear message when no credentials configured
 
 All searches are async-safe and never hang.
 Google-only architecture — no third-party search engine fallback.
@@ -47,8 +48,26 @@ def _try_dataforseo(keyword: str, location_code: int, language_code: str, limit:
     return serp
 
 
+def _try_google_custom_search(keyword: str, location: str, num_results: int) -> Optional[Dict[str, Any]]:
+    """
+    Attempt to use Google Custom Search JSON API.
+    Returns None if credentials are missing.
+    Returns dict with source="api_error" on failure.
+    Returns dict with source="google_custom_search" on success.
+    """
+    from core.google_custom_search import search_google_cse
+    return search_google_cse(keyword, location=location, num_results=num_results)
+
+
 class GoogleSerpScraper:
-    """Google SERP scraper via DataForSEO API (real Google data)."""
+    """
+    Multi-source Google SERP scraper.
+
+    Priority:
+    1. DataForSEO (premium, real Google organic SERP + SEO metrics)
+    2. Google Custom Search JSON API (free 100/day, Programmable Search)
+    3. Error state (no credentials)
+    """
 
     async def search(self, keyword: str, location: str = "vn", num_results: int = 10) -> Dict[str, Any]:
         loc = LOCATION_MAP.get(location.lower(), LOCATION_MAP["vn"])
@@ -56,52 +75,48 @@ class GoogleSerpScraper:
         language_code = loc["language_code"]
         num = max(5, min(20, num_results))
 
-        # Try DataForSEO (real Google SERP)
+        # ── Strategy 1: DataForSEO (premium, real Google SERP) ──
         try:
             raw = await asyncio.wait_for(
                 asyncio.to_thread(_try_dataforseo, keyword, location_code, language_code, num),
                 timeout=20.0,
             )
-            if raw is None:
-                # No credentials configured
-                return {
-                    "keyword": keyword,
-                    "location": loc.get("label", ""),
-                    "organic_results": [],
-                    "serp_features": [],
-                    "total_results": 0,
-                    "results_count": 0,
-                    "source": "missing_credentials",
-                    "error": "Cần cấu hình DataForSEO API để lấy Google SERP. "
-                             "Set DATAFORSEO_LOGIN và DATAFORSEO_PASSWORD trong backend/.env. "
-                             "Đăng ký tại https://dataforseo.com",
-                }
-
-            # Format DataForSEO response to standard format
-            return self._format_dataforseo(raw, keyword, loc)
-
+            if raw is not None:
+                return self._format_dataforseo(raw, keyword, loc)
         except RuntimeError as exc:
-            return {
-                "keyword": keyword,
-                "location": loc.get("label", ""),
-                "organic_results": [],
-                "serp_features": [],
-                "total_results": 0,
-                "results_count": 0,
-                "source": "api_error",
-                "error": f"DataForSEO API lỗi: {str(exc)[:200]}",
-            }
-        except Exception as exc:
-            return {
-                "keyword": keyword,
-                "location": loc.get("label", ""),
-                "organic_results": [],
-                "serp_features": [],
-                "total_results": 0,
-                "results_count": 0,
-                "source": "error",
-                "error": f"Không thể kết nối DataForSEO. Kiểm tra credentials và kết nối mạng. ({str(exc)[:100]})",
-            }
+            # DataForSEO configured but API error → still try Custom Search
+            pass
+        except Exception:
+            # DataForSEO timeout/network → still try Custom Search
+            pass
+
+        # ── Strategy 2: Google Custom Search JSON API (free 100/day) ──
+        try:
+            cse_result = await asyncio.wait_for(
+                asyncio.to_thread(_try_google_custom_search, keyword, location.lower(), num),
+                timeout=15.0,
+            )
+            if cse_result is not None:
+                # Add location label
+                cse_result["location"] = loc.get("label", "")
+                return cse_result
+        except Exception:
+            pass
+
+        # ── Strategy 3: No credentials configured ──
+        return {
+            "keyword": keyword,
+            "location": loc.get("label", ""),
+            "organic_results": [],
+            "serp_features": [],
+            "total_results": 0,
+            "results_count": 0,
+            "source": "missing_credentials",
+            "error": "Cần cấu hình ít nhất một SERP provider:\n"
+                     "• DataForSEO: set DATAFORSEO_LOGIN + DATAFORSEO_PASSWORD\n"
+                     "• Google Custom Search: set GOOGLE_CUSTOM_SEARCH_API_KEY + GOOGLE_CUSTOM_SEARCH_ENGINE_ID\n"
+                     "Xem LOCAL-DEV.md để biết chi tiết.",
+        }
 
     def _format_dataforseo(self, raw: Dict[str, Any], keyword: str, loc: Dict) -> Dict[str, Any]:
         """Format DataForSEO response to our standard SERP format."""
@@ -131,7 +146,7 @@ class GoogleSerpScraper:
             "serp_features": raw.get("features", []),
             "total_results": raw.get("total_results", len(organic)),
             "results_count": len(organic),
-            "source": "google_live",
+            "source": "dataforseo_live",
             "search_volume": raw.get("search_volume"),
             "cpc": raw.get("cpc"),
             "competition": raw.get("competition"),

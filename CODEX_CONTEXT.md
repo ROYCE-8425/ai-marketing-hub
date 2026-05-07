@@ -133,7 +133,7 @@ Tất cả SEO analysis, AI features, databases, file converter, WordPress publi
 **Không còn:** `mock_gsc`/`mock_ga4`/`mock_serp` types, `_is_mock_fallback`, `binhphuocmitsubishi.com` runtime defaults.
 **save_gsc_config:** Read-modify-write (preserves existing .env vars).
 
-**GSC = Real data. SERP Live = Google SERP via DataForSEO (cần credentials). Hoạt động không cần thêm config ngoại trừ SERP.**
+**GSC = Real data. SERP Live = Google SERP via DataForSEO (ưu tiên) hoặc Google Custom Search API (free 100/day). Cần ít nhất 1 bộ credentials.**
 
 ---
 

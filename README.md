@@ -66,7 +66,7 @@ Open http://localhost:5173
 | Styling | Vanilla CSS — dark glassmorphism |
 | Charts | Recharts |
 | File Processing | MarkItDown (Microsoft) |
-| SERP Data | DataForSEO (Google SERP) |
+| SERP Data | DataForSEO (ưu tiên) / Google Custom Search API (free 100/day) |
 
 ## Documentation
 

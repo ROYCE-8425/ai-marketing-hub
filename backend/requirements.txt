@@ -20,8 +20,8 @@ numpy>=1.24.0               # numeric support for sklearn
 textstat>=0.7.0             # readability scoring (anti-detection)
 markdown>=3.5                # Markdown-to-HTML for WordPress publisher (graceful fallback)
 
-# ── Phase 8 — Live SERP Results ─────────────────────────────────────────────────
-duckduckgo-search>=7.0.0    # real search results (free, no API key)
+# ── Phase 8 — Live SERP Results (Google via DataForSEO) ─────────────────────────
+# DataForSEO credentials required: DATAFORSEO_LOGIN, DATAFORSEO_PASSWORD
 
 # ── Optional Live-Data Connectors (Phase 6) ─────────────────────────────────────
 # These are lazy-loaded: server starts without them but endpoints will return
