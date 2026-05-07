@@ -1,6 +1,6 @@
 # 🔬 PHÂN TÍCH & CHIA NHỎ DỰ ÁN ĐỂ PHÁT TRIỂN
 
-> **Ngày:** 30/04/2026 | **Version:** 3.1.0 | **Tổng:** 11,125 LOC
+> **Ngày cập nhật:** 03/05/2026 | **Version:** 3.1.0 | **Phase:** 20 | **Tổng:** ~27,600 LOC
 
 ---
 
@@ -12,11 +12,11 @@ Dự án chia thành **8 phần phát triển độc lập**, mỗi phần có t
 |---|------|---------|---------------------|---------|
 | 1 | Core SEO Engine | 🔴 Cao | ✅ 80% done | Cải thiện accuracy |
 | 2 | Content AI Engine | 🔴 Cao | ✅ 70% done | Thêm AI models |
-| 3 | Data Connectors | 🟡 Trung bình | ⚠️ 40% done | Cần real API keys |
+| 3 | Data Connectors | 🟡 Trung bình | ⚠️ 60% done | GA4 cần OAuth scope |
 | 4 | Rank Tracking System | 🔴 Cao | ✅ 85% done | Cần cron jobs |
-| 5 | File Processing (MarkItDown) | 🟡 Trung bình | ✅ 60% done | Cần UI upload |
+| 5 | File Processing (MarkItDown) | 🟡 Trung bình | ✅ 85% done | UI drag-drop đã có |
 | 6 | Publishing & Export | 🟡 Trung bình | ✅ 75% done | Thêm formats |
-| 7 | Frontend UI/UX | 🔴 Cao | ✅ 65% done | Polish + responsive |
+| 7 | Frontend UI/UX | 🔴 Cao | ✅ 75% done | Polish + responsive |
 | 8 | DevOps & Auth | 🔴 Cao | ❌ 10% done | Deploy + login |
 
 ---
@@ -91,9 +91,9 @@ Dự án chia thành **8 phần phát triển độc lập**, mỗi phần có t
 | AI visibility analysis | `geo_analyzer.py` | — | ✅ Done |
 | FAQ Schema generation | `geo_analyzer.py` | — | ✅ Done |
 | LocalBusiness Schema | `geo_analyzer.py` | — | ✅ Done |
-| **TODO:** Product Schema | — | — | ❌ Chưa |
-| **TODO:** Article Schema | — | — | ❌ Chưa |
-| **TODO:** Breadcrumb Schema | — | — | ❌ Chưa |
+| Product Schema | `geo_analyzer.py` | — | ✅ Done |
+| Article Schema | `geo_analyzer.py` | — | ✅ Done |
+| Breadcrumb Schema | `geo_analyzer.py` | — | ✅ Done |
 
 ### 2.3 Content Planner
 | Task | File | Size | Status |
@@ -122,18 +122,18 @@ Dự án chia thành **8 phần phát triển độc lập**, mỗi phần có t
 ### 3.1 Google Search Console
 | Task | File | Size | Status |
 |------|------|------|--------|
-| GSC client setup | `google_search_console.py` | 18KB | ⚠️ Cần lib |
-| Keywords fetch | `google_search_console.py` | — | ⚠️ Mock data |
-| Click/impression data | `google_search_console.py` | — | ⚠️ Mock data |
-| **TODO:** `pip install google-api-python-client` | — | — | ❌ Chưa |
+| GSC client setup (httpx + OAuth2) | `google_search_console.py` | 8KB | ✅ Done |
+| Keywords fetch | `google_search_console.py` | — | ✅ Real data |
+| Click/impression data | `google_search_console.py` | — | ✅ Real data |
+| Quick wins analysis | `google_search_console.py` | — | ✅ Done |
+| Trending queries | `google_search_console.py` | — | ✅ Done |
 | **TODO:** OAuth2 flow UI | — | — | ❌ Chưa |
-| **TODO:** Real-time sync | — | — | ❌ Chưa |
 
 ### 3.2 Google Analytics 4
 | Task | File | Size | Status |
 |------|------|------|--------|
-| GA4 fetcher | `ga4_fetcher.py` | 11KB | ⚠️ Mock data |
-| Sessions/users/pageviews | `ga4_fetcher.py` | — | ⚠️ Mock data |
+| GA4 fetcher | `ga4_fetcher.py` | 9KB | ⚠️ Cần credentials |
+| Sessions/users/pageviews | `ga4_fetcher.py` | — | ⚠️ Cần OAuth scope |
 | **TODO:** Real GA4 API integration | — | — | ❌ Chưa |
 | **TODO:** Custom date range | — | — | ❌ Chưa |
 
@@ -180,11 +180,12 @@ Dự án chia thành **8 phần phát triển độc lập**, mỗi phần có t
 | File → Markdown convert | `file_converter.py` | 3KB | ✅ Done |
 | URL → Markdown convert | `file_converter.py` | — | ✅ Done |
 | 20 format support | `file_converter.py` | — | ✅ Done |
-| API endpoint (upload) | `api_convert.py` | 1KB | ✅ Done |
-| **TODO:** Frontend drag-drop UI | — | — | ❌ Chưa |
+| API endpoint (upload) | `api_convert.py` | 2.5KB | ✅ Done |
+| Frontend drag-drop UI | `FileConverter.tsx` | 13KB | ✅ Done |
+| URL → Markdown convert | `file_converter.py` | — | ✅ Done |
+| Copy/Download result | `FileConverter.tsx` | — | ✅ Done |
 | **TODO:** File → SEO audit pipeline | — | — | ❌ Chưa |
 | **TODO:** Batch file processing | — | — | ❌ Chưa |
-| **TODO:** Preview converted content | — | — | ❌ Chưa |
 
 ---
 
@@ -238,7 +239,7 @@ Dự án chia thành **8 phần phát triển độc lập**, mỗi phần có t
 | Task | File | LOC | Status |
 |------|------|-----|--------|
 | Overview cards | `DashboardOverview.tsx` | 483 | ✅ Done |
-| Charts (mock data) | `DashboardOverview.tsx` | — | ⚠️ Mock |
+| Charts (error state khi chưa có data) | `DashboardOverview.tsx` | — | ✅ Error/empty state |
 | **TODO:** Real-time data | — | — | ❌ Chưa |
 | **TODO:** Customizable widgets | — | — | ❌ Chưa |
 
@@ -261,7 +262,7 @@ Dự án chia thành **8 phần phát triển độc lập**, mỗi phần có t
 | Report Generator | `ReportGenerator.tsx` | 177 | 60% |
 | Site Manager | `SiteManager.tsx` | 167 | 60% |
 | Technical SEO | `TechnicalSeo.tsx` | 152 | 55% |
-| **TODO:** File Converter UI | — | — | ❌ Chưa |
+| File Converter | `FileConverter.tsx` | 353 | ✅ 80% |
 | **TODO:** Settings Page | — | — | ❌ Chưa |
 
 ---
@@ -324,11 +325,11 @@ Dự án chia thành **8 phần phát triển độc lập**, mỗi phần có t
 
 | Metric | Đã làm | Cần làm | Tổng |
 |--------|--------|---------|------|
-| **Backend modules** | 36 | 15 | 51 |
-| **API endpoints** | 42 | 12 | 54 |
-| **Frontend components** | 19 | 4 | 23 |
-| **Data connectors** | 2 real + 2 mock | 2 cần real | 4 |
-| **TODO items** | — | **52 tasks** | — |
+| **Backend modules** | 37 | 14 | 51 |
+| **API endpoints** | 45+ | 10 | 55+ |
+| **Frontend components** | 25 | 1 | 26 |
+| **Data connectors** | 3 real + 1 mock | 1 cần real (GA4 scope) | 4 |
+| **TODO items** | — | **~45 tasks** | — |
 
 ---
 

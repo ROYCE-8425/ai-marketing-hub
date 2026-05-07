@@ -39,7 +39,7 @@ interface BacklinkResult {
 }
 
 export function BacklinkAnalyzer() {
-  const [url, setUrl] = useState("https://binhphuocmitsubishi.com");
+  const [url, setUrl] = useState("");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<BacklinkResult | null>(null);
   const [error, setError] = useState("");

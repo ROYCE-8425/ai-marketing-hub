@@ -2,8 +2,13 @@
 API SERP Router — Phase 8
 
 Provides live SERP data endpoints:
-- POST /api/serp/live          — Get real top-ranking pages for a keyword
+- POST /api/serp/live          — Get real Google SERP results for a keyword
 - POST /api/serp/deep-analyze  — Deep-analyze content of top-ranking pages
+
+SERP Strategy (Google-first):
+1. DataForSEO API (premium, real Google SERP) — if credentials configured
+2. GoogleSerpScraper fallback — also uses DataForSEO internally
+3. Explicit error state when no credentials — NO silent fallback
 """
 
 from __future__ import annotations
@@ -157,11 +162,11 @@ async def _scrape_page_content(url: str) -> Dict[str, Any]:
 @router.post("/serp/live")
 async def serp_live(body: SerpLiveRequest):
     """
-    Get real top-ranking pages for a keyword.
+    Get real Google SERP results for a keyword.
 
-    Strategy:
-    1. If DATAFORSEO_LOGIN env is set → use DataForSEO API (premium, most accurate)
-    2. Otherwise → scrape Google directly (free, may be rate-limited)
+    Strategy (Google-first):
+    1. DataForSEO API (premium, real Google SERP) — if credentials configured
+    2. Explicit error state when no credentials — NO silent fallback
     """
     # Location mapping for DataForSEO
     dfs_location_map = {
@@ -169,7 +174,7 @@ async def serp_live(body: SerpLiveRequest):
         "in": 2356, "sg": 2702, "jp": 2392,
     }
 
-    # Strategy 1: Try DataForSEO
+    # Strategy 1: Try DataForSEO (real Google SERP)
     dfs_loc = dfs_location_map.get(body.location.lower(), 2840)
     dfs_result = await asyncio.to_thread(
         _try_dataforseo, body.keyword, dfs_loc, body.num_results
@@ -178,7 +183,7 @@ async def serp_live(body: SerpLiveRequest):
         dfs_result["analyzed_at"] = datetime.now().isoformat()
         return dfs_result
 
-    # Strategy 2: Scrape Google directly
+    # Strategy 2: GoogleSerpScraper (also DataForSEO-backed, handles error states)
     from core.google_serp_scraper import GoogleSerpScraper
     scraper = GoogleSerpScraper()
     result = await scraper.search(
@@ -187,11 +192,7 @@ async def serp_live(body: SerpLiveRequest):
         num_results=body.num_results,
     )
 
-    if result.get("error"):
-        # Return the error but don't crash — let frontend handle it
-        result["analyzed_at"] = datetime.now().isoformat()
-        return result
-
+    # Return result (including error states) — let frontend handle it
     result["analyzed_at"] = datetime.now().isoformat()
     return result
 

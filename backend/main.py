@@ -32,11 +32,13 @@ from routers import api_convert
 
 app = FastAPI(
     title="AI Marketing Hub — Backend",
-    version="3.0.0",
+    version="3.1.0",
     description=(
-        "AI Marketing Hub API — Phase 9: SEO Audit, CRO, Competitor Gap, "
+        "AI Marketing Hub API — Phase 20: SEO Audit, CRO, Competitor Gap, "
         "Content Planning, Publish, Opportunity Scoring, Live Data Connectors, "
-        "Anti-Detection Content Polish, Live SERP Results, Dashboard & Export"
+        "Content Polish, Live SERP, Dashboard, Rank Tracker, Spin Editor, "
+        "GEO Optimizer, Backlinks, Content Calendar, Technical SEO, "
+        "AI Reports, Multi-site, A/B Testing, File Converter (MarkItDown)"
     ),
 )
 

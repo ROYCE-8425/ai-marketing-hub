@@ -47,8 +47,8 @@ const CATEGORY_META: Record<string, { icon: string; label: string; color: string
 };
 
 export function GeoOptimizer() {
-  const [url, setUrl] = useState("https://binhphuocmitsubishi.com");
-  const [keyword, setKeyword] = useState("mitsubishi bình phước");
+  const [url, setUrl] = useState("");
+  const [keyword, setKeyword] = useState("");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<GeoResult | null>(null);
   const [error, setError] = useState("");
@@ -63,11 +63,11 @@ export function GeoOptimizer() {
   // Schema generator state
   const [showSchemaGen, setShowSchemaGen] = useState(false);
   const [schemaForm, setSchemaForm] = useState({
-    name: "Mitsubishi Bình Phước",
-    address: "Quốc lộ 14, P. Tân Bình, TP. Đồng Xoài, Bình Phước",
-    phone: "0707 199 279",
-    url: "https://binhphuocmitsubishi.com",
-    business_type: "AutoDealer",
+    name: "",
+    address: "",
+    phone: "",
+    url: "",
+    business_type: "LocalBusiness",
   });
   const [schemaCode, setSchemaCode] = useState("");
 

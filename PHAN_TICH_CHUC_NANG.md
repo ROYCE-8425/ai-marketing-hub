@@ -1,9 +1,9 @@
-# 📊 PHÂN TÍCH CHỨC NĂNG — AI Marketing Hub v3.0.0
+# 📊 PHÂN TÍCH CHỨC NĂNG — AI Marketing Hub v3.1.0
 
-> **Ngày tạo:** 30/04/2026  
-> **Phiên bản:** 3.0.0 (Phase 19)  
+> **Ngày cập nhật:** 03/05/2026  
+> **Phiên bản:** 3.1.0 (Phase 20)  
 > **Kiến trúc:** FastAPI (Backend) + React/TypeScript (Frontend)  
-> **Tổng số tính năng:** 17 modules | 36 core engines | 40+ API endpoints
+> **Tổng số tính năng:** 20 modules | 37 core engines | 45+ API endpoints
 
 ---
 
@@ -18,8 +18,8 @@
 │  │ groups) │ │ GSC+GA4  │ │          │ │             │ │
 │  └─────────┘ └──────────┘ └──────────┘ └─────────────┘ │
 ├─────────────────────────────────────────────────────────┤
-│                    BACKEND (FastAPI v3.0.0)              │
-│  9 API Routers → 36 Core Engines → 3 SQLite DBs        │
+│                    BACKEND (FastAPI v3.1.0)              │
+│  10 API Routers → 37 Core Engines → 4 SQLite DBs       │
 │  AI: Groq LLaMA 3.3 70B | Data: GSC, GA4, DuckDuckGo  │
 └─────────────────────────────────────────────────────────┘
 ```
@@ -139,7 +139,7 @@
 | **Mô tả** | Tối ưu cho AI search engines (SGE, Bing Chat, Perplexity) |
 | **API** | `POST /api/geo/analyze`, `/generate-faq`, `/generate-schema` |
 | **Core Engine** | `geo_analyzer.py` (16KB) |
-| **Tính năng** | ✅ GEO score (0-100) ✅ Breakdown theo categories ✅ Auto-generate FAQ Schema (JSON-LD) ✅ Auto-generate LocalBusiness Schema ✅ Recommendations |
+| **Tính năng** | ✅ GEO score (0-100) ✅ Breakdown theo categories ✅ FAQ Schema ✅ LocalBusiness Schema ✅ Product Schema ✅ Article Schema ✅ Breadcrumb Schema ✅ Schema Validator ✅ Recommendations |
 | **AI** | Groq LLaMA 3.3 70B (cho FAQ generation) |
 
 ### 3.4 Lịch nội dung (Content Calendar)
@@ -173,6 +173,16 @@
 | **Mô tả** | Tổng hợp tất cả scan results + AI summary → export file |
 | **API** | `POST /api/report/generate`, `/export` |
 | **Core Engine** | `report_generator.py` (8KB) |
+
+### 4.4 File Converter (MarkItDown)
+| Thuộc tính | Chi tiết |
+|------------|----------|
+| **Mô tả** | Chuyển đổi PDF, Word, Excel, PowerPoint, HTML, ảnh → Markdown |
+| **API** | `POST /api/convert/file`, `POST /api/convert/url` |
+| **Core Engine** | `file_converter.py` (3KB) — Microsoft MarkItDown |
+| **Input** | File upload (drag-drop) hoặc URL |
+| **Output** | Markdown text, word count, char count |
+| **Tính năng** | ✅ 20 định dạng ✅ Drag-drop upload ✅ URL convert ✅ Copy/Download kết quả |
 | **Output** | SEO score + Tech SEO + Backlinks + AI summary → export .txt |
 | **AI** | Groq LLaMA 3.3 70B (summary generation) |
 
@@ -239,12 +249,12 @@
 
 | Metric | Giá trị |
 |--------|---------|
-| **Backend files** | 9 routers + 36 core engines |
-| **Frontend components** | 24 files (TSX + CSS) |
-| **API endpoints** | 40+ endpoints |
-| **Core engines total size** | ~500KB Python code |
-| **Frontend total size** | ~280KB TSX/CSS code |
-| **Dependencies** | FastAPI, httpx, BeautifulSoup, scikit-learn, textstat, duckduckgo-search |
+| **Backend files** | 10 routers + 37 core engines |
+| **Frontend components** | 25 files (TSX + CSS) |
+| **API endpoints** | 45+ endpoints |
+| **Core engines total size** | ~550KB Python code |
+| **Frontend total size** | ~320KB TSX/CSS code |
+| **Dependencies** | FastAPI, httpx, BeautifulSoup, scikit-learn, textstat, duckduckgo-search, markitdown |
 | **AI Provider** | Groq (LLaMA 3.3 70B Versatile) |
 | **Databases** | 4 SQLite databases |
 

@@ -13,11 +13,11 @@ export interface DataConnectorStatus {
 
 export interface GscKeywordResult {
   keyword: string;
-  clicks: number;
-  impressions: number;
-  ctr: number;
-  position: number;
-  source: "live_gsc" | "mock_gsc";
+  clicks?: number;
+  impressions?: number;
+  ctr?: number;
+  position?: number;
+  source: "live_gsc" | "error";
   error?: string;
 }
 
@@ -30,13 +30,14 @@ export interface GscSyncResponse {
   gsc: GscKeywordResult | null;
   ga4: {
     url: string;
-    total_pageviews: number;
-    sessions: number;
-    avg_engagement_rate: number;
-    bounce_rate: number;
-    trend_direction: string;
-    trend_percent: number;
-    source: "live_ga4" | "mock_ga4";
+    total_pageviews?: number;
+    sessions?: number;
+    avg_engagement_rate?: number;
+    bounce_rate?: number;
+    trend_direction?: string;
+    trend_percent?: number;
+    source: "live_ga4" | "error";
+    error?: string;
   } | null;
   page_content: { title: string; content: string } | null;
 }
@@ -47,15 +48,12 @@ export interface SerpSyncResponse {
   keyword: string;
   location_code: number;
   analyzed_at: string;
-  source: "live_dataforseo" | "mock";
+  source: "live_dataforseo" | "missing_credentials" | "api_error" | "error";
   search_volume?: number;
   difficulty?: number;
   cpc?: number;
   competition?: number;
   serp_features?: string[];
-  estimated_ctr_position_1?: number;
-  estimated_ctr_position_3?: number;
-  estimated_ctr_position_10?: number;
   search_intent?: {
     primary: string;
     secondary: string;
@@ -76,8 +74,6 @@ export interface BulkSyncResponse {
     gsc: string;
     serp: string;
   };
-  /** True when the backend returned mock data because credentials are not configured. */
-  _is_mock_fallback?: boolean;
   current_position?: number;
   monthly_clicks?: number;
   monthly_impressions?: number;

@@ -5,7 +5,7 @@ import { API_BASE } from "../lib/apiConfig";
 export interface AutoFillResult {
   bulk: BulkSyncResponse | null;
   gscStatus: { gsc: string; ga4: string; dataforseo: string };
-  /** The actual error that triggered mock fallback. Shown in the UI so the user knows the connection failed. */
+  /** Error message when auto-fill fails */
   fallbackReason: string | null;
 }
 
@@ -18,8 +18,11 @@ export interface UseAutoFillReturn {
 }
 
 /**
- * useAutoFill — calls the bulk-data-sync endpoint to pull live (or mock) metrics
+ * useAutoFill — calls the bulk-data-sync endpoint to pull live metrics
  * and returns them ready for auto-population into the Campaign Tracker form.
+ *
+ * When the backend returns error responses (missing credentials), this hook
+ * surfaces the error clearly — it does NOT generate dummy/mock data.
  */
 export function useAutoFill(): UseAutoFillReturn {
   const [result, setResult] = useState<AutoFillResult | null>(null);
@@ -28,7 +31,7 @@ export function useAutoFill(): UseAutoFillReturn {
 
   const autoFill = useCallback(async (url: string, keyword: string): Promise<AutoFillResult | null> => {
     if (!url.trim() || !keyword.trim()) {
-      setError("URL and keyword are required.");
+      setError("Cần nhập URL và từ khóa.");
       return null;
     }
 
@@ -49,35 +52,59 @@ export function useAutoFill(): UseAutoFillReturn {
 
       const bulk: BulkSyncResponse = await res.json();
 
-      // Determine data-source health from raw responses
-      const gscSource = bulk._raw_gsc?.source ?? "unknown";
-      const serpSource = bulk._raw_serp?.source ?? "unknown";
-      const gscStatus = bulk._raw_gsc?.gsc;
+      // Determine connector status from actual backend responses
+      const gscData = bulk._raw_gsc;
+      const serpData = bulk._raw_serp;
+
+      // GSC status: only "connected" if source is live_gsc (not error)
+      const gscSource = gscData?.source ?? "unknown";
+      const gscConnected = gscSource === "live" || gscData?.gsc?.source === "live_gsc";
+
+      // GA4 status: independent — check ga4 sub-object, NOT derived from GSC
+      const ga4Source = gscData?.ga4?.source ?? "unknown";
+      const ga4Connected = ga4Source === "live_ga4";
+
+      // DataForSEO status: check serp source
+      const serpSource = serpData?.source ?? "unknown";
+      const dfsConnected = serpSource === "live_dataforseo";
 
       const connectorResult: AutoFillResult = {
         bulk,
         gscStatus: {
-          gsc: gscSource === "live_gsc" ? "connected" : "disconnected",
-          ga4: gscStatus != null ? "connected" : "disconnected",
-          dataforseo: serpSource === "live_dataforseo" ? "connected" : "pending",
+          gsc: gscConnected ? "connected" : "disconnected",
+          ga4: ga4Connected ? "connected" : "disconnected",
+          dataforseo: dfsConnected ? "connected" : "disconnected",
         },
         fallbackReason: null,
       };
 
+      // Check for errors from backend (missing credentials, API failures)
+      const gscError = gscData?.gsc?.error;
+      const ga4Error = (gscData?.ga4 as any)?.error;
+      const serpError = serpData?.error;
+
+      const errorParts: string[] = [];
+      if (gscError) errorParts.push(`GSC: ${gscError}`);
+      if (ga4Error) errorParts.push(`GA4: ${ga4Error}`);
+      if (serpError) errorParts.push(`SERP: ${serpError}`);
+
+      if (errorParts.length > 0) {
+        connectorResult.fallbackReason = errorParts.join(" · ");
+      }
+
       setResult(connectorResult);
       return connectorResult;
     } catch (e) {
-      const msg = e instanceof Error ? e.message : "Auto-fill failed";
+      const msg = e instanceof Error ? e.message : "Auto-fill thất bại";
       setError(msg);
-      // Graceful degradation: return mock data with explicit flag,
-      // so the form still works but the UI makes it clear the data is synthetic.
-      const dummy: AutoFillResult = {
-        bulk: { ..._buildDummyBulk(url, keyword), _is_mock_fallback: true },
-        gscStatus: { gsc: "disconnected", ga4: "disconnected", dataforseo: "pending" },
+      // Return error state — NO dummy data generation
+      const errorResult: AutoFillResult = {
+        bulk: null,
+        gscStatus: { gsc: "disconnected", ga4: "disconnected", dataforseo: "disconnected" },
         fallbackReason: msg,
       };
-      setResult(dummy);
-      return dummy;
+      setResult(errorResult);
+      return errorResult;
     } finally {
       setLoading(false);
     }
@@ -89,43 +116,4 @@ export function useAutoFill(): UseAutoFillReturn {
   }, []);
 
   return { result, loading, error, autoFill, reset };
-}
-
-// ─── Dummy data fallback (no credentials needed) ─────────────────────────────
-
-function _buildDummyBulk(url: string, keyword: string): BulkSyncResponse {
-  const kw = keyword.toLowerCase();
-  const isCommercial = /best|top|review|vs|compare|alternative|pricing|hosting/i.test(kw);
-  const isTransactional = /buy|pricing|cost|plan/i.test(kw);
-
-  const vol = isTransactional ? 3200 : isCommercial ? 5800 : 2400;
-  const diff = isTransactional ? 68 : isCommercial ? 55 : 42;
-  const pos = 12;
-  const imp = 2400;
-  const clk = Math.round(imp * 0.04);
-
-  return {
-    url,
-    keyword,
-    analyzed_at: new Date().toISOString(),
-    data_sources: { gsc: "mock", serp: "mock" },
-    current_position: pos,
-    monthly_clicks: clk,
-    monthly_impressions: imp,
-    ctr: Math.round((clk / imp) * 10000) / 10000,
-    search_volume: vol,
-    difficulty: diff,
-    serp_features: isCommercial ? "featured_snippet,people_also_ask,local_pack" : "featured_snippet,people_also_ask",
-    search_intent: isTransactional ? "transactional" : isCommercial ? "commercial_investigation" : "informational",
-    _raw_gsc: {
-      url, keyword, analyzed_at: new Date().toISOString(), period_days: 30,
-      source: "mock", gsc: { keyword, clicks: clk, impressions: imp, ctr: clk / imp, position: pos, source: "mock_gsc" },
-      ga4: { url, total_pageviews: 4820, sessions: 3640, avg_engagement_rate: 0.61, bounce_rate: 0.38, trend_direction: "rising", trend_percent: 12.4, source: "mock_ga4" },
-      page_content: null,
-    },
-    _raw_serp: {
-      keyword, location_code: 2840, analyzed_at: new Date().toISOString(), source: "mock",
-      search_volume: vol, difficulty: diff, serp_features: ["featured_snippet", "people_also_ask"],
-    },
-  };
 }

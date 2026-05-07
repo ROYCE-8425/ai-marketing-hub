@@ -53,7 +53,7 @@ VITE_API_BASE_URL=http://localhost:8000
 
 ### Backend — Optional Live Data Connectors
 
-These are **lazy-loaded**: the server starts without them, but endpoints return mock data unless credentials are set.
+These are **lazy-loaded**: the server starts without them, but endpoints return error states unless credentials are set.
 
 #### Google Search Console + GA4
 
@@ -82,7 +82,7 @@ WORDPRESS_USERNAME=your_username
 WORDPRESS_APP_PASSWORD=xxxx_xxxx_xxxx_xxxx
 ```
 
-## Mock vs. Live Data
+## Data Availability (No Mock)
 
 | Feature | No Credentials | Credentials Configured |
 |---|---|---|
@@ -90,11 +90,14 @@ WORDPRESS_APP_PASSWORD=xxxx_xxxx_xxxx_xxxx
 | CRO & Trust Analysis | Live (from scraped content) | Live |
 | Competitor Radar | Live (scrapes competitor URLs) | Live |
 | Content Planner | Live (rule-based outline) | Live |
-| Campaign Tracker Auto-Fill | **Mock data** (estimated metrics) | **Mock data** |
-| Live Data Connectors | **Mock data** + warning banner | **Live data** |
+| SERP Live (Google) | **Error state** + cần cấu hình | **Live data** (DataForSEO) |
+| Google Search Console | **Error state** + red banner | **Live data** (OAuth2) |
+| Google Analytics 4 | **Error state** + red banner | **Live data** (needs OAuth scope) |
+| Campaign Tracker Auto-Fill | **Error state** + warning | **Live data** |
+| DataForSEO SERP Metrics | **Error state** + warning | **Live data** |
 
-> **Important:** When no credentials are configured, the Campaign Tracker shows a
-> yellow "Mock data" warning banner. Data is synthetic and for preview only.
+> **Zero-mock policy:** Khi không có credentials, UI hiển thị trạng thái lỗi rõ ràng
+> (🔴 Chưa kết nối + error message). KHÔNG có dữ liệu giả.
 
 ## Verification Commands
 

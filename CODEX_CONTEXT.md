@@ -19,7 +19,7 @@
 - Convert file (PDF/Word/Excel) sang Markdown qua MarkItDown
 - Kết nối Google Search Console và GA4 cho data thật
 
-**Khách hàng mục tiêu:** Owner website `binhphuocmitsubishi.com` — đại lý Mitsubishi Bình Phước.
+**Khách hàng mục tiêu:** Owner website / agency quản lý nhiều site. Hiện dùng `binhphuocmitsubishi.com` làm test tenant.
 
 ---
 
@@ -38,7 +38,7 @@ ai_marketing_hub/
 │   │   ├── spin_editor.py          # AI content spinning (Groq)
 │   │   ├── rank_tracker.py         # Keyword rank tracking (SQLite)
 │   │   ├── google_search_console.py # GSC via httpx+OAuth2 (REAL)
-│   │   ├── ga4_fetcher.py          # GA4 (mock — needs service account)
+│   │   ├── ga4_fetcher.py          # GA4 và REST API + OAuth2
 │   │   ├── file_converter.py       # MarkItDown integration
 │   │   ├── content_scorer.py       # Multi-algorithm scoring
 │   │   ├── cro_checker.py          # CRO analysis
@@ -56,17 +56,17 @@ ai_marketing_hub/
 │   └── requirements.txt
 ├── frontend/                   # React + TypeScript (Vite)
 │   ├── src/
-│   │   ├── App.tsx             # Main app, sidebar nav, 20 tabs
-│   │   ├── index.css           # Design system (2419 LOC)
-│   │   ├── components/         # 19 page components
-│   │   │   ├── DashboardOverview.tsx
-│   │   │   ├── RankTracker.tsx
-│   │   │   ├── SpinEditor.tsx
-│   │   │   ├── FileConverter.tsx
-│   │   │   └── ... (19 components)
-│   │   ├── hooks/              # useSeoAudit, useOpportunities...
-│   │   ├── lib/                # history, apiConfig
-│   │   └── types/              # TypeScript types
+│       ├── App.tsx             # Main app, sidebar nav, 18 tabs
+│       ├── index.css           # Design system (~2500 LOC)
+│       ├── components/         # 25 component files (19 page + 6 support)
+│       │   ├── DashboardOverview.tsx
+│       │   ├── RankTracker.tsx
+│       │   ├── SpinEditor.tsx
+│       │   ├── FileConverter.tsx
+│       │   └── ... (25 components)
+│       ├── hooks/              # useSeoAudit, useAutoFill, useOpportunities...
+│       ├── lib/                # history, apiConfig
+│       └── types/              # TypeScript types
 │   └── package.json
 ├── .superpowers/               # obra/superpowers (agentic skills)
 ├── .skills/                    # mattpocock/skills
@@ -109,26 +109,31 @@ ai_marketing_hub/
 | Key | Status | Ghi chú |
 |-----|--------|---------|
 | `GROQ_API_KEY` | ✅ **Hoạt động** | AI engine chính, dùng cho Spin/GEO/Report/A-B Test |
-| `GSC_*` (3 keys) | ✅ **Real data** | OAuth2 refresh token mới (01/05/2026), site: binhphuocmitsubishi.com |
-| `GA4_PROPERTY_ID` | 🟡 **Thiếu credentials** | Có Property ID nhưng thiếu Service Account JSON |
+| `GSC_*` (3 keys) | ✅ **Real data** | OAuth2 refresh token, site URL tùy config |
+| `GA4_PROPERTY_ID` | 🟡 **Cần OAuth scope** | Dùng chung OAuth2 với GSC, cần scope `analytics.readonly` |
 | `GEMINI_API_KEY` | 🟡 **Hết quota (429)** | User chọn dùng Groq thay thế |
 | `ZAI_API_KEY` | ⚪ **Chưa dùng** | Có key nhưng chưa tích hợp |
 
 ---
 
-## 4. DATA THẬT vs MOCK
+## 4. DATA THẬT vs ERROR STATE
 
-### ✅ Real Data (22 modules)
+### ✅ Real Data (23 modules)
 Tất cả SEO analysis, AI features, databases, file converter, WordPress publisher, GSC.
 
-### 🔴 Mock Data (còn lại)
-| Module | File | Vấn đề | Cách fix |
-|--------|------|--------|----------|
-| GA4 | `ga4_fetcher.py` | Random mock numbers | Cần Service Account JSON |
-| Data Router (GA4 part) | `api_data.py` | `_mock_ga4_data()` fallback | Khi GA4 credentials có |
-| SERP Scraper | `google_serp_scraper.py` | `_mock_serp()` fallback | DuckDuckGo real hoạt động, mock chỉ khi fail |
+### 🔴 ZERO MOCK POLICY (enforced 03/05/2026, hardened 04/05/2026)
+**Tất cả mock data generators đã bị xóa.** Khi thiếu credentials:
+| Module | Trạng thái | Response khi lỗi |
+|--------|-----------|-----------------|
+| GA4 | Cần OAuth scope `analytics.readonly` | `{ data_source: "error", error: "...", overview: {} }` |
+| DataForSEO | Cần API key | `{ source: "missing_credentials", error: "..." }` |
+| AI Keywords | Cần GSC data | `{ data_source: "no_data", error: "..." }` |
+| GSC (bulk-sync) | Cần OAuth2 | `{ source: "error", error: "..." }` |
 
-**GSC đã fix xong — trả real data từ 01/05/2026.**
+**Không còn:** `mock_gsc`/`mock_ga4`/`mock_serp` types, `_is_mock_fallback`, `binhphuocmitsubishi.com` runtime defaults.
+**save_gsc_config:** Read-modify-write (preserves existing .env vars).
+
+**GSC = Real data. SERP Live = Google SERP via DataForSEO (cần credentials). Hoạt động không cần thêm config ngoại trừ SERP.**
 
 ---
 
@@ -175,7 +180,7 @@ Tất cả SEO analysis, AI features, databases, file converter, WordPress publi
 15. **File Converter** — Drag-drop upload, 20 formats → Markdown, SEO pipeline
 
 ### Data
-16. **SERP trực tiếp** — DuckDuckGo live search, deep content analysis
+16. **SERP trực tiếp** — Google SERP via DataForSEO, deep content analysis
 17. **Dashboard** — Charts (Recharts), GA4 data, GSC data, history
 
 ### Management

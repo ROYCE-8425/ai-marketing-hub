@@ -29,8 +29,8 @@ interface Report {
 }
 
 export function ReportGenerator() {
-  const [url, setUrl] = useState("https://binhphuocmitsubishi.com");
-  const [keyword, setKeyword] = useState("mitsubishi bình phước");
+  const [url, setUrl] = useState("");
+  const [keyword, setKeyword] = useState("");
   const [loading, setLoading] = useState(false);
   const [report, setReport] = useState<Report | null>(null);
   const [error, setError] = useState("");

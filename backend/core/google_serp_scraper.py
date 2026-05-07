@@ -1,151 +1,140 @@
 """
-SERP Scraper — Phase 9
+SERP Scraper — Google-first via DataForSEO
 
 Strategy:
-1. DataForSEO API (if configured) — most reliable
-2. DuckDuckGo HTML scraping via lite.duckduckgo.com
-3. Google scraping fallback
-4. Mock data with clear Vietnamese notice
+1. DataForSEO API (if configured) — returns real Google SERP data
+2. Error state with clear message when credentials are missing (no fallback)
 
 All searches are async-safe and never hang.
+No DuckDuckGo fallback — Google-only architecture.
 """
 
 import asyncio
-import re
-import sys
-import json
-import subprocess
-from typing import Any, Dict, List
-from urllib.parse import urlparse, quote_plus
-
-import httpx
+import os
+from typing import Any, Dict, List, Optional
+from urllib.parse import urlparse
 
 
 LOCATION_MAP = {
-    "vn": {"gl": "vn", "hl": "vi", "kl": "vn-vi", "label": "Việt Nam"},
-    "us": {"gl": "us", "hl": "en", "kl": "us-en", "label": "Hoa Kỳ"},
-    "uk": {"gl": "uk", "hl": "en", "kl": "uk-en", "label": "Anh"},
-    "au": {"gl": "au", "hl": "en", "kl": "au-en", "label": "Úc"},
-    "in": {"gl": "in", "hl": "en", "kl": "in-en", "label": "Ấn Độ"},
-    "sg": {"gl": "sg", "hl": "en", "kl": "sg-en", "label": "Singapore"},
-    "jp": {"gl": "jp", "hl": "ja", "kl": "jp-jp", "label": "Nhật Bản"},
+    "vn": {"location_code": 2704, "language_code": "vi", "label": "Việt Nam"},
+    "us": {"location_code": 2840, "language_code": "en", "label": "Hoa Kỳ"},
+    "uk": {"location_code": 2826, "language_code": "en", "label": "Anh"},
+    "au": {"location_code": 2036, "language_code": "en", "label": "Úc"},
+    "in": {"location_code": 2356, "language_code": "en", "label": "Ấn Độ"},
+    "sg": {"location_code": 2702, "language_code": "en", "label": "Singapore"},
+    "jp": {"location_code": 2392, "language_code": "ja", "label": "Nhật Bản"},
 }
 
 
-def _mock_serp(keyword: str, loc_label: str) -> Dict[str, Any]:
-    """Return realistic Vietnamese mock SERP data."""
-    kw = keyword.lower()
-    slug = kw.replace(" ", "-")
-    mock_results = [
-        {"position": i + 1, "title": t, "url": u, "domain": d, "snippet": s, "breadcrumb": ""}
-        for i, (t, u, d, s) in enumerate([
-            (f"Top 10 {keyword} - Hướng dẫn đầy đủ 2025", f"https://www.techradar.com/best/{slug}", "techradar.com", f"Chuyên gia đánh giá {kw} tốt nhất. So sánh tính năng và giá cả."),
-            (f"{keyword} - Đánh giá chuyên sâu", f"https://www.pcmag.com/picks/{slug}", "pcmag.com", f"PCMag đánh giá và xếp hạng {kw}. Tìm giải pháp phù hợp."),
-            (f"{keyword} tốt nhất (Xếp hạng)", f"https://www.forbes.com/advisor/{slug}", "forbes.com", f"Forbes Advisor xếp hạng {kw} dựa trên tính năng và giá."),
-            (f"{keyword}: Hướng dẫn mua hàng", f"https://www.g2.com/categories/{slug}", "g2.com", f"So sánh {kw} dựa trên đánh giá người dùng thực."),
-            (f"Cách chọn {keyword} phù hợp", "https://www.youtube.com/watch?v=example", "youtube.com", f"Video hướng dẫn chọn {kw} phù hợp nhất."),
-            (f"{keyword} - Wikipedia", f"https://vi.wikipedia.org/wiki/{slug}", "wikipedia.org", f"{keyword} là thuật ngữ dùng để chỉ..."),
-            (f"Reddit - {keyword} tốt nhất?", f"https://www.reddit.com/r/best_{slug}", "reddit.com", f"Cộng đồng đề xuất {kw} tốt nhất 2025."),
-            (f"So sánh {keyword} 2025", f"https://www.capterra.com/compare/{slug}", "capterra.com", f"So sánh chi tiết các giải pháp {kw}."),
-            (f"{keyword} giá rẻ cho doanh nghiệp", f"https://www.hostinger.com/{slug}", "hostinger.com", f"Bắt đầu với {kw} chỉ từ 59.000đ/tháng."),
-            (f"{keyword} - Đánh giá Trustpilot", f"https://www.trustpilot.com/categories/{slug}", "trustpilot.com", f"Đọc đánh giá thực từ khách hàng về {kw}."),
-        ])
-    ]
-    return {
-        "keyword": keyword,
-        "location": loc_label,
-        "organic_results": mock_results[:10],
-        "serp_features": ["video_carousel", "knowledge_panel", "people_also_ask"],
-        "total_results": 10,
-        "results_count": 10,
-        "source": "mock_serp",
-        "note": "⚠️ Dữ liệu mẫu — server không thể kết nối tới search engine (bị chặn bởi captcha). Cấu hình DataForSEO API hoặc deploy lên hosting production để có dữ liệu thật.",
-    }
+def _try_dataforseo(keyword: str, location_code: int, language_code: str, limit: int) -> Optional[Dict[str, Any]]:
+    """
+    Attempt to use DataForSEO to get real Google SERP data.
+    Returns None if credentials are missing.
+    Raises on API errors.
+    """
+    login = os.getenv("DATAFORSEO_LOGIN")
+    password = os.getenv("DATAFORSEO_PASSWORD")
+    if not login or not password:
+        return None
 
+    from core.dataforseo import DataForSEO
+    client = DataForSEO(login=login, password=password)
+    serp = client.get_serp_data(keyword, location_code=location_code, limit=limit)
 
-def _ddg_subprocess(keyword: str, region: str, max_results: int) -> List[Dict]:
-    """Run DuckDuckGo search in a subprocess with strict timeout."""
-    script = f'''
-import json, warnings, sys
-warnings.filterwarnings("ignore")
-try:
-    from duckduckgo_search import DDGS
-    with DDGS() as ddgs:
-        results = list(ddgs.text({json.dumps(keyword)}, region={json.dumps(region)}, max_results={max_results}))
-        print(json.dumps(results, ensure_ascii=False))
-except Exception as e:
-    print(json.dumps([]))
-'''
-    try:
-        result = subprocess.run(
-            [sys.executable, "-c", script],
-            capture_output=True, text=True, timeout=12,
-        )
-        if result.returncode == 0 and result.stdout.strip():
-            data = json.loads(result.stdout.strip())
-            if isinstance(data, list) and len(data) > 0:
-                return data
-    except (subprocess.TimeoutExpired, json.JSONDecodeError, Exception):
-        pass
-    return []
+    if "error" in serp:
+        raise RuntimeError(serp["error"])
+
+    return serp
 
 
 class GoogleSerpScraper:
-    """SERP scraper with multiple fallbacks."""
+    """Google SERP scraper via DataForSEO API (real Google data)."""
 
     async def search(self, keyword: str, location: str = "vn", num_results: int = 10) -> Dict[str, Any]:
         loc = LOCATION_MAP.get(location.lower(), LOCATION_MAP["vn"])
-        kl = loc.get("kl", "vn-vi")
+        location_code = loc["location_code"]
+        language_code = loc["language_code"]
         num = max(5, min(20, num_results))
 
-        # Strategy 1: Try DuckDuckGo via subprocess (avoids event loop conflicts)
+        # Try DataForSEO (real Google SERP)
         try:
             raw = await asyncio.wait_for(
-                asyncio.to_thread(_ddg_subprocess, keyword, kl, num),
-                timeout=15.0,
+                asyncio.to_thread(_try_dataforseo, keyword, location_code, language_code, num),
+                timeout=20.0,
             )
-            if raw:
-                return self._format(raw, keyword, loc)
-        except Exception:
-            pass
+            if raw is None:
+                # No credentials configured
+                return {
+                    "keyword": keyword,
+                    "location": loc.get("label", ""),
+                    "organic_results": [],
+                    "serp_features": [],
+                    "total_results": 0,
+                    "results_count": 0,
+                    "source": "missing_credentials",
+                    "error": "Cần cấu hình DataForSEO API để lấy Google SERP. "
+                             "Set DATAFORSEO_LOGIN và DATAFORSEO_PASSWORD trong backend/.env. "
+                             "Đăng ký tại https://dataforseo.com",
+                }
 
-        # Strategy 2: Fallback to mock data
-        result = _mock_serp(keyword, loc.get("label", ""))
-        result["error"] = "Search engine không phản hồi — hiển thị dữ liệu mẫu. Cấu hình DataForSEO để có kết quả thật."
-        return result
+            # Format DataForSEO response to standard format
+            return self._format_dataforseo(raw, keyword, loc)
 
-    def _format(self, raw: List[Dict], keyword: str, loc: Dict) -> Dict[str, Any]:
+        except RuntimeError as exc:
+            return {
+                "keyword": keyword,
+                "location": loc.get("label", ""),
+                "organic_results": [],
+                "serp_features": [],
+                "total_results": 0,
+                "results_count": 0,
+                "source": "api_error",
+                "error": f"DataForSEO API lỗi: {str(exc)[:200]}",
+            }
+        except Exception as exc:
+            return {
+                "keyword": keyword,
+                "location": loc.get("label", ""),
+                "organic_results": [],
+                "serp_features": [],
+                "total_results": 0,
+                "results_count": 0,
+                "source": "error",
+                "error": f"Không thể kết nối DataForSEO. Kiểm tra credentials và kết nối mạng. ({str(exc)[:100]})",
+            }
+
+    def _format_dataforseo(self, raw: Dict[str, Any], keyword: str, loc: Dict) -> Dict[str, Any]:
+        """Format DataForSEO response to our standard SERP format."""
         organic = []
-        for i, item in enumerate(raw, 1):
-            href = item.get("href", "") or item.get("link", "")
+        for item in raw.get("organic_results", []):
+            url = item.get("url", "")
             title = item.get("title", "")
-            body = item.get("body", "") or item.get("snippet", "")
-            if not href or not title:
+            if not url or not title:
                 continue
             try:
-                domain = urlparse(href).netloc.replace("www.", "")
+                domain = urlparse(url).netloc.replace("www.", "")
             except Exception:
                 domain = ""
             organic.append({
-                "position": i, "title": title, "url": href,
-                "domain": domain, "snippet": body, "breadcrumb": "",
+                "position": item.get("position") or item.get("rank_absolute", len(organic) + 1),
+                "title": title,
+                "url": url,
+                "domain": domain,
+                "snippet": item.get("description", "") or item.get("snippet", ""),
+                "breadcrumb": item.get("breadcrumb", ""),
             })
-
-        features = []
-        domains = [r["domain"] for r in organic]
-        if any("youtube.com" in d for d in domains):
-            features.append("video_carousel")
-        if any("wikipedia.org" in d for d in domains):
-            features.append("knowledge_panel")
 
         return {
             "keyword": keyword,
             "location": loc.get("label", ""),
             "organic_results": organic,
-            "serp_features": features,
-            "total_results": len(organic),
+            "serp_features": raw.get("features", []),
+            "total_results": raw.get("total_results", len(organic)),
             "results_count": len(organic),
-            "source": "duckduckgo_live",
+            "source": "google_live",
+            "search_volume": raw.get("search_volume"),
+            "cpc": raw.get("cpc"),
+            "competition": raw.get("competition"),
         }
 
 

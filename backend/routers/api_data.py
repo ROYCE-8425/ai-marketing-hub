@@ -4,7 +4,7 @@ API Data Router — Phase 6
 Provides live data connectors:
 - GET  /api/data/status    — Check connection status per data source
 - POST /api/data/gsc-sync  — Fetch real GSC + GA4 metrics for a URL/keyword
-- POST /api/data/serp-sync — Fetch SERP data (DataForSEO or mock)
+- POST /api/data/serp-sync — Fetch SERP data (DataForSEO or error)
 - POST /api/data/bulk-sync — Run all connectors in parallel → unified payload
 """
 
@@ -83,16 +83,42 @@ class GscConfigRequest(BaseModel):
 
 @router.post("/config/gsc")
 async def save_gsc_config(body: GscConfigRequest):
-    """Save GSC credentials to backend .env file and reload."""
+    """Save GSC credentials to backend .env file (preserving other vars) and reload."""
     env_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), ".env")
-    lines = [
-        f"GOOGLE_SEARCH_CONSOLE_CLIENT_ID={body.client_id}",
-        f"GOOGLE_SEARCH_CONSOLE_CLIENT_SECRET={body.client_secret}",
-        f"GOOGLE_SEARCH_CONSOLE_REFRESH_TOKEN={body.refresh_token}",
-        f"GSC_SITE_URL={body.site_url}",
-    ]
+
+    # Keys we will upsert
+    updates = {
+        "GOOGLE_SEARCH_CONSOLE_CLIENT_ID": body.client_id,
+        "GOOGLE_SEARCH_CONSOLE_CLIENT_SECRET": body.client_secret,
+        "GOOGLE_SEARCH_CONSOLE_REFRESH_TOKEN": body.refresh_token,
+        "GSC_SITE_URL": body.site_url,
+    }
+
+    # Read existing lines (preserving order and non-GSC vars)
+    existing_lines: list[str] = []
+    seen_keys: set[str] = set()
+    if os.path.exists(env_path):
+        with open(env_path, "r") as f:
+            for line in f:
+                stripped = line.strip()
+                if "=" in stripped and not stripped.startswith("#"):
+                    key = stripped.split("=", 1)[0]
+                    if key in updates:
+                        existing_lines.append(f"{key}={updates[key]}\n")
+                        seen_keys.add(key)
+                    else:
+                        existing_lines.append(line if line.endswith("\n") else line + "\n")
+                else:
+                    existing_lines.append(line if line.endswith("\n") else line + "\n")
+
+    # Append any keys that were not already in the file
+    for key, val in updates.items():
+        if key not in seen_keys:
+            existing_lines.append(f"{key}={val}\n")
+
     with open(env_path, "w") as f:
-        f.write("\n".join(lines) + "\n")
+        f.writelines(existing_lines)
+
     # Reload env vars in current process
     load_dotenv(env_path, override=True)
     return {"status": "ok", "message": "GSC credentials saved"}
@@ -152,16 +178,20 @@ async def oauth_callback(code: str = Query(None), error: str = Query(None)):
     if not refresh_token:
         return {"error": "No refresh_token in response", "details": token_data}
     
-    # Save to .env — update REFRESH_TOKEN
+    # Save to .env — update or append REFRESH_TOKEN
     env_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), ".env")
     env_lines = []
+    found = False
     if os.path.exists(env_path):
         with open(env_path, "r") as f:
             for line in f:
                 if line.startswith("GOOGLE_SEARCH_CONSOLE_REFRESH_TOKEN="):
                     env_lines.append(f"GOOGLE_SEARCH_CONSOLE_REFRESH_TOKEN={refresh_token}\n")
+                    found = True
                 else:
                     env_lines.append(line)
+    if not found:
+        env_lines.append(f"GOOGLE_SEARCH_CONSOLE_REFRESH_TOKEN={refresh_token}\n")
     with open(env_path, "w") as f:
         f.writelines(env_lines)
     load_dotenv(env_path, override=True)
@@ -242,77 +272,32 @@ async def save_ga4_config(body: Ga4ConfigRequest):
     return {"status": "ok", "message": f"GA4 Property ID saved: {body.property_id}"}
 
 
-# Mock data generators (fallback when credentials are missing)
+# Error response helpers (no synthetic data)
 # ─────────────────────────────────────────────────────────────────────────────
 
 
-def _mock_gsc_data(keyword: str, _url: str) -> Dict[str, Any]:
-    """Realistic GSC mock data based on keyword commercial intent."""
-    kw = keyword.lower()
-    is_commercial = any(t in kw for t in [
-        "best", "top", "review", "vs", "compare", "alternative", "pricing", "hosting"
-    ])
-    base_imp = 2400 if is_commercial else 1200
-    base_clk = int(base_imp * (0.04 if is_commercial else 0.05))
-    base_pos = 14.3 if is_commercial else 18.7
+def _error_gsc(keyword: str, note: str) -> Dict[str, Any]:
+    """Return an error result for GSC (no synthetic metrics)."""
     return {
         "keyword": keyword,
-        "clicks": base_clk,
-        "impressions": base_imp,
-        "ctr": round(base_clk / base_imp, 4),
-        "position": round(base_pos + (hash(keyword) % 10) - 5, 1),
-        "source": "mock_gsc",
-        "note": "Configure GSC credentials for live data"
+        "source": "error",
+        "error": note,
     }
 
 
-def _mock_ga4_data(url: str) -> Dict[str, Any]:
+def _error_ga4(url: str, note: str) -> Dict[str, Any]:
     return {
         "url": url,
-        "total_pageviews": 4820,
-        "sessions": 3640,
-        "avg_engagement_rate": 0.61,
-        "bounce_rate": 0.38,
-        "trend_direction": "rising",
-        "trend_percent": 12.4,
-        "source": "mock_ga4",
-        "note": "Configure GA4 credentials for live analytics"
+        "source": "error",
+        "error": note,
     }
 
 
-def _mock_serp_data(keyword: str) -> Dict[str, Any]:
-    """Realistic SERP mock data based on keyword intent."""
-    kw = keyword.lower()
-    is_tx = any(t in kw for t in ["buy", "pricing", "cost", "plan"])
-    is_cm = any(t in kw for t in ["best", "top", "review", "vs", "compare", "alternative", "pricing", "hosting", "software", "tool"])
-    is_if = any(t in kw for t in ["how to", "what is", "guide", "tutorial"])
-
-    if is_tx:   vol, diff, cpc = 3200, 68, 4.80
-    elif is_cm: vol, diff, cpc = 5800, 55, 3.20
-    elif is_if: vol, diff, cpc = 9100, 42, 1.10
-    else:       vol, diff, cpc = 2400, 35, 0.80
-
-    features = []
-    if vol > 5000:  features.extend(["featured_snippet", "people_also_ask", "top_stories"])
-    if is_cm:      features.extend(["local_pack", "shopping_results"])
-    if is_if:      features.append("video_carousel")
-
-    seed = hash(keyword) % 100
-    vol  = max(100, vol  + (seed - 50) * 20)
-    diff = max(5, min(95, diff + (seed % 30) - 15))
-
+def _error_serp(keyword: str, note: str) -> Dict[str, Any]:
     return {
         "keyword": keyword,
-        "search_volume": vol,
-        "difficulty": diff,
-        "cpc": cpc,
-        "competition": round(diff / 100, 2),
-        "serp_features": features[:5],
-        "estimated_ctr_position_1": 0.28,
-        "estimated_ctr_position_3": 0.12,
-        "estimated_ctr_position_10": 0.025,
-        "source": "mock_dataforseo",
-        "note": "DataForSEO API key required for live SERP data"
+        "source": "missing_credentials",
+        "error": note,
     }
 
 
@@ -398,12 +383,12 @@ async def sync_gsc_data(
 ):
     """
     Fetch GSC + GA4 data for a URL/keyword.
-    Falls back to intelligent mock data when credentials are absent.
+    Returns error state when credentials are absent (no synthetic data).
     """
     result: Dict[str, Any] = {
         "url": body.url, "keyword": body.keyword,
         "analyzed_at": datetime.now().isoformat(),
-        "period_days": days, "source": "mock",
+        "period_days": days, "source": "pending",
         "gsc": None, "ga4": None, "page_content": None,
     }
 
@@ -473,17 +458,13 @@ async def sync_gsc_data(
                         }
                         result["source"] = "live"
                     else:
-                        result["gsc"] = _mock_gsc_data(body.keyword, body.url)
-                        result["gsc"]["note"] = f"Không tìm thấy từ khóa '{body.keyword}' trong GSC. Dùng dữ liệu ước tính."
+                        result["gsc"] = _error_gsc(body.keyword, f"Không tìm thấy từ khóa '{body.keyword}' trong GSC.")
                 else:
-                    result["gsc"] = _mock_gsc_data(body.keyword, body.url)
-                    result["gsc"]["note"] = f"GSC API lỗi {gsc_resp.status_code}. Dùng dữ liệu ước tính."
+                    result["gsc"] = _error_gsc(body.keyword, f"GSC API lỗi {gsc_resp.status_code}.")
             else:
-                result["gsc"] = _mock_gsc_data(body.keyword, body.url)
-                result["gsc"]["note"] = "Không lấy được access token. Refresh token có thể hết hạn."
+                result["gsc"] = _error_gsc(body.keyword, "Không lấy được access token. Refresh token có thể hết hạn.")
         except Exception as exc:
-            result["gsc"] = _mock_gsc_data(body.keyword, body.url)
-            result["gsc"]["note"] = f"GSC error: {str(exc)[:100]}"
+            result["gsc"] = _error_gsc(body.keyword, f"GSC error: {str(exc)[:100]}")
     elif body.gsc_site_url and body.gsc_credentials_path:
         # Legacy path: credentials file
         try:
@@ -499,24 +480,43 @@ async def sync_gsc_data(
                 result["gsc"]["source"] = "live_gsc"
                 result["source"] = "live"
         except Exception as exc:
-            result["gsc"] = {"error": str(exc), "source": "live_gsc"}
+            result["gsc"] = _error_gsc(body.keyword, f"GSC legacy error: {str(exc)[:100]}")
     else:
-        result["gsc"] = _mock_gsc_data(body.keyword, body.url)
+        result["gsc"] = _error_gsc(body.keyword, "GSC chưa được cấu hình. Cần OAuth2 credentials.")
 
-    # ── GA4 ──────────────────────────────────────────────────────────────────
-    if body.ga4_property_id and body.ga4_credentials_path:
+    # ── GA4 — try .env config first, then request body credentials ────────
+    env_ga4_property = os.getenv("GA4_PROPERTY_ID", "")
+    ga4_prop = body.ga4_property_id or env_ga4_property
+
+    if ga4_prop and body.ga4_credentials_path:
+        # Legacy path: credential file from client
         try:
-            client = _ga4()(property_id=body.ga4_property_id, credentials_path=body.ga4_credentials_path)
+            client = _ga4()(property_id=ga4_prop, credentials_path=body.ga4_credentials_path)
             result["ga4"] = client.get_page_performance(body.url, days=days)
             result["ga4"]["source"] = "live_ga4"
-        except Exception:
-            result["ga4"] = _mock_ga4_data(body.url)
+        except Exception as exc:
+            result["ga4"] = _error_ga4(body.url, f"GA4 error: {str(exc)[:100]}")
+    elif ga4_prop:
+        # .env OAuth path — use same refresh token as GSC
+        try:
+            from core.ga4_fetcher import get_ga4_overview
+            overview = await get_ga4_overview(days)
+            if overview.get("data_source") in ("live_ga4", "partial_live_ga4"):
+                result["ga4"] = {"url": body.url, "source": "live_ga4", **{k: v for k, v in overview.items() if k != "property_id"}}
+            else:
+                result["ga4"] = _error_ga4(body.url, overview.get("error") or "GA4 không lấy được dữ liệu.")
+        except Exception as exc:
+            result["ga4"] = _error_ga4(body.url, f"GA4 error: {str(exc)[:100]}")
     else:
-        result["ga4"] = _mock_ga4_data(body.url)
+        result["ga4"] = _error_ga4(body.url, "GA4_PROPERTY_ID chưa được cấu hình.")
 
     # ── Page content ─────────────────────────────────────────────────────────
     if result["gsc"] and result["gsc"].get("position"):
         result["page_content"] = await asyncio.to_thread(_scrape_page, body.url)
+
+    # Ensure source is never returned as sentinel value
+    if result.get("source") == "pending":
+        result["source"] = "error"
 
     return result
 
@@ -529,13 +529,13 @@ async def sync_gsc_data(
 async def sync_serp_data(body: SerpSyncRequest):
     """
     Fetch SERP metrics for a keyword.
-    Live DataForSEO when credentials provided; intent-based mock otherwise.
+    Live DataForSEO when credentials provided; error state otherwise.
     """
     result: Dict[str, Any] = {
         "keyword": body.keyword,
         "location_code": body.location_code,
         "analyzed_at": datetime.now().isoformat(),
-        "source": "mock",
+        "source": "pending",
     }
 
     login = body.dataforseo_login or os.getenv("DATAFORSEO_LOGIN")
@@ -556,15 +556,12 @@ async def sync_serp_data(body: SerpSyncRequest):
                 result["serp_features"] = serp["features"]
         except Exception as exc:
             result["error"] = str(exc)
-            result["note"] = "DataForSEO request failed — falling back to mock data"
+            result["source"] = "api_error"
+            result["note"] = "DataForSEO request failed. Check credentials and try again."
 
-    if result.get("source") == "mock" or result.get("search_volume") is None:
-        mock = _mock_serp_data(body.keyword)
-        for key in ["search_volume", "difficulty", "cpc", "competition",
-                    "serp_features", "estimated_ctr_position_1",
-                    "estimated_ctr_position_3", "estimated_ctr_position_10",
-                    "source", "note"]:
-            result.setdefault(key, mock.get(key))
+    if result.get("source") == "pending":
+        result["source"] = "missing_credentials"
+        result["error"] = result.get("error") or "DataForSEO API key chưa được cấu hình. Set DATAFORSEO_LOGIN và DATAFORSEO_PASSWORD trong .env."
 
     # Cross-reference search intent
     try:

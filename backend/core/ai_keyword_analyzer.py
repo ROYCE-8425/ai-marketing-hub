@@ -299,7 +299,7 @@ def analyze_keywords_with_ai(target_keyword: Optional[str] = None) -> Dict[str, 
         "top_performing": [],
         "quick_wins": [],
         "summary": "",
-        "data_source": "mock",
+        "data_source": "no_data",
         "ai_provider": "none",
     }
 
@@ -359,11 +359,10 @@ Tất cả từ khóa: {json.dumps([kw['keyword'] for kw in gsc_keywords], ensur
 
 Phân tích và đề xuất 10-15 từ khóa MỚI + topic clusters + chiến lược nội dung + quick wins."""
     else:
-        prompt = f"""Website: {os.getenv('GSC_SITE_URL', '')}
-Ngành: đại lý xe Mitsubishi Bình Phước
-Từ khóa mục tiêu: {target_keyword or 'mitsubishi bình phước'}
-
-Đề xuất 15-20 từ khóa tiềm năng + topic clusters + chiến lược nội dung."""
+        # No GSC data available — return error state, do not fabricate AI recommendations
+        result["error"] = "Chưa có dữ liệu GSC. Cấu hình Google Search Console để phân tích từ khóa thật."
+        result["summary"] = "Cần kết nối Google Search Console để lấy dữ liệu từ khóa thật trước khi phân tích."
+        return result
 
     # Step 3: Try AI, fallback to built-in
     try:

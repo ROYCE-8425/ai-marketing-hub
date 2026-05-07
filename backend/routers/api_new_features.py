@@ -9,7 +9,19 @@ import os
 
 router = APIRouter()
 
-_DEFAULT_SITE = lambda: os.getenv("GSC_SITE_URL", "https://binhphuocmitsubishi.com/")
+_DEFAULT_SITE = lambda: os.getenv("GSC_SITE_URL", "")
+
+def _require_site(site_url: str = None) -> str:
+    """Resolve site URL: explicit > env > active site in DB. Returns '' if nothing configured."""
+    resolved = (site_url or "").strip() or _DEFAULT_SITE()
+    if not resolved:
+        try:
+            from core.site_manager import get_active_site
+            active = get_active_site()
+            resolved = (active.get("url") or "").strip()
+        except Exception:
+            pass
+    return resolved
 
 
 # ─── Phase 10: Rank Tracker ─────────────────────────────────────────────
@@ -21,7 +33,10 @@ async def add_tracked_keyword(
     tag: str = Body("", embed=True),
 ):
     from core.rank_tracker import add_keyword
-    return add_keyword(keyword, site_url or _DEFAULT_SITE(), tag)
+    resolved = _require_site(site_url)
+    if not resolved:
+        return {"error": "Chưa có site. Cấu hình GSC_SITE_URL hoặc thêm site trong Quản lý site.", "status": "not_configured"}
+    return add_keyword(keyword, resolved, tag)
 
 
 @router.post("/api/rank-tracker/remove")
@@ -30,7 +45,10 @@ async def remove_tracked_keyword(
     site_url: str = Body(None, embed=True),
 ):
     from core.rank_tracker import remove_keyword
-    return remove_keyword(keyword, site_url or _DEFAULT_SITE())
+    resolved = _require_site(site_url)
+    if not resolved:
+        return {"error": "Chưa có site.", "status": "not_configured"}
+    return remove_keyword(keyword, resolved)
 
 
 @router.post("/api/rank-tracker/update-tag")
@@ -40,31 +58,37 @@ async def update_tag(
     site_url: str = Body(None, embed=True),
 ):
     from core.rank_tracker import update_keyword_tag
-    return update_keyword_tag(keyword, site_url or _DEFAULT_SITE(), tag)
+    resolved = _require_site(site_url)
+    if not resolved:
+        return {"error": "Chưa có site.", "status": "not_configured"}
+    return update_keyword_tag(keyword, resolved, tag)
 
 
 @router.get("/api/rank-tracker/keywords")
 async def get_tracked_keywords_list(site_url: str = None, tag: str = ""):
     from core.rank_tracker import get_tracked_keywords
-    return {"keywords": get_tracked_keywords(site_url or _DEFAULT_SITE(), tag)}
+    return {"keywords": get_tracked_keywords(_require_site(site_url), tag)}
 
 
 @router.get("/api/rank-tracker/tags")
 async def get_all_tags_api(site_url: str = None):
     from core.rank_tracker import get_all_tags
-    return {"tags": get_all_tags(site_url or _DEFAULT_SITE())}
+    return {"tags": get_all_tags(_require_site(site_url))}
 
 
 @router.get("/api/rank-tracker/history")
 async def get_keyword_history_api(keyword: str, days: int = 30, site_url: str = None):
     from core.rank_tracker import get_keyword_history
-    return {"keyword": keyword, "history": get_keyword_history(keyword, site_url or _DEFAULT_SITE(), days)}
+    return {"keyword": keyword, "history": get_keyword_history(keyword, _require_site(site_url), days)}
 
 
 @router.post("/api/rank-tracker/sync")
 async def sync_rankings():
     from core.rank_tracker import sync_rankings_from_gsc
-    return await sync_rankings_from_gsc(_DEFAULT_SITE())
+    resolved = _require_site()
+    if not resolved:
+        return {"error": "Chưa có site. Cấu hình GSC_SITE_URL hoặc thêm site.", "synced": 0}
+    return await sync_rankings_from_gsc(resolved)
 
 
 @router.post("/api/rank-tracker/import-csv")
@@ -73,13 +97,16 @@ async def import_csv(
     site_url: str = Body(None, embed=True),
 ):
     from core.rank_tracker import import_keywords_csv
-    return import_keywords_csv(csv_text, site_url or _DEFAULT_SITE())
+    resolved = _require_site(site_url)
+    if not resolved:
+        return {"error": "Chưa có site.", "status": "not_configured"}
+    return import_keywords_csv(csv_text, resolved)
 
 
 @router.get("/api/rank-tracker/export-csv")
 async def export_csv(site_url: str = None):
     from core.rank_tracker import export_keywords_csv
-    csv_data = export_keywords_csv(site_url or _DEFAULT_SITE())
+    csv_data = export_keywords_csv(_require_site(site_url))
     return PlainTextResponse(
         content=csv_data,
         media_type="text/csv",
@@ -90,7 +117,7 @@ async def export_csv(site_url: str = None):
 @router.get("/api/rank-tracker/alerts")
 async def get_alerts(threshold: int = 5, site_url: str = None):
     from core.rank_tracker import check_ranking_alerts
-    return {"alerts": check_ranking_alerts(site_url or _DEFAULT_SITE(), threshold)}
+    return {"alerts": check_ranking_alerts(_require_site(site_url), threshold)}
 
 
 # ─── Phase 11: Spin Editor ──────────────────────────────────────────────

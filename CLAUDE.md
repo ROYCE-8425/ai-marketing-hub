@@ -29,7 +29,7 @@
 ```
 backend/core/    → 37 business logic modules
 backend/routers/ → 10 API routers
-frontend/src/components/ → 19 page components
+frontend/src/components/ → 25 component files
 backend/*.db     → 4 SQLite databases
 ```
 

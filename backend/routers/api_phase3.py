@@ -8,7 +8,19 @@ import os
 
 router = APIRouter()
 
-_DEFAULT_SITE = lambda: os.getenv("GSC_SITE_URL", "https://binhphuocmitsubishi.com/")
+_DEFAULT_SITE = lambda: os.getenv("GSC_SITE_URL", "")
+
+def _require_site(site_url: str = None) -> str:
+    """Resolve site URL: explicit > env > active site in DB. Returns '' if nothing configured."""
+    resolved = (site_url or "").strip() or _DEFAULT_SITE()
+    if not resolved:
+        try:
+            from core.site_manager import get_active_site
+            active = get_active_site()
+            resolved = (active.get("url") or "").strip()
+        except Exception:
+            pass
+    return resolved
 
 
 # ─── Phase 15: Content Calendar ────────────────────────────────────────
@@ -25,7 +37,10 @@ async def add_calendar_item(
     priority: str = Body("medium", embed=True),
 ):
     from core.content_calendar import add_item
-    return add_item(title, site_url or _DEFAULT_SITE(), description, content_type,
+    resolved = _require_site(site_url)
+    if not resolved:
+        return {"error": "Chưa có site. Cấu hình GSC_SITE_URL hoặc thêm site.", "status": "not_configured"}
+    return add_item(title, resolved, description, content_type,
                     scheduled_date, author, keywords, priority)
 
 
@@ -59,13 +74,13 @@ async def get_calendar_items(
     site_url: str = None, month: str = "", status: str = "", content_type: str = "",
 ):
     from core.content_calendar import get_items
-    return {"items": get_items(site_url or _DEFAULT_SITE(), month, status, content_type)}
+    return {"items": get_items(_require_site(site_url), month, status, content_type)}
 
 
 @router.get("/api/calendar/stats")
 async def get_calendar_stats(site_url: str = None):
     from core.content_calendar import get_stats
-    return get_stats(site_url or _DEFAULT_SITE())
+    return get_stats(_require_site(site_url))
 
 
 @router.post("/api/calendar/suggest-topics")
@@ -75,7 +90,10 @@ async def suggest_topics_api(
     count: int = Body(5, embed=True),
 ):
     from core.content_calendar import suggest_topics
-    return await suggest_topics(site_url or _DEFAULT_SITE(), niche, count)
+    resolved = _require_site(site_url)
+    if not resolved:
+        return {"error": "Chưa có site. Cấu hình GSC_SITE_URL hoặc thêm site.", "status": "not_configured"}
+    return await suggest_topics(resolved, niche, count)
 
 
 # ─── Phase 18: Multi-site Manager ──────────────────────────────────────
@@ -128,13 +146,16 @@ async def create_ab_test(
     keyword: str = Body("", embed=True),
 ):
     from core.ab_testing import create_test
-    return create_test(name, test_type, variant_a, variant_b, site_url or _DEFAULT_SITE(), url, keyword)
+    resolved = _require_site(site_url)
+    if not resolved:
+        return {"error": "Chưa có site. Cấu hình GSC_SITE_URL hoặc thêm site.", "status": "not_configured"}
+    return create_test(name, test_type, variant_a, variant_b, resolved, url, keyword)
 
 
 @router.get("/api/ab-test/list")
 async def list_ab_tests(site_url: str = None, status: str = ""):
     from core.ab_testing import get_tests
-    return {"tests": get_tests(site_url or _DEFAULT_SITE(), status)}
+    return {"tests": get_tests(_require_site(site_url), status)}
 
 
 @router.post("/api/ab-test/evaluate")

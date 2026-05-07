@@ -1,4 +1,4 @@
-import { useState, type JSX } from "react";
+import { useState } from "react";
 import { useSeoAudit } from "./hooks/useSeoAudit";
 import { useOpportunities } from "./hooks/useOpportunities";
 import { useAutoFill } from "./hooks/useAutoFill";
@@ -158,7 +158,7 @@ function Sidebar({ active, onChange, collapsed, onToggle }: {
 
         {!collapsed && (
           <div className="sidebar-footer">
-            <div className="sidebar-version">v3.0 · Phase 19</div>
+            <div className="sidebar-version">v3.1 · Phase 20</div>
           </div>
         )}
       </aside>
@@ -522,19 +522,18 @@ export default function App() {
   const handleAutoFill = async (e: React.MouseEvent) => {
     e.preventDefault();
     if (!trackUrl.trim() || !trackKeyword.trim()) {
-      alert("Enter URL and keyword first, then click Auto-Fill.");
+      alert("Nhập URL và từ khóa trước khi bấm Tự động điền.");
       return;
     }
     const res = await autoFill(trackUrl.trim(), trackKeyword.trim());
     if (!res) return;
     const bulk = res.bulk;
-    // Update connector status cards
     setTrackGscStatus(res.gscStatus.gsc as "connected" | "disconnected" | "pending");
     setTrackDfsStatus(res.gscStatus.dataforseo as "connected" | "disconnected" | "pending");
-    setTrackMockFallback(!!bulk?._is_mock_fallback);
+    setTrackMockFallback(!!res.fallbackReason);
     setTrackFallbackReason(res.fallbackReason);
+    // Only populate form with real metrics (skip fields not returned)
     if (!bulk) return;
-    // Auto-populate form fields
     if (bulk.current_position != null)     setTrackPosition(String(bulk.current_position));
     if (bulk.monthly_impressions != null)  setTrackImpressions(String(bulk.monthly_impressions));
     if (bulk.monthly_clicks != null)        setTrackClicks(String(bulk.monthly_clicks));
@@ -863,12 +862,12 @@ export default function App() {
                 <span>
                   {trackFallbackReason ? (
                     <>
-                      <strong>Tự động điền thất bại:</strong> {trackFallbackReason} —{" "}
-                      Biểu mẫu đã được điền bằng số liệu ước tính. Cấu hình GSC / DataForSEO để có dữ liệu thật.
+                      <strong>Lỗi kết nối:</strong> {trackFallbackReason} —{" "}
+                      Không thể lấy dữ liệu thật. Cấu hình GSC / DataForSEO để có số liệu.
                     </>
                   ) : (
                     <>
-                      <strong>Dữ liệu ước tính:</strong> Chưa cấu hình GSC hoặc DataForSEO — kết quả chỉ mang tính tham khảo.
+                      <strong>Chưa có dữ liệu:</strong> Chưa cấu hình GSC hoặc DataForSEO — không có số liệu để điền tự động.
                     </>
                   )}
                 </span>
@@ -880,7 +879,7 @@ export default function App() {
                   <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
                 </svg>
                 <span>
-                  <strong>Lỗi tự điền:</strong> {autofillError} — Biểu mẫu đã được điền bằng số liệu ước tính.
+                  <strong>Lỗi tự điền:</strong> {autofillError} — Kiểm tra kết nối backend.
                 </span>
               </div>
             )}
@@ -946,7 +945,7 @@ export default function App() {
 
             <form className="audit-form" onSubmit={handleTrackerSubmit} noValidate>
               <div className="hint-box">
-                📍 <strong>Gợi ý:</strong> Nhập URL thuộc domain đã cấu hình trong GSC để lấy dữ liệu thật. Domain khác sẽ dùng số liệu ước tính.
+                📍 <strong>Gợi ý:</strong> Nhập URL thuộc domain đã cấu hình trong GSC để lấy dữ liệu thật. Nếu chưa cấu hình, hệ thống sẽ báo lỗi.
               </div>
               <div className="input-row">
                 <div className="input-group">
@@ -987,7 +986,7 @@ export default function App() {
                   className="autofill-btn"
                   onClick={handleAutoFill}
                   disabled={autofillLoading || !trackUrl.trim() || !trackKeyword.trim()}
-                  title="Lấy số liệu thực từ GSC & DataForSEO, hoặc dữ liệu mẫu nếu chưa cấu hình"
+                  title="Lấy số liệu thực từ GSC & DataForSEO"
                 >
                   {autofillLoading ? (
                     <span className="btn-spinner" aria-label="Auto-filling" />
@@ -1169,7 +1168,7 @@ export default function App() {
                   <div className="result-header">
                     <div className="result-meta">
                       <h2 className="result-title">📊 Phân tích từ khóa — {aiKeysData.site_url}</h2>
-                      <p className="result-keyword">Nguồn: <strong>{aiKeysData.data_source === "live_gsc" ? "✅ GSC thật" : "🟡 Ước tính"}</strong> | AI: <strong>{aiKeysData.ai_provider === "ai" ? "✅ AI" : "⚙️ Thuật toán"}</strong></p>
+                      <p className="result-keyword">Nguồn: <strong>{aiKeysData.data_source === "live_gsc" ? "✅ GSC thật" : "🔴 Chưa có GSC"}</strong> | AI: <strong>{aiKeysData.ai_provider === "ai" ? "✅ AI" : "⚙️ Thuật toán"}</strong></p>
                     </div>
                   </div>
                   <div className="result-grid">

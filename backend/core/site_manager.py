@@ -103,7 +103,7 @@ def get_active_site() -> Dict[str, Any]:
         row = conn.execute("SELECT * FROM managed_sites ORDER BY id ASC LIMIT 1").fetchone()
         if row:
             return dict(row)
-        return {"url": "https://binhphuocmitsubishi.com", "name": "Default"}
+        return {"url": "", "name": "", "status": "not_configured", "message": "Chưa có site nào. Thêm site trong Quản lý site."}
     finally:
         conn.close()
 

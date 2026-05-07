@@ -1,134 +1,92 @@
-# ⚠️ DANH SÁCH DỮ LIỆU GIẢ (MOCK DATA) TRONG DỰ ÁN
+# ⚠️ MOCK DATA STATUS — AI Marketing Hub
 
-> **Mục tiêu:** Chuyển tất cả từ mock → real data  
-> **Ngày cập nhật:** 30/04/2026
-
----
-
-## 🔴 CẦN SỬA NGAY (Đang hiển thị dữ liệu giả cho user)
-
-### 1. Google Analytics 4 — `core/ga4_fetcher.py`
-**Vấn đề:** Toàn bộ dữ liệu GA4 là MOCK — random numbers
-| Dòng | Hàm mock | Dữ liệu giả |
-|------|----------|-------------|
-| 67-96 | `fetch_ga4_data()` | Trả về `"data_source": "mock"` khi không có GA4 credentials |
-| 237 | `_mock_overview()` | Sessions: 1247, Users: 892, Pageviews: 3421 (cố định) |
-| 248 | `_mock_traffic_sources()` | Organic: 523, Direct: 234, Social: 156 (cố định) |
-| 257 | `_mock_top_pages()` | 3 trang giả với views/duration cố định |
-| 266 | `_mock_daily_sessions()` | Random Gaussian sessions 30 ngày (`random.gauss(40, 12)`) |
-
-**Cách fix:** Cài `google-analytics-data` + tạo Service Account → truyền `GA4_CREDENTIALS_PATH`
+> **Chính sách:** KHÔNG có mock/dummy/synthetic data trong user-facing flows.
+> **Ngày cập nhật:** 05/05/2026 · v3.2.0 · Phase 20c (multi-site hardened)
 
 ---
 
-### 2. Google Search Console — `core/google_search_console.py`  
-**Vấn đề:** Module cần `googleapiclient` nhưng chưa cài → hoàn toàn không hoạt động
-| Dòng | Vấn đề |
-|------|--------|
-| Import | `from googleapiclient` → **ModuleNotFoundError** |
-| Toàn bộ | Không thể fetch keywords, clicks, impressions, positions |
+## 🟢 REAL DATA — 23+ modules
 
-**Cách fix:** `pip install google-api-python-client google-auth` + OAuth2 setup
+Tất cả modules sau trả dữ liệu thật (scrape, analyze, AI, database):
 
----
-
-### 3. Data Router — `routers/api_data.py`
-**Vấn đề:** 3 hàm mock data fallback khi không có API credentials
-| Dòng | Hàm mock | Dữ liệu giả |
-|------|----------|-------------|
-| 249 | `_mock_gsc_data()` | Position: random 5-45, Impressions: random, CTR: random |
-| 269 | `_mock_ga4_data()` | Sessions: 847, Users: 623, Bounce: 42.3% (cố định) |
-| 283 | `_mock_serp_data()` | Search volume, CPC, difficulty giả theo intent |
-
-**Nơi gọi mock:**
-- Dòng 476-504: GSC sync → fallback mock khi OAuth fail
-- Dòng 513-515: GA4 sync → fallback mock
-- Dòng 561-567: SERP sync → fallback mock khi DataForSEO không có key
-
----
-
-### 4. SERP Scraper — `core/google_serp_scraper.py`
-**Vấn đề:** Có hàm `_mock_serp()` trả dữ liệu SERP giả bằng tiếng Việt
-| Dòng | Hàm mock | Dữ liệu giả |
-|------|----------|-------------|
-| 35 | `_mock_serp()` | 3 results cố định với URLs giả |
-| 113 | `search_google()` | Fallback mock khi DuckDuckGo fail |
-
-**Hiện trạng:** DuckDuckGo search **hoạt động real** → mock chỉ là fallback
+| Module | File | Loại |
+|--------|------|------|
+| SEO Audit | `seo_quality_rater.py` | Content analysis |
+| Technical SEO | `technical_seo.py` | Scrape + analyze |
+| CRO Checker | `cro_checker.py` | Rule-based |
+| CTA Analyzer | `cta_analyzer.py` | Pattern matching |
+| Trust Signals | `trust_signal_analyzer.py` | Pattern matching |
+| Above Fold | `above_fold_analyzer.py` | Content analysis |
+| Keyword Analyzer | `keyword_analyzer.py` | TF-IDF + KMeans |
+| AI Keywords | `ai_keyword_analyzer.py` | GSC real + AI (Groq/Gemini) |
+| Backlinks | `backlink_analyzer.py` | Scrape links |
+| Competitor Gap | `competitor_gap_analyzer.py` | Scrape + analyze |
+| Article Planner | `article_planner.py` | Rule-based |
+| Content Scorer | `content_scorer.py` | Multi-algorithm |
+| Spin Editor | `spin_editor.py` | Groq AI |
+| GEO Optimizer | `geo_analyzer.py` | Groq AI + Schema |
+| A/B Testing | `ab_testing.py` | Groq AI + SQLite |
+| Report Generator | `report_generator.py` | Groq AI |
+| Content Calendar | `content_calendar.py` | SQLite CRUD |
+| Site Manager | `site_manager.py` | SQLite CRUD |
+| Rank Tracker | `rank_tracker.py` | SQLite + GSC sync |
+| File Converter | `file_converter.py` | MarkItDown |
+| WordPress Publisher | `wordpress_publisher.py` | WP REST API |
+| Google Search Console | `google_search_console.py` | httpx + OAuth2 |
+| SERP Live (Google/DataForSEO) | `google_serp_scraper.py` | DataForSEO API (Google SERP) |
 
 ---
 
-### 5. AI Keyword Analyzer — `core/ai_keyword_analyzer.py`
-**Vấn đề:** Trả `"data_source": "mock"` khi Groq API fail
-| Dòng | Vấn đề |
-|------|--------|
-| 302 | Fallback mock data khi AI call thất bại |
+## 🔴 CẦN CREDENTIALS — 3 connectors
 
-**Hiện trạng:** Groq API key **đã cấu hình** → chỉ mock khi API down
+Khi thiếu credentials, trả **error state** (không trả dữ liệu giả):
 
----
+| Connector | Cần gì | Khi thiếu |
+|-----------|--------|-----------|
+| **GA4** | `GA4_PROPERTY_ID` + OAuth2 scope `analytics.readonly` | `error: "GA4_PROPERTY_ID chưa được cấu hình..."`, `data_source: "error"` |
+| **DataForSEO** | `DATAFORSEO_LOGIN` + `DATAFORSEO_PASSWORD` | Thiếu key: `source: "missing_credentials"`. Có key nhưng lỗi: `source: "api_error"` |
+| **SERP Live** | `DATAFORSEO_LOGIN` + `DATAFORSEO_PASSWORD` | `source: "missing_credentials"`, hiển thị banner cần cấu hình |
+| **GSC (OAuth flow)** | `GOOGLE_SEARCH_CONSOLE_CLIENT_ID/SECRET/REFRESH_TOKEN` | `source: "error"` |
 
-## 🟡 MOCK NHẸ (Sample data trong code, không ảnh hưởng production)
+### Hành vi khi thiếu credentials
 
-### 6. Sample content trong `if __name__ == "__main__"`
-Các file này chứa sample content chỉ dùng khi chạy trực tiếp file (testing):
-- `readability_scorer.py:466` — sample_content cho test
-- `cta_analyzer.py:500` — sample_content cho test  
-- `cro_checker.py:592` — sample_content cho test
-- `landing_page_scorer.py:701` — sample_content cho test
-- `keyword_analyzer.py:612` — sample_content cho test
-- `trust_signal_analyzer.py:521` — sample_content cho test
-- `above_fold_analyzer.py:458` — sample_content cho test
-- `seo_quality_rater.py:595` — sample_content cho test
+**Backend:**
+- Trả `{ "error": "...", "source": "error" }` hoặc `{ "source": "missing_credentials" }` hoặc `{ "source": "api_error" }`
+- KHÔNG trả số liệu giả (clicks, impressions, sessions, etc.)
+- Các section lỗi trả mảng rỗng `[]` hoặc object rỗng `{}`
 
-**→ KHÔNG cần sửa** — đây là test code, không chạy trong production
+**Frontend:**
+- Banner cảnh báo rõ ràng (đỏ/vàng) với error message từ backend
+- Charts hiển thị "Chưa có dữ liệu GA4" hoặc error chi tiết
+- Campaign Tracker KHÔNG điền số giả vào form khi thiếu dữ liệu
 
 ---
 
-## 🟢 ĐÃ REAL (Không có mock)
+## ❌ ĐÃ LOẠI BỎ (từ Phase 20 cleanup)
 
-| Module | Trạng thái | Ghi chú |
-|--------|-----------|---------|
-| SEO Audit (`seo_quality_rater.py`) | ✅ Real | Phân tích content thật |
-| Keyword Analyzer (`keyword_analyzer.py`) | ✅ Real | TF-IDF + KMeans clustering |
-| CRO Checker (`cro_checker.py`) | ✅ Real | Rule-based analysis |
-| CTA Analyzer (`cta_analyzer.py`) | ✅ Real | Pattern matching |
-| Trust Signals (`trust_signal_analyzer.py`) | ✅ Real | Pattern matching |
-| Above Fold (`above_fold_analyzer.py`) | ✅ Real | Content analysis |
-| Technical SEO (`technical_seo.py`) | ✅ Real | Scrape + analyze |
-| Backlink Analyzer (`backlink_analyzer.py`) | ✅ Real | Scrape links |
-| Spin Editor (`spin_editor.py`) | ✅ Real | Groq AI |
-| GEO Optimizer (`geo_analyzer.py`) | ✅ Real | Groq AI |
-| A/B Testing (`ab_testing.py`) | ✅ Real | Groq AI + SQLite |
-| Report Generator (`report_generator.py`) | ✅ Real | Groq AI |
-| Content Calendar (`content_calendar.py`) | ✅ Real | SQLite CRUD |
-| Site Manager (`site_manager.py`) | ✅ Real | SQLite CRUD |
-| Rank Tracker (`rank_tracker.py`) | ✅ Real | SQLite + GSC sync |
-| File Converter (`file_converter.py`) | ✅ Real | MarkItDown |
-| WordPress Publisher (`wordpress_publisher.py`) | ✅ Real | WP REST API |
-| Competitor Gap (`competitor_gap_analyzer.py`) | ✅ Real | Scrape + analyze |
-| Article Planner (`article_planner.py`) | ✅ Real | Rule-based |
-| Content Scorer (`content_scorer.py`) | ✅ Real | Multi-algorithm |
-| SERP Live (DuckDuckGo) | ✅ Real | duckduckgo-search |
-| DataForSEO (`dataforseo.py`) | ⚠️ Cần API key | Đã code xong |
+| Hàm đã xóa | File | Lý do |
+|------------|------|-------|
+| `_mock_overview()` | `ga4_fetcher.py` | Trả sessions/users cố định giả |
+| `_mock_traffic_sources()` | `ga4_fetcher.py` | Trả source data cố định giả |
+| `_mock_top_pages()` | `ga4_fetcher.py` | Trả page data cố định giả |
+| `_mock_daily_sessions()` | `ga4_fetcher.py` | Trả random Gaussian sessions giả |
+| `_mock_gsc_data()` | `api_data.py` | Trả position/clicks/impressions giả |
+| `_mock_ga4_data()` | `api_data.py` | Trả pageviews/sessions cố định giả |
+| `_mock_serp_data()` | `api_data.py` | Trả search volume/difficulty giả |
+| `_mock_serp()` | `google_serp_scraper.py` | Trả 10 fake SERP results bằng tiếng Việt |
+| `_buildDummyBulk()` | `useAutoFill.ts` | Frontend tự tạo bulk data giả khi fetch fail |
 
 ---
 
 ## 📋 TÓM TẮT
 
-| Loại | Số lượng | Cần làm |
-|------|---------|---------|
-| 🔴 Mock data chính | **5 modules** | Cần API keys + cài thêm libs |
-| 🟡 Sample test data | 8 files | Không cần sửa |
-| 🟢 Real data | **22 modules** | Đã hoạt động |
-
-### Để chuyển 100% sang REAL, cần:
-1. `pip install google-api-python-client google-auth google-analytics-data`
-2. Tạo Google Cloud Project → bật GSC API + GA4 API
-3. Tạo OAuth2 credentials → lấy refresh token
-4. Tạo GA4 Service Account → download JSON key
-5. (Tùy chọn) Đăng ký DataForSEO → lấy login/password
+| Loại | Số lượng |
+|------|---------|
+| 🟢 Real data modules | **23+** |
+| 🔴 Cần credentials | **3** (GA4, DataForSEO, GSC OAuth) |
+| ❌ Mock functions đã xóa | **9** |
+| ⚠️ Remaining test-only samples | 8 files (`if __name__ == "__main__"`) — không ảnh hưởng production |
 
 ---
 
-*File được tạo để tracking mock data — cập nhật khi có thay đổi*
+*Cập nhật: 05/05/2026 — Multi-site hardening, DataForSEO error semantics, empty-site guards*

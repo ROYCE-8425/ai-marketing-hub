@@ -40,7 +40,7 @@ const SECTION_META: Record<string, { icon: string; label: string; color: string 
 };
 
 export function TechnicalSeo() {
-  const [url, setUrl] = useState("https://binhphuocmitsubishi.com");
+  const [url, setUrl] = useState("");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<ScanResult | null>(null);
   const [error, setError] = useState("");

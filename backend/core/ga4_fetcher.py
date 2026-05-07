@@ -64,14 +64,14 @@ async def _run_report_async(property_id: str, access_token: str, body: Dict) -> 
 async def get_ga4_overview(days: int = 30) -> Dict[str, Any]:
     """
     Fetch GA4 site overview: sessions, users, pageviews, engagement.
-    Returns mock data if GA4 is not configured.
+    Returns empty data with error message if GA4 is not configured.
     """
     load_dotenv(os.path.join(os.path.dirname(os.path.dirname(__file__)), ".env"), override=True)
     property_id = os.getenv("GA4_PROPERTY_ID", "")
     result: Dict[str, Any] = {
         "fetched_at": datetime.now().isoformat(),
         "period_days": days,
-        "data_source": "mock",
+        "data_source": "error",
         "property_id": property_id,
         "overview": {},
         "traffic_sources": [],
@@ -81,22 +81,15 @@ async def get_ga4_overview(days: int = 30) -> Dict[str, Any]:
 
     if not property_id:
         result["error"] = "GA4_PROPERTY_ID chưa được cấu hình. Vào Google Analytics → Admin → Property Details để lấy Property ID."
-        result["overview"] = _mock_overview()
-        result["traffic_sources"] = _mock_traffic_sources()
-        result["top_pages"] = _mock_top_pages()
-        result["daily_sessions"] = _mock_daily_sessions(days)
         return result
 
     access_token = await _get_access_token_async()
     if not access_token:
-        result["error"] = "Không lấy được access token. Kiểm tra OAuth2 credentials."
-        result["overview"] = _mock_overview()
-        result["traffic_sources"] = _mock_traffic_sources()
-        result["top_pages"] = _mock_top_pages()
-        result["daily_sessions"] = _mock_daily_sessions(days)
+        result["error"] = "Không lấy được access token. Kiểm tra OAuth2 credentials (Client ID, Secret, Refresh Token)."
         return result
 
     errors = []
+    failed_sections = []
 
     # 1. Overview metrics
     try:
@@ -132,10 +125,9 @@ async def get_ga4_overview(days: int = 30) -> Dict[str, Any]:
                 "avg_session_duration": 0, "new_users": 0,
             }
             result["note"] = "Property mới, chưa có dữ liệu. Cài Google Tag G-DFEE14V0T8 vào website để bắt đầu thu thập."
-        result["data_source"] = "live_ga4"
     except Exception as e:
         errors.append(f"Overview: {e}")
-        result["overview"] = _mock_overview()
+        failed_sections.append("overview")
 
     # 2. Traffic sources
     try:
@@ -163,7 +155,7 @@ async def get_ga4_overview(days: int = 30) -> Dict[str, Any]:
         result["traffic_sources"] = sources
     except Exception as e:
         errors.append(f"Traffic: {e}")
-        result["traffic_sources"] = _mock_traffic_sources()
+        failed_sections.append("traffic_sources")
 
     # 3. Top pages
     try:
@@ -194,7 +186,7 @@ async def get_ga4_overview(days: int = 30) -> Dict[str, Any]:
         result["top_pages"] = pages
     except Exception as e:
         errors.append(f"Pages: {e}")
-        result["top_pages"] = _mock_top_pages()
+        failed_sections.append("top_pages")
 
     # 4. Daily sessions timeline
     try:
@@ -224,58 +216,18 @@ async def get_ga4_overview(days: int = 30) -> Dict[str, Any]:
         result["daily_sessions"] = timeline
     except Exception as e:
         errors.append(f"Timeline: {e}")
-        result["daily_sessions"] = _mock_daily_sessions(days)
+        failed_sections.append("daily_sessions")
 
     if errors:
         result["errors"] = errors
+    if failed_sections:
+        result["failed_sections"] = failed_sections
 
-    return result
+    # Determine data_source based on how many sections succeeded
+    if not failed_sections:
+        result["data_source"] = "live_ga4"
+    elif len(failed_sections) < 4:
+        result["data_source"] = "partial_live_ga4"
+    # else stays "error" (= credentials present but all sections failed)
 
-
-# ── Mock data (when GA4 is not configured) ───────────────────────────────────
-
-def _mock_overview() -> Dict[str, Any]:
-    return {
-        "sessions": 1247,
-        "active_users": 892,
-        "pageviews": 3421,
-        "bounce_rate": 42.3,
-        "engagement_rate": 57.7,
-        "avg_session_duration": 124.5,
-        "new_users": 645,
-    }
-
-def _mock_traffic_sources() -> List[Dict[str, Any]]:
-    return [
-        {"source": "Organic Search", "sessions": 523, "users": 412, "engagement_rate": 62.1},
-        {"source": "Direct", "sessions": 312, "users": 245, "engagement_rate": 55.3},
-        {"source": "Social", "sessions": 198, "users": 167, "engagement_rate": 48.2},
-        {"source": "Referral", "sessions": 134, "users": 98, "engagement_rate": 71.5},
-        {"source": "Email", "sessions": 80, "users": 65, "engagement_rate": 68.9},
-    ]
-
-def _mock_top_pages() -> List[Dict[str, Any]]:
-    return [
-        {"path": "/", "title": "Trang chủ", "pageviews": 1245, "sessions": 980, "bounce_rate": 35.2, "avg_duration": 95.3},
-        {"path": "/xe-mitsubishi/", "title": "Xe Mitsubishi", "pageviews": 567, "sessions": 423, "bounce_rate": 38.7, "avg_duration": 142.1},
-        {"path": "/bang-gia/", "title": "Bảng giá", "pageviews": 432, "sessions": 345, "bounce_rate": 28.4, "avg_duration": 186.5},
-        {"path": "/lien-he/", "title": "Liên hệ", "pageviews": 298, "sessions": 234, "bounce_rate": 45.1, "avg_duration": 67.8},
-        {"path": "/xpander/", "title": "Mitsubishi Xpander", "pageviews": 245, "sessions": 198, "bounce_rate": 32.6, "avg_duration": 210.4},
-    ]
-
-def _mock_daily_sessions(days: int) -> List[Dict[str, Any]]:
-    import random
-    random.seed(42)
-    result = []
-    base = datetime.now().date() - timedelta(days=days)
-    for i in range(days):
-        d = base + timedelta(days=i)
-        weekday_boost = 1.3 if d.weekday() < 5 else 0.7
-        sessions = int(random.gauss(40, 12) * weekday_boost)
-        result.append({
-            "date": d.strftime("%d/%m"),
-            "sessions": max(5, sessions),
-            "pageviews": max(8, int(sessions * random.uniform(2.2, 3.5))),
-            "users": max(3, int(sessions * random.uniform(0.65, 0.85))),
-        })
     return result

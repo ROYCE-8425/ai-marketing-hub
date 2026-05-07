@@ -1,6 +1,5 @@
 import { useState, useRef, useCallback } from "react";
-
-const API_BASE = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
+import { API_BASE } from "../lib/apiConfig";
 
 const FORMAT_ICONS: Record<string, string> = {
   ".pdf": "📄", ".docx": "📝", ".doc": "📝", ".pptx": "📊",
@@ -52,7 +51,7 @@ export default function FileConverter() {
     try {
       const formData = new FormData();
       formData.append("file", selectedFile);
-      const resp = await fetch(`${API_BASE}/api/convert/file`, {
+      const resp = await fetch(`${API_BASE}/convert/file`, {
         method: "POST",
         body: formData,
       });
@@ -73,7 +72,7 @@ export default function FileConverter() {
     setError("");
     setResult(null);
     try {
-      const resp = await fetch(`${API_BASE}/api/convert/url`, {
+      const resp = await fetch(`${API_BASE}/convert/url`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ url: url.trim() }),

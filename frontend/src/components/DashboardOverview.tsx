@@ -6,9 +6,8 @@ import {
   PieChart, Pie, Cell, AreaChart, Area, CartesianGrid,
   RadarChart, PolarGrid, PolarAngleAxis, Radar
 } from "recharts";
+import { API_BASE } from "../lib/apiConfig";
 import "./DashboardOverview.css";
-
-const API_BASE = import.meta.env.VITE_API_URL ?? "http://localhost:8000/api";
 
 // ─── Colors ─────────────────────────────────────────────────────────────────
 
@@ -207,14 +206,35 @@ export function DashboardOverview({ onNavigate }: { onNavigate: (tab: string) =>
             <span>GSC: {gscKeywords.length} từ khóa · {gscData.total_clicks} lượt nhấp · {gscData.total_impressions} hiển thị</span>
           </div>
         )}
-        {ga4Data && (
-          <div className="gsc-live-banner" style={{ borderColor: ga4Data.data_source === 'live_ga4' ? 'rgba(99,102,241,0.3)' : 'rgba(245,158,11,0.2)', background: ga4Data.data_source === 'live_ga4' ? 'rgba(99,102,241,0.06)' : 'rgba(245,158,11,0.05)' }}>
-            <div className="gsc-live-dot" style={{ background: ga4Data.data_source === 'live_ga4' ? '#6366f1' : '#f59e0b' }} />
-            <span style={{ color: ga4Data.data_source === 'live_ga4' ? '#a5b4fc' : '#fcd34d' }}>
-              GA4: {ga4Data.data_source === 'live_ga4' ? '✅ Dữ liệu thật' : '🟡 Dữ liệu mẫu'} · {ga4Data.overview?.sessions || 0} phiên · {ga4Data.overview?.pageviews || 0} lượt xem
-            </span>
+        {gscData && gscData.data_source !== "live_gsc" && (
+          <div className="gsc-live-banner" style={{ borderColor: 'rgba(245,158,11,0.2)', background: 'rgba(245,158,11,0.05)' }}>
+            <div className="gsc-live-dot" style={{ background: '#f59e0b' }} />
+            <span style={{ color: '#fcd34d' }}>GSC: 🟡 Chưa kết nối — Cấu hình OAuth2 credentials để xem dữ liệu thật</span>
           </div>
         )}
+        {ga4Data && (() => {
+          const isLive = ga4Data.data_source === 'live_ga4';
+          const isPartial = ga4Data.data_source === 'partial_live_ga4';
+          const hasError = !isLive && !isPartial;
+          const borderColor = isLive ? 'rgba(99,102,241,0.3)' : isPartial ? 'rgba(245,158,11,0.25)' : 'rgba(239,68,68,0.2)';
+          const bg = isLive ? 'rgba(99,102,241,0.06)' : hasError ? 'rgba(239,68,68,0.05)' : 'rgba(245,158,11,0.05)';
+          const dotColor = isLive ? '#6366f1' : hasError ? '#ef4444' : '#f59e0b';
+          const textColor = isLive ? '#a5b4fc' : hasError ? '#fca5a5' : '#fcd34d';
+          const label = isLive
+            ? `✅ Dữ liệu thật · ${ga4Data.overview?.sessions || 0} phiên · ${ga4Data.overview?.pageviews || 0} lượt xem`
+            : isPartial
+            ? `⚠️ Dữ liệu một phần · ${ga4Data.overview?.sessions || 0} phiên`
+            : `🔴 Chưa kết nối`;
+          return (
+            <div className="gsc-live-banner" style={{ borderColor, background: bg }}>
+              <div className="gsc-live-dot" style={{ background: dotColor }} />
+              <span style={{ color: textColor }}>
+                GA4: {label}
+                {hasError && ga4Data.error && <> — {ga4Data.error}</>}
+              </span>
+            </div>
+          );
+        })()}
       </div>
 
       {/* GSC + GA4 Stat cards */}
@@ -332,7 +352,7 @@ export function DashboardOverview({ onNavigate }: { onNavigate: (tab: string) =>
               </AreaChart>
             </ResponsiveContainer>
           ) : (
-            <div className="chart-empty">{ga4Loading ? "Đang tải GA4..." : "Chưa có dữ liệu"}</div>
+            <div className="chart-empty">{ga4Loading ? "Đang tải GA4..." : (ga4Data?.error ? `⚠️ ${ga4Data.error}` : "Chưa có dữ liệu GA4")}</div>
           )}
         </div>
 
