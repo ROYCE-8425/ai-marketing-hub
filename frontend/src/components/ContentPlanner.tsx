@@ -194,6 +194,7 @@ interface ContentPlannerPanelProps {
 export function ContentPlannerPanel({ plan, onPublish }: ContentPlannerPanelProps) {
   // AI Writer draft state — populated only via AI polish flow
   const [writerDraft, setWriterDraft] = useState("");
+  const [generating, setGenerating] = useState(false);
 
   const handlePolishAccept = (humanized: string) => {
     setWriterDraft(humanized);
@@ -204,6 +205,25 @@ export function ContentPlannerPanel({ plan, onPublish }: ContentPlannerPanelProp
       plan.meta.title_options[0] || plan.topic,
       humanized
     );
+  };
+
+  // Auto-generate draft from outline
+  const handleGenerateDraft = () => {
+    setGenerating(true);
+    const draft = plan.sections.map((s) => {
+      const intro = s.strategic_angle ? `${s.strategic_angle}\n\n` : "";
+      const hook = s.engagement_hook ? `> ${s.engagement_hook}\n\n` : "";
+      const body = `[Viết nội dung cho phần "${s.heading}" tại đây — khoảng ${s.word_target} từ. `;
+      const gaps = s.knowledge_gaps.length > 0
+        ? `Chủ đề cần đề cập: ${s.knowledge_gaps.join(", ")}.`
+        : "";
+      const cta = s.cta ? ` CTA: ${s.cta.toUpperCase()}.` : "";
+      return `## ${s.heading}\n\n${hook}${intro}${body}${gaps}${cta}]`;
+    }).join("\n\n---\n\n");
+
+    const fullDraft = `# ${plan.meta.title_options[0] || plan.topic}\n\n${draft}`;
+    setWriterDraft(fullDraft);
+    setTimeout(() => setGenerating(false), 500);
   };
 
   // Warn if user tries to publish the outline skeleton directly
@@ -301,31 +321,51 @@ export function ContentPlannerPanel({ plan, onPublish }: ContentPlannerPanelProp
 
       {/* ── AI Writer — Polish & Humanize Section ── */}
       <div className="section-block">
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "14px" }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "14px", gap: "8px", flexWrap: "wrap" }}>
           <h3 className="section-title" style={{ margin: 0 }}>AI Writer</h3>
-          {writerDraft && (
+          <div style={{ display: "flex", gap: "8px" }}>
             <button
               type="button"
-              onClick={handleOutlinePublish}
+              onClick={handleGenerateDraft}
+              disabled={generating}
               style={{
                 fontSize: "12px",
                 padding: "5px 12px",
-                background: "rgba(139,92,246,0.1)",
-                border: "1px solid rgba(139,92,246,0.25)",
+                background: "linear-gradient(135deg, #7c3aed, #6d28d9)",
+                border: "none",
                 borderRadius: "99px",
-                color: "var(--primary)",
-                cursor: "pointer",
+                color: "#fff",
+                cursor: generating ? "wait" : "pointer",
+                opacity: generating ? 0.6 : 1,
               }}
             >
-              Publish Outline as Draft
+              {generating ? "⏳ Đang tạo..." : "✨ Tạo bản nháp từ outline"}
             </button>
-          )}
+            {writerDraft && (
+              <button
+                type="button"
+                onClick={handleOutlinePublish}
+                style={{
+                  fontSize: "12px",
+                  padding: "5px 12px",
+                  background: "rgba(139,92,246,0.1)",
+                  border: "1px solid rgba(139,92,246,0.25)",
+                  borderRadius: "99px",
+                  color: "var(--primary)",
+                  cursor: "pointer",
+                }}
+              >
+                Publish Outline as Draft
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Polish panel: textarea + action bar + result */}
         <PolishPanel
           onAccept={handlePolishAccept}
           onPublish={handlePolishPublish}
+          initialContent={writerDraft}
         />
       </div>
     </div>

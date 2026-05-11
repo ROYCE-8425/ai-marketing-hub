@@ -65,6 +65,28 @@ app.include_router(api_convert.router)
 app.include_router(api_auth.router)
 
 
+@app.on_event("startup")
+async def auto_setup():
+    """Auto-add default site and sync rank tracker on startup if empty."""
+    import os
+    try:
+        from core.site_manager import get_sites, add_site, set_active_site
+        sites = get_sites()
+        if not sites:
+            site_url = os.getenv("GSC_SITE_URL", "https://binhphuocmitsubishi.com/")
+            result = add_site(
+                name="Mitsubishi Bình Phước",
+                url=site_url,
+                description="Đại lý chính hãng Mitsubishi tại Bình Phước",
+                niche="ô tô",
+            )
+            if result.get("id"):
+                set_active_site(result["id"])
+    except Exception:
+        pass  # Non-critical — site can be added manually
+
+
 @app.get("/health")
 async def health():
     return {"status": "ok", "phase": 20, "version": "3.1.0"}
+

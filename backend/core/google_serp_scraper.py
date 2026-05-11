@@ -3,17 +3,49 @@ SERP Scraper — Multi-source Google SERP
 
 Strategy (waterfall):
 1. DataForSEO API (if configured) — real Google organic SERP + SEO metrics
-2. SerpAPI (if configured) — real Google SERP, 100 free/month
+2. SerpAPI (if configured) — real Google SERP, 100 free/month (with 1h cache)
 3. Google Custom Search JSON API (if configured) — Programmable Search
 4. Error state with clear message when no credentials configured
 
 All searches are async-safe and never hang.
+SERP results are cached in-memory for 1 hour to save quota.
 """
 
 import asyncio
 import os
+import time
 from typing import Any, Dict, List, Optional
 from urllib.parse import urlparse
+
+
+# ─── In-memory SERP cache (TTL = 1 hour) ──────────────────────────────────────
+_serp_cache: Dict[str, Dict[str, Any]] = {}
+_CACHE_TTL = 3600  # 1 hour
+
+
+def _cache_key(keyword: str, location: str, num: int) -> str:
+    return f"{keyword.lower().strip()}|{location.lower()}|{num}"
+
+
+def _get_cached(keyword: str, location: str, num: int) -> Optional[Dict[str, Any]]:
+    key = _cache_key(keyword, location, num)
+    entry = _serp_cache.get(key)
+    if entry and (time.time() - entry["_ts"]) < _CACHE_TTL:
+        result = {k: v for k, v in entry.items() if k != "_ts"}
+        result["_cached"] = True
+        return result
+    if entry:
+        del _serp_cache[key]
+    return None
+
+
+def _set_cache(keyword: str, location: str, num: int, data: Dict[str, Any]):
+    key = _cache_key(keyword, location, num)
+    _serp_cache[key] = {**data, "_ts": time.time()}
+    # Evict old entries if cache grows too large
+    if len(_serp_cache) > 200:
+        oldest = min(_serp_cache, key=lambda k: _serp_cache[k]["_ts"])
+        del _serp_cache[oldest]
 
 
 LOCATION_MAP = {
@@ -83,6 +115,11 @@ class GoogleSerpScraper:
         language_code = loc["language_code"]
         num = max(5, min(20, num_results))
 
+        # ── Check cache first (saves SerpAPI quota) ──
+        cached = _get_cached(keyword, location, num)
+        if cached:
+            return cached
+
         # ── Strategy 1: DataForSEO (premium, real Google SERP) ──
         try:
             raw = await asyncio.wait_for(
@@ -90,7 +127,9 @@ class GoogleSerpScraper:
                 timeout=20.0,
             )
             if raw is not None:
-                return self._format_dataforseo(raw, keyword, loc)
+                result = self._format_dataforseo(raw, keyword, loc)
+                _set_cache(keyword, location, num, result)
+                return result
         except RuntimeError:
             pass
         except Exception:
@@ -105,6 +144,7 @@ class GoogleSerpScraper:
             if serpapi_result is not None:
                 if serpapi_result.get("source") != "api_error":
                     serpapi_result["location"] = loc.get("label", "")
+                    _set_cache(keyword, location, num, serpapi_result)
                     return serpapi_result
         except Exception:
             pass
@@ -118,6 +158,7 @@ class GoogleSerpScraper:
             if cse_result is not None:
                 if cse_result.get("source") != "api_error":
                     cse_result["location"] = loc.get("label", "")
+                    _set_cache(keyword, location, num, cse_result)
                     return cse_result
         except Exception:
             pass

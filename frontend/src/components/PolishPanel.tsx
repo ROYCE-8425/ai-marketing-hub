@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { usePolish } from "../hooks/usePolish";
 import type { PolishSuccess } from "../hooks/usePolish";
 import "./ContentPlanner.css";
@@ -8,11 +8,18 @@ interface PolishPanelProps {
   onAccept: (humanized: string) => void;
   /** Callback to open the publish modal with humanized content. */
   onPublish: (humanized: string) => void;
+  /** Optional initial content to pre-fill the textarea */
+  initialContent?: string;
 }
 
-export function PolishPanel({ onAccept, onPublish }: PolishPanelProps) {
+export function PolishPanel({ onAccept, onPublish, initialContent }: PolishPanelProps) {
   const [draft, setDraft] = useState("");
   const { loading, error, result, polish, reset } = usePolish();
+
+  // Sync with initialContent when it changes
+  useEffect(() => {
+    if (initialContent) setDraft(initialContent);
+  }, [initialContent]);
 
   const hasResult = result !== null && result.success;
   const polishResult = result as PolishSuccess | null;

@@ -103,6 +103,8 @@ export function DashboardOverview({ onNavigate }: { onNavigate: (tab: string) =>
   const [ga4Data, setGa4Data] = useState<any>(null);
   const [ga4Loading, setGa4Loading] = useState(false);
   const [oauthLoading, setOauthLoading] = useState(false);
+  const [serpOverview, setSerpOverview] = useState<any>(null);
+  const [serpLoading, setSerpLoading] = useState(false);
 
   useEffect(() => {
     setHistory(getHistory());
@@ -146,10 +148,29 @@ export function DashboardOverview({ onNavigate }: { onNavigate: (tab: string) =>
     }
   }, []);
 
+  // Fetch SERP overview for dashboard (when GSC not connected)
+  const fetchSerpOverview = useCallback(async () => {
+    setSerpLoading(true);
+    try {
+      const r = await fetch(`${API_BASE}/serp/live`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ keyword: "mitsubishi binh phuoc", location: "vn", num_results: 10 }),
+      });
+      if (r.ok) {
+        const data = await r.json();
+        if (data.organic_results?.length > 0) setSerpOverview(data);
+      }
+    } catch { /* silent */ }
+    finally { setSerpLoading(false); }
+  }, []);
+
   useEffect(() => {
     fetchGscData();
     fetchGa4Data();
-  }, [fetchGscData, fetchGa4Data]);
+    // Auto-fetch SERP overview
+    fetchSerpOverview();
+  }, [fetchGscData, fetchGa4Data, fetchSerpOverview]);
 
   // Listen for OAuth2 callback completion (postMessage from popup)
   useEffect(() => {
@@ -284,6 +305,55 @@ export function DashboardOverview({ onNavigate }: { onNavigate: (tab: string) =>
           );
         })()}
       </div>
+
+      {/* SERP Quick Overview — shows when GSC is not connected */}
+      {serpOverview && serpOverview.organic_results?.length > 0 && (
+        <div className="chart-card" style={{ marginBottom: '0.5rem' }}>
+          <h3 className="chart-title">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" /></svg>
+            🌐 SERP Overview — "{serpOverview.keyword}" ({serpOverview.results_count} kết quả)
+            {serpOverview._cached && <span style={{ fontSize: 10, color: '#6ee7b7', marginLeft: 8 }}>⚡ cached</span>}
+          </h3>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '8px' }}>
+            {serpOverview.organic_results.slice(0, 5).map((r: any, i: number) => (
+              <a
+                key={i}
+                href={r.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  display: 'flex', alignItems: 'center', gap: '8px',
+                  background: i === 0 ? 'rgba(16,185,129,0.1)' : 'var(--surface2)',
+                  border: `1px solid ${i === 0 ? 'rgba(16,185,129,0.3)' : 'var(--border)'}`,
+                  borderRadius: '8px', padding: '8px 12px', flex: '1 1 45%', minWidth: 0,
+                  textDecoration: 'none', transition: 'border-color 0.2s',
+                }}
+              >
+                <span style={{ fontSize: 18, fontWeight: 800, color: i === 0 ? '#10b981' : i < 3 ? '#3b82f6' : '#8892b0', fontFamily: 'DM Mono, monospace', flexShrink: 0, width: 28 }}>#{r.position}</span>
+                <div style={{ minWidth: 0, flex: 1 }}>
+                  <div style={{ fontSize: 12, color: '#e2e8f0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{r.title}</div>
+                  <div style={{ fontSize: 10, color: '#4a5578' }}>{r.domain}</div>
+                </div>
+              </a>
+            ))}
+          </div>
+          {serpOverview.serp_features?.length > 0 && (
+            <div style={{ display: 'flex', gap: '6px', marginTop: '8px', flexWrap: 'wrap' }}>
+              {serpOverview.serp_features.map((f: string, i: number) => (
+                <span key={i} style={{ fontSize: 10, background: 'rgba(139,92,246,0.15)', color: '#c4b5fd', padding: '2px 8px', borderRadius: '99px', border: '1px solid rgba(139,92,246,0.2)' }}>{f.replace(/_/g, ' ')}</span>
+              ))}
+            </div>
+          )}
+          <button className="dash-action-btn" onClick={() => onNavigate('serp')} style={{ marginTop: 8, fontSize: 12, padding: '6px 14px', width: 'fit-content' }}>
+            🔍 Xem chi tiết SERP
+          </button>
+        </div>
+      )}
+      {serpLoading && !serpOverview && (
+        <div className="chart-card" style={{ marginBottom: '0.5rem' }}>
+          <div className="chart-empty">🔄 Đang tải SERP overview...</div>
+        </div>
+      )}
 
       {/* GSC + GA4 Stat cards */}
       <div className="dashboard-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))' }}>

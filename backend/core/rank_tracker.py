@@ -372,3 +372,62 @@ async def sync_rankings_from_gsc(site_url: str) -> Dict[str, Any]:
                 continue
 
         return {"status": "ok", "synced": synced_count, "total_keywords": len(keywords)}
+
+
+async def sync_rankings_from_serp(site_url: str) -> Dict[str, Any]:
+    """
+    Sync rankings using SerpAPI instead of GSC.
+    Searches each tracked keyword and finds the site's position in results.
+    Falls back to this when GSC OAuth is not configured.
+    """
+    from urllib.parse import urlparse
+    try:
+        from core.google_serp_scraper import GoogleSerpScraper
+    except ImportError:
+        return {"error": "SerpAPI scraper not available", "synced": 0}
+
+    conn = _get_db()
+    tracked = conn.execute(
+        "SELECT keyword FROM tracked_keywords WHERE site_url = ?",
+        (site_url,),
+    ).fetchall()
+    conn.close()
+
+    if not tracked:
+        return {"error": "Chưa có keyword nào được theo dõi", "synced": 0}
+
+    keywords = [r["keyword"] for r in tracked]
+    synced_count = 0
+    scraper = GoogleSerpScraper()
+
+    # Parse the site domain for matching
+    try:
+        site_domain = urlparse(site_url).netloc.replace("www.", "").rstrip("/")
+    except Exception:
+        site_domain = site_url.replace("https://", "").replace("http://", "").split("/")[0]
+
+    for kw in keywords:
+        try:
+            result = await scraper.search(keyword=kw, location="vn", num_results=20)
+            organic = result.get("organic_results", [])
+            found = False
+            for item in organic:
+                item_domain = (item.get("domain") or "").replace("www.", "")
+                if site_domain in item_domain or item_domain in site_domain:
+                    save_ranking(
+                        keyword=kw,
+                        site_url=site_url,
+                        position=item.get("position", 0),
+                        source="serpapi",
+                    )
+                    synced_count += 1
+                    found = True
+                    break
+            if not found:
+                save_ranking(kw, site_url, 0, source="serp_not_found")
+                synced_count += 1
+        except Exception:
+            continue
+
+    return {"status": "ok", "synced": synced_count, "total_keywords": len(keywords), "source": "serpapi"}
+

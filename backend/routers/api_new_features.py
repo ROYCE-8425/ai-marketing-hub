@@ -84,11 +84,15 @@ async def get_keyword_history_api(keyword: str, days: int = 30, site_url: str = 
 
 @router.post("/api/rank-tracker/sync")
 async def sync_rankings():
-    from core.rank_tracker import sync_rankings_from_gsc
+    from core.rank_tracker import sync_rankings_from_gsc, sync_rankings_from_serp
     resolved = _require_site()
     if not resolved:
         return {"error": "Chưa có site. Cấu hình GSC_SITE_URL hoặc thêm site.", "synced": 0}
-    return await sync_rankings_from_gsc(resolved)
+    # Try GSC first, fall back to SerpAPI
+    result = await sync_rankings_from_gsc(resolved)
+    if result.get("error") and "OAuth" in result.get("error", ""):
+        result = await sync_rankings_from_serp(resolved)
+    return result
 
 
 @router.post("/api/rank-tracker/import-csv")

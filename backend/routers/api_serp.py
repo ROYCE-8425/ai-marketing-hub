@@ -5,10 +5,11 @@ Provides live SERP data endpoints:
 - POST /api/serp/live          — Get real Google SERP results for a keyword
 - POST /api/serp/deep-analyze  — Deep-analyze content of top-ranking pages
 
-SERP Strategy (waterfall):
+SERP Strategy (waterfall, cached 1h):
 1. DataForSEO API (premium, real Google organic SERP + SEO metrics)
-2. Google Custom Search JSON API (free 100/day, Programmable Search)
-3. Explicit error state when no credentials — NO silent fallback
+2. SerpAPI (real Google SERP, 100 free/month)
+3. Google Custom Search JSON API (free 100/day, Programmable Search)
+4. Error state with clear message when no credentials configured
 """
 
 from __future__ import annotations
@@ -164,9 +165,11 @@ async def serp_live(body: SerpLiveRequest):
     """
     Get real Google SERP results for a keyword.
 
-    Strategy (Google-first):
+    Strategy (waterfall, cached 1h):
     1. DataForSEO API (premium, real Google SERP) — if credentials configured
-    2. Explicit error state when no credentials — NO silent fallback
+    2. SerpAPI (real Google SERP, 100 free/month) — if SERPAPI_KEY configured
+    3. Google Custom Search JSON API — legacy fallback
+    4. Explicit error state when no credentials
     """
     # Location mapping for DataForSEO
     dfs_location_map = {
