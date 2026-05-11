@@ -110,7 +110,7 @@ ai_marketing_hub/
 |-----|--------|---------|
 | `GROQ_API_KEY` | ✅ **Hoạt động** | AI engine chính, dùng cho Spin/GEO/Report/A-B Test |
 | `GSC_*` (3 keys) | ✅ **Real data** | OAuth2 refresh token, site URL tùy config |
-| `GA4_PROPERTY_ID` | 🟡 **Cần OAuth scope** | Dùng chung OAuth2 với GSC, cần scope `analytics.readonly` |
+| `GA4_PROPERTY_ID` | ✅ **Hoạt động** | 1-click OAuth2 flow (Dashboard → Kết nối GA), scope `analytics.readonly` |
 | `GEMINI_API_KEY` | 🟡 **Hết quota (429)** | User chọn dùng Groq thay thế |
 | `ZAI_API_KEY` | ⚪ **Chưa dùng** | Có key nhưng chưa tích hợp |
 
@@ -125,7 +125,7 @@ Tất cả SEO analysis, AI features, databases, file converter, WordPress publi
 **Tất cả mock data generators đã bị xóa.** Khi thiếu credentials:
 | Module | Trạng thái | Response khi lỗi |
 |--------|-----------|-----------------|
-| GA4 | Cần OAuth scope `analytics.readonly` | `{ data_source: "error", error: "...", overview: {} }` |
+| GA4 | 1-click OAuth2 flow có sẵn | `{ data_source: "error", error: "...", overview: {} }` |
 | DataForSEO | Cần API key | `{ source: "missing_credentials", error: "..." }` |
 | AI Keywords | Cần GSC data | `{ data_source: "no_data", error: "..." }` |
 | GSC (bulk-sync) | Cần OAuth2 | `{ source: "error", error: "..." }` |
@@ -192,7 +192,7 @@ Tất cả SEO analysis, AI features, databases, file converter, WordPress publi
 ## 7. NHỮNG GÌ CHƯA LÀM (TODO)
 
 ### Ưu tiên cao — Cần làm sớm
-- [ ] **GA4 real data** — Cần tạo Service Account JSON trên Google Cloud
+- [x] **GA4 real data** — 1-click OAuth2 flow (`/auth/google/setup` + `/auth/google/callback`)
 - [ ] **Export PDF/Excel** — Báo cáo xuất file
 - [ ] **Ranking chart** — Line graph cho keyword history
 

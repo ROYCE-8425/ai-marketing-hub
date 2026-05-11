@@ -55,17 +55,32 @@ VITE_API_BASE_URL=http://localhost:8000
 
 These are **lazy-loaded**: the server starts without them, but endpoints return error states unless credentials are set.
 
-#### Google Search Console + GA4
+#### Google Search Console + GA4 (1-click OAuth2 flow)
+
+**Setup 3 bước:**
+
+1. **Cấu hình Client ID/Secret** (một lần duy nhất):
+   ```env
+   # backend/.env
+   GOOGLE_SEARCH_CONSOLE_CLIENT_ID=your_client_id.apps.googleusercontent.com
+   GOOGLE_SEARCH_CONSOLE_CLIENT_SECRET=GOCSPX-...
+   GSC_SITE_URL=https://yoursite.com/
+   GA4_PROPERTY_ID=123456789
+   ```
+
+2. **1-click kết nối** — Vào Dashboard → bấm "🔗 Kết nối Google Analytics"
+   - Hoặc gọi `GET http://localhost:8000/auth/google/setup` → mở `auth_url`
+   - App sẽ xin cả 2 scope: GSC (`webmasters.readonly`) + GA4 (`analytics.readonly`)
+
+3. **Xong** — Refresh token tự động lưu vào `.env`. Không cần thao tác thêm.
 
 ```env
-GOOGLE_SEARCH_CONSOLE_CLIENT_ID=...
-GOOGLE_SEARCH_CONSOLE_CLIENT_SECRET=...
-GOOGLE_SEARCH_CONSOLE_REFRESH_TOKEN=...
-GSC_SITE_URL=https://search.google.com/search-console/...
-
-GA4_PROPERTY_ID=123456789
-GA4_CREDENTIALS_PATH=/path/to/service-account.json
+# Tự động tạo sau OAuth flow (KHÔNG cần điền tay):
+GOOGLE_SEARCH_CONSOLE_REFRESH_TOKEN=1//...
 ```
+
+> **Lưu ý:** GA4 `refresh_token` dùng chung với GSC (`GOOGLE_SEARCH_CONSOLE_REFRESH_TOKEN`).
+> Nếu cần token riêng cho GA4, set `GA4_REFRESH_TOKEN=...` — hệ thống sẽ ưu tiên đọc biến này.
 
 #### DataForSEO (SERP data — ưu tiên #1)
 

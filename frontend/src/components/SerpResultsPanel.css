@@ -56,6 +56,21 @@
   color: #93c5fd;
 }
 
+.serp-source-badge.src-custom-search {
+  background: rgba(16,185,129,0.15);
+  color: #6ee7b7;
+}
+
+.serp-source-badge.src-error {
+  background: rgba(239,68,68,0.12);
+  color: #fca5a5;
+}
+
+.serp-source-badge.src-serpapi {
+  background: rgba(34,197,94,0.15);
+  color: #86efac;
+}
+
 /* ── Features badges ────────────────────────────────────────────────────────── */
 
 .serp-features-row {

@@ -29,6 +29,7 @@ from routers import api_new_features
 from routers import api_phase2
 from routers import api_phase3
 from routers import api_convert
+from routers import api_auth
 
 app = FastAPI(
     title="AI Marketing Hub — Backend",
@@ -61,6 +62,7 @@ app.include_router(api_new_features.router)
 app.include_router(api_phase2.router)
 app.include_router(api_phase3.router)
 app.include_router(api_convert.router)
+app.include_router(api_auth.router)
 
 
 @app.get("/health")

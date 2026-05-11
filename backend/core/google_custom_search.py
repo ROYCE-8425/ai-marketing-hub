@@ -57,6 +57,52 @@ def _get_credentials() -> tuple[Optional[str], Optional[str]]:
     return api_key, cx
 
 
+# ── Daily quota limiter (stay within free tier: 100/day) ──────────────────────
+# Configurable via .env: CSE_DAILY_LIMIT=30 (default)
+
+def _get_daily_limit() -> int:
+    """Get daily quota limit from env or default to 30."""
+    return int(os.getenv("CSE_DAILY_LIMIT", "30"))
+
+def _check_and_increment_quota() -> bool:
+    """
+    Check if we're within daily quota. Returns True if OK to proceed.
+    Uses a simple file-based counter that resets each day.
+    """
+    from datetime import date
+    quota_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), ".cache")
+    os.makedirs(quota_dir, exist_ok=True)
+    quota_file = os.path.join(quota_dir, "cse_quota.json")
+
+    today = date.today().isoformat()
+    data = {"date": today, "count": 0}
+
+    # Read existing counter
+    try:
+        if os.path.exists(quota_file):
+            import json
+            with open(quota_file, "r") as f:
+                data = json.load(f)
+            if data.get("date") != today:
+                data = {"date": today, "count": 0}
+    except Exception:
+        data = {"date": today, "count": 0}
+
+    if data["count"] >= _get_daily_limit():
+        return False
+
+    # Increment and save
+    data["count"] += 1
+    try:
+        import json
+        with open(quota_file, "w") as f:
+            json.dump(data, f)
+    except Exception:
+        pass
+
+    return True
+
+
 def search_google_cse(
     keyword: str,
     location: str = "vn",
@@ -69,13 +115,27 @@ def search_google_cse(
       - Dict with organic_results, source="google_custom_search" on success
       - None if credentials are not configured
       - Dict with source="api_error" on API failure
+      - Dict with source="quota_exceeded" if daily limit reached
 
     Note: Google CSE returns max 10 results per request.
     For num_results > 10, we make a second request (costs extra quota).
+    Daily limit: 90 queries (free tier = 100, we keep 10 as safety margin).
     """
     api_key, cx = _get_credentials()
     if not api_key or not cx:
         return None
+
+    # Check daily quota BEFORE making API call
+    if not _check_and_increment_quota():
+        return {
+            "keyword": keyword,
+            "organic_results": [],
+            "serp_features": [],
+            "total_results": 0,
+            "results_count": 0,
+            "source": "quota_exceeded",
+            "error": f"Đã đạt giới hạn {_get_daily_limit()} queries/ngày (free tier). Thử lại ngày mai hoặc dùng DataForSEO.",
+        }
 
     # Google CSE max 10 per request
     first_batch = min(num_results, 10)
@@ -92,14 +152,7 @@ def search_google_cse(
         return results
 
     except httpx.HTTPStatusError as exc:
-        error_msg = f"Google Custom Search API HTTP {exc.response.status_code}"
-        try:
-            body = exc.response.json()
-            error_detail = body.get("error", {}).get("message", "")
-            if error_detail:
-                error_msg += f": {error_detail[:200]}"
-        except Exception:
-            pass
+        error_msg = _format_google_cse_error(exc)
         return {
             "keyword": keyword,
             "organic_results": [],
@@ -119,6 +172,31 @@ def search_google_cse(
             "source": "api_error",
             "error": f"Google Custom Search lỗi: {str(exc)[:200]}",
         }
+
+
+def _format_google_cse_error(exc: httpx.HTTPStatusError) -> str:
+    """Return Vietnamese, actionable Google Custom Search error message."""
+    status_code = exc.response.status_code
+    detail = ""
+    try:
+        body = exc.response.json()
+        detail = body.get("error", {}).get("message", "")
+    except Exception:
+        detail = exc.response.text[:200]
+
+    if status_code == 403 and "access to Custom Search JSON API" in detail:
+        return (
+            "Google Custom Search API chưa được bật cho project này. "
+            "Vào Google Cloud Console → APIs & Services → Library → bật Custom Search JSON API, "
+            "sau đó kiểm tra API key và Search Engine ID."
+        )
+    if status_code == 403 and ("quota" in detail.lower() or "limit" in detail.lower()):
+        return "Google Custom Search đã hết quota/ngày. Thử lại ngày mai hoặc cấu hình DataForSEO."
+    if status_code == 400 and "cx" in detail.lower():
+        return "Search Engine ID (cx) không hợp lệ. Kiểm tra GOOGLE_CUSTOM_SEARCH_ENGINE_ID trong backend/.env."
+    if status_code in (401, 403):
+        return f"Google Custom Search API bị từ chối quyền truy cập ({status_code}). Kiểm tra API key và quyền API."
+    return f"Google Custom Search API HTTP {status_code}: {detail[:200]}" if detail else f"Google Custom Search API HTTP {status_code}"
 
 
 def _fetch_cse(

@@ -124,7 +124,7 @@ async def get_ga4_overview(days: int = 30) -> Dict[str, Any]:
                 "bounce_rate": 0, "engagement_rate": 0,
                 "avg_session_duration": 0, "new_users": 0,
             }
-            result["note"] = "Property mới, chưa có dữ liệu. Cài Google Tag G-DFEE14V0T8 vào website để bắt đầu thu thập."
+            result["note"] = f"Property mới, chưa có dữ liệu. Cài Google Tag với Measurement ID {property_id} vào website để bắt đầu thu thập."
     except Exception as e:
         errors.append(f"Overview: {e}")
         failed_sections.append("overview")

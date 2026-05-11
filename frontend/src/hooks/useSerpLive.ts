@@ -94,9 +94,6 @@ export function useSerpLive() {
         throw new Error(errBody.detail ?? `HTTP ${res.status}`);
       }
       const result = await res.json();
-      if (result.error && !result.organic_results?.length) {
-        throw new Error(result.error);
-      }
       setData(result);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Unknown error");

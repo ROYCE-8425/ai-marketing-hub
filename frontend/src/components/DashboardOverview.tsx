@@ -102,6 +102,7 @@ export function DashboardOverview({ onNavigate }: { onNavigate: (tab: string) =>
   const [gscLoading, setGscLoading] = useState(false);
   const [ga4Data, setGa4Data] = useState<any>(null);
   const [ga4Loading, setGa4Loading] = useState(false);
+  const [oauthLoading, setOauthLoading] = useState(false);
 
   useEffect(() => {
     setHistory(getHistory());
@@ -149,6 +150,37 @@ export function DashboardOverview({ onNavigate }: { onNavigate: (tab: string) =>
     fetchGscData();
     fetchGa4Data();
   }, [fetchGscData, fetchGa4Data]);
+
+  // Listen for OAuth2 callback completion (postMessage from popup)
+  useEffect(() => {
+    const handler = (event: MessageEvent) => {
+      if (event.data?.type === "google-oauth-complete") {
+        // OAuth flow completed — reload GA4 data
+        fetchGa4Data();
+        fetchGscData();
+      }
+    };
+    window.addEventListener("message", handler);
+    return () => window.removeEventListener("message", handler);
+  }, [fetchGa4Data, fetchGscData]);
+
+  // 1-click Google OAuth2 setup
+  const handleConnectGoogle = useCallback(async () => {
+    setOauthLoading(true);
+    try {
+      const res = await fetch(`${API_BASE.replace('/api', '')}/auth/google/setup`);
+      const data = await res.json();
+      if (data.auth_url) {
+        window.open(data.auth_url, "_blank", "width=600,height=700,scrollbars=yes");
+      } else if (data.error) {
+        alert(data.error);
+      }
+    } catch (err) {
+      alert("Không thể kết nối đến backend. Kiểm tra server đang chạy.");
+    } finally {
+      setOauthLoading(false);
+    }
+  }, []);
 
   const handleClear = () => {
     if (confirm("Xóa toàn bộ lịch sử phân tích?")) {
@@ -210,6 +242,13 @@ export function DashboardOverview({ onNavigate }: { onNavigate: (tab: string) =>
           <div className="gsc-live-banner" style={{ borderColor: 'rgba(245,158,11,0.2)', background: 'rgba(245,158,11,0.05)' }}>
             <div className="gsc-live-dot" style={{ background: '#f59e0b' }} />
             <span style={{ color: '#fcd34d' }}>GSC: 🟡 Chưa kết nối — Cấu hình OAuth2 credentials để xem dữ liệu thật</span>
+            <button
+              className="dash-connect-btn"
+              onClick={handleConnectGoogle}
+              disabled={oauthLoading}
+            >
+              {oauthLoading ? "⏳" : "🔗"} Kết nối Google
+            </button>
           </div>
         )}
         {ga4Data && (() => {
@@ -232,6 +271,15 @@ export function DashboardOverview({ onNavigate }: { onNavigate: (tab: string) =>
                 GA4: {label}
                 {hasError && ga4Data.error && <> — {ga4Data.error}</>}
               </span>
+              {hasError && (
+                <button
+                  className="dash-connect-btn"
+                  onClick={handleConnectGoogle}
+                  disabled={oauthLoading}
+                >
+                  {oauthLoading ? "⏳" : "🔗"} Kết nối Google Analytics
+                </button>
+              )}
             </div>
           );
         })()}

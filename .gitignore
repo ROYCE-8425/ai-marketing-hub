@@ -54,3 +54,6 @@ seomachine/
 
 # SQLite databases (local data)
 *.db
+
+# Cache
+backend/.cache/

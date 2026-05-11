@@ -3,11 +3,11 @@ SERP Scraper — Multi-source Google SERP
 
 Strategy (waterfall):
 1. DataForSEO API (if configured) — real Google organic SERP + SEO metrics
-2. Google Custom Search JSON API (if configured) — Programmable Search, 100 free/day
-3. Error state with clear message when no credentials configured
+2. SerpAPI (if configured) — real Google SERP, 100 free/month
+3. Google Custom Search JSON API (if configured) — Programmable Search
+4. Error state with clear message when no credentials configured
 
 All searches are async-safe and never hang.
-Google-only architecture — no third-party search engine fallback.
 """
 
 import asyncio
@@ -48,12 +48,19 @@ def _try_dataforseo(keyword: str, location_code: int, language_code: str, limit:
     return serp
 
 
+def _try_serpapi(keyword: str, location: str, num_results: int) -> Optional[Dict[str, Any]]:
+    """
+    Attempt to use SerpAPI to get real Google SERP data.
+    Returns None if API key is missing.
+    """
+    from core.serpapi_search import search_serpapi
+    return search_serpapi(keyword, location=location, num_results=num_results)
+
+
 def _try_google_custom_search(keyword: str, location: str, num_results: int) -> Optional[Dict[str, Any]]:
     """
     Attempt to use Google Custom Search JSON API.
     Returns None if credentials are missing.
-    Returns dict with source="api_error" on failure.
-    Returns dict with source="google_custom_search" on success.
     """
     from core.google_custom_search import search_google_cse
     return search_google_cse(keyword, location=location, num_results=num_results)
@@ -65,8 +72,9 @@ class GoogleSerpScraper:
 
     Priority:
     1. DataForSEO (premium, real Google organic SERP + SEO metrics)
-    2. Google Custom Search JSON API (free 100/day, Programmable Search)
-    3. Error state (no credentials)
+    2. SerpAPI (real Google SERP, 100 free searches/month)
+    3. Google Custom Search JSON API (Programmable Search)
+    4. Error state (no credentials)
     """
 
     async def search(self, keyword: str, location: str = "vn", num_results: int = 10) -> Dict[str, Any]:
@@ -83,27 +91,38 @@ class GoogleSerpScraper:
             )
             if raw is not None:
                 return self._format_dataforseo(raw, keyword, loc)
-        except RuntimeError as exc:
-            # DataForSEO configured but API error → still try Custom Search
+        except RuntimeError:
             pass
         except Exception:
-            # DataForSEO timeout/network → still try Custom Search
             pass
 
-        # ── Strategy 2: Google Custom Search JSON API (free 100/day) ──
+        # ── Strategy 2: SerpAPI (real Google SERP, free 100/month) ──
+        try:
+            serpapi_result = await asyncio.wait_for(
+                asyncio.to_thread(_try_serpapi, keyword, location.lower(), num),
+                timeout=20.0,
+            )
+            if serpapi_result is not None:
+                if serpapi_result.get("source") != "api_error":
+                    serpapi_result["location"] = loc.get("label", "")
+                    return serpapi_result
+        except Exception:
+            pass
+
+        # ── Strategy 3: Google Custom Search JSON API ──
         try:
             cse_result = await asyncio.wait_for(
                 asyncio.to_thread(_try_google_custom_search, keyword, location.lower(), num),
                 timeout=15.0,
             )
             if cse_result is not None:
-                # Add location label
-                cse_result["location"] = loc.get("label", "")
-                return cse_result
+                if cse_result.get("source") != "api_error":
+                    cse_result["location"] = loc.get("label", "")
+                    return cse_result
         except Exception:
             pass
 
-        # ── Strategy 3: No credentials configured ──
+        # ── Strategy 4: No credentials configured ──
         return {
             "keyword": keyword,
             "location": loc.get("label", ""),
@@ -113,8 +132,8 @@ class GoogleSerpScraper:
             "results_count": 0,
             "source": "missing_credentials",
             "error": "Cần cấu hình ít nhất một SERP provider:\n"
+                     "• SerpAPI: set SERPAPI_KEY (miễn phí 100 searches/tháng tại https://serpapi.com)\n"
                      "• DataForSEO: set DATAFORSEO_LOGIN + DATAFORSEO_PASSWORD\n"
-                     "• Google Custom Search: set GOOGLE_CUSTOM_SEARCH_API_KEY + GOOGLE_CUSTOM_SEARCH_ENGINE_ID\n"
                      "Xem LOCAL-DEV.md để biết chi tiết.",
         }
 
