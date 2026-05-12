@@ -20,7 +20,7 @@
 ├─────────────────────────────────────────────────────────┤
 │                    BACKEND (FastAPI v3.1.0)              │
 │  10 API Routers → 37 Core Engines → 4 SQLite DBs       │
-│  AI: Groq LLaMA 3.3 70B | Data: GSC, GA4, DataForSEO   │
+│  AI: Groq LLaMA 3.3 70B | Data: GSC, GA4, DuckDuckGo  │
 └─────────────────────────────────────────────────────────┘
 ```
 
@@ -62,7 +62,7 @@
 |------------|----------|
 | **Mô tả** | Lấy kết quả tìm kiếm thực từ Google — phân tích đối thủ trên SERP |
 | **API** | `POST /api/serp/live`, `POST /api/serp/deep-analyze` |
-| **Core Engine** | `google_serp_scraper.py`, DataForSEO API (Google SERP) |
+| **Core Engine** | `google_serp_scraper.py` (7KB), DuckDuckGo Search API |
 | **Input** | Keyword, location (vn/us/uk...), số kết quả (5-20) |
 | **Output** | Top ranking URLs, titles, snippets, deep content analysis |
 | **Đặc biệt** | Hỗ trợ 7+ quốc gia, so sánh word count với bạn |
@@ -229,7 +229,7 @@
 | **Google Search Console** | Keywords, clicks, impressions, positions | `GOOGLE_SEARCH_CONSOLE_*` env vars |
 | **Google Analytics 4** | Sessions, users, pageviews, bounce rate | `GA4_PROPERTY_ID` env var |
 | **Groq LLaMA 3.3 70B** | AI content generation, spin, evaluate | `GROQ_API_KEY` env var |
-| **DataForSEO** | Google SERP data (cần API key) | `DATAFORSEO_LOGIN` + `DATAFORSEO_PASSWORD` |
+| **DuckDuckGo Search** | Live SERP results (miễn phí, không cần API key) | Không cần cấu hình |
 | **WordPress REST API** | Xuất bản bài viết trực tiếp | URL + username + app password |
 
 ---
@@ -254,7 +254,7 @@
 | **API endpoints** | 45+ endpoints |
 | **Core engines total size** | ~550KB Python code |
 | **Frontend total size** | ~320KB TSX/CSS code |
-| **Dependencies** | FastAPI, httpx, BeautifulSoup, scikit-learn, textstat, markitdown |
+| **Dependencies** | FastAPI, httpx, BeautifulSoup, scikit-learn, textstat, duckduckgo-search, markitdown |
 | **AI Provider** | Groq (LLaMA 3.3 70B Versatile) |
 | **Databases** | 4 SQLite databases |
 

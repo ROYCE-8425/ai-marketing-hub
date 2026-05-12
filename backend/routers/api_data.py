@@ -46,8 +46,8 @@ def _dfs():
 # ─────────────────────────────────────────────────────────────────────────────
 
 class GscSyncRequest(BaseModel):
-    url: str = Field(..., description="Full URL of the page to analyze")
-    keyword: str = Field(..., description="Target keyword to track")
+    url: str = Field("https://binhphuocmitsubishi.com", description="Full URL of the page to analyze")
+    keyword: str = Field("mitsubishi bình phước", description="Target keyword to track")
     gsc_site_url: Optional[str] = None
     gsc_credentials_path: Optional[str] = None
     ga4_property_id: Optional[str] = None
@@ -235,10 +235,11 @@ class Ga4OverviewRequest(BaseModel):
     days: int = Field(30, description="Number of days to look back")
 
 @router.post("/ga4-overview")
-async def ga4_overview(body: Ga4OverviewRequest):
+async def ga4_overview(body: Ga4OverviewRequest = None):
     """Fetch GA4 site overview: sessions, users, traffic sources, top pages, daily timeline."""
     from core.ga4_fetcher import get_ga4_overview
-    result = await get_ga4_overview(body.days)
+    days = body.days if body else 30
+    result = await get_ga4_overview(days)
     return result
 
 

@@ -55,48 +55,25 @@ VITE_API_BASE_URL=http://localhost:8000
 
 These are **lazy-loaded**: the server starts without them, but endpoints return error states unless credentials are set.
 
-#### Google Search Console + GA4 (1-click OAuth2 flow)
-
-**Setup 3 bước:**
-
-1. **Cấu hình Client ID/Secret** (một lần duy nhất):
-   ```env
-   # backend/.env
-   GOOGLE_SEARCH_CONSOLE_CLIENT_ID=your_client_id.apps.googleusercontent.com
-   GOOGLE_SEARCH_CONSOLE_CLIENT_SECRET=GOCSPX-...
-   GSC_SITE_URL=https://yoursite.com/
-   GA4_PROPERTY_ID=123456789
-   ```
-
-2. **1-click kết nối** — Vào Dashboard → bấm "🔗 Kết nối Google Analytics"
-   - Hoặc gọi `GET http://localhost:8000/auth/google/setup` → mở `auth_url`
-   - App sẽ xin cả 2 scope: GSC (`webmasters.readonly`) + GA4 (`analytics.readonly`)
-
-3. **Xong** — Refresh token tự động lưu vào `.env`. Không cần thao tác thêm.
+#### Google Search Console + GA4
 
 ```env
-# Tự động tạo sau OAuth flow (KHÔNG cần điền tay):
-GOOGLE_SEARCH_CONSOLE_REFRESH_TOKEN=1//...
+GOOGLE_SEARCH_CONSOLE_CLIENT_ID=...
+GOOGLE_SEARCH_CONSOLE_CLIENT_SECRET=...
+GOOGLE_SEARCH_CONSOLE_REFRESH_TOKEN=...
+GSC_SITE_URL=https://search.google.com/search-console/...
+
+GA4_PROPERTY_ID=123456789
+GA4_CREDENTIALS_PATH=/path/to/service-account.json
 ```
 
-> **Lưu ý:** GA4 `refresh_token` dùng chung với GSC (`GOOGLE_SEARCH_CONSOLE_REFRESH_TOKEN`).
-> Nếu cần token riêng cho GA4, set `GA4_REFRESH_TOKEN=...` — hệ thống sẽ ưu tiên đọc biến này.
-
-#### DataForSEO (SERP data — ưu tiên #1)
+#### DataForSEO (SERP data)
 
 ```env
 DATAFORSEO_LOGIN=your_login
 DATAFORSEO_PASSWORD=your_password
 ```
 
-#### Google Custom Search JSON API (SERP data — fallback #2, free 100/day)
-
-```env
-GOOGLE_CUSTOM_SEARCH_API_KEY=AIza...
-GOOGLE_CUSTOM_SEARCH_ENGINE_ID=017...
-```
-
-> **Lưu ý:** Google Custom Search trả kết quả từ Programmable Search Engine, không có SEO metrics (volume, CPC). DataForSEO trả Google organic SERP thật + metrics.
 #### WordPress Publishing
 
 ```env
@@ -113,7 +90,7 @@ WORDPRESS_APP_PASSWORD=xxxx_xxxx_xxxx_xxxx
 | CRO & Trust Analysis | Live (from scraped content) | Live |
 | Competitor Radar | Live (scrapes competitor URLs) | Live |
 | Content Planner | Live (rule-based outline) | Live |
-| SERP Live (Google) | **Error state** + cần cấu hình | **Live data** (DataForSEO hoặc Custom Search API) |
+| SERP Live (Google) | **Error state** + cần cấu hình | **Live data** (DataForSEO) |
 | Google Search Console | **Error state** + red banner | **Live data** (OAuth2) |
 | Google Analytics 4 | **Error state** + red banner | **Live data** (needs OAuth scope) |
 | Campaign Tracker Auto-Fill | **Error state** + warning | **Live data** |

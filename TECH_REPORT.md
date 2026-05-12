@@ -57,7 +57,7 @@
 | Nguồn dữ liệu | Phương pháp | Thời gian |
 |----------------|-------------|-----------|
 | HTML (Title, Meta, Schema...) | httpx + BeautifulSoup | ~2s |
-| SERP Top 10 | DataForSEO (Google SERP) | ~3s |
+| SERP Top 10 | DuckDuckGo search | ~3s |
 | Từ khóa phân cụm | TF-IDF + KMeans | <1s |
 | GSC (ranking, clicks, CTR) | Google API + OAuth2 | ~2s |
 | GA4 (sessions, traffic) | Google API + OAuth2 | ~3s |
@@ -155,7 +155,7 @@ cd frontend && npm install && npm run dev
 | Backend | 27 modules (~470KB) |
 | Frontend | 15 files (~166KB) |
 | API endpoints | 17 |
-| External APIs | 5 (GSC, GA4, Groq, Gemini, DataForSEO) |
+| External APIs | 5 (GSC, GA4, Groq, Gemini, DuckDuckGo) |
 | Phases | 9/9 ✅ |
 
 ---

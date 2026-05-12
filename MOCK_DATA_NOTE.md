@@ -33,7 +33,7 @@ Tất cả modules sau trả dữ liệu thật (scrape, analyze, AI, database):
 | File Converter | `file_converter.py` | MarkItDown |
 | WordPress Publisher | `wordpress_publisher.py` | WP REST API |
 | Google Search Console | `google_search_console.py` | httpx + OAuth2 |
-| SERP Live | `google_serp_scraper.py` | DataForSEO (ưu tiên) hoặc Google Custom Search API |
+| SERP Live (Google/DataForSEO) | `google_serp_scraper.py` | DataForSEO API (Google SERP) |
 
 ---
 
@@ -45,8 +45,7 @@ Khi thiếu credentials, trả **error state** (không trả dữ liệu giả):
 |-----------|--------|-----------|
 | **GA4** | `GA4_PROPERTY_ID` + OAuth2 scope `analytics.readonly` | `error: "GA4_PROPERTY_ID chưa được cấu hình..."`, `data_source: "error"` |
 | **DataForSEO** | `DATAFORSEO_LOGIN` + `DATAFORSEO_PASSWORD` | Thiếu key: `source: "missing_credentials"`. Có key nhưng lỗi: `source: "api_error"` |
-| **Google Custom Search** | `GOOGLE_CUSTOM_SEARCH_API_KEY` + `GOOGLE_CUSTOM_SEARCH_ENGINE_ID` | Thiếu key: fallthrough sang error. Có key nhưng lỗi: `source: "api_error"` |
-| **SERP Live** | Cần ít nhất 1 trong DataForSEO hoặc Custom Search | `source: "missing_credentials"`, hiển thị banner cần cấu hình |
+| **SERP Live** | `DATAFORSEO_LOGIN` + `DATAFORSEO_PASSWORD` | `source: "missing_credentials"`, hiển thị banner cần cấu hình |
 | **GSC (OAuth flow)** | `GOOGLE_SEARCH_CONSOLE_CLIENT_ID/SECRET/REFRESH_TOKEN` | `source: "error"` |
 
 ### Hành vi khi thiếu credentials

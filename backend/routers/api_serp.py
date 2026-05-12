@@ -5,11 +5,10 @@ Provides live SERP data endpoints:
 - POST /api/serp/live          — Get real Google SERP results for a keyword
 - POST /api/serp/deep-analyze  — Deep-analyze content of top-ranking pages
 
-SERP Strategy (waterfall, cached 1h):
-1. DataForSEO API (premium, real Google organic SERP + SEO metrics)
-2. SerpAPI (real Google SERP, 100 free/month)
-3. Google Custom Search JSON API (free 100/day, Programmable Search)
-4. Error state with clear message when no credentials configured
+SERP Strategy (Google-first):
+1. DataForSEO API (premium, real Google SERP) — if credentials configured
+2. GoogleSerpScraper fallback — also uses DataForSEO internally
+3. Explicit error state when no credentials — NO silent fallback
 """
 
 from __future__ import annotations
@@ -22,8 +21,11 @@ from typing import Any, Dict, List, Optional
 
 import httpx
 from bs4 import BeautifulSoup
+from dotenv import load_dotenv
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
+
+load_dotenv(os.path.join(os.path.dirname(os.path.dirname(__file__)), ".env"))
 
 
 # ─── Schemas ────────────────────────────────────────────────────────────────────
@@ -165,11 +167,9 @@ async def serp_live(body: SerpLiveRequest):
     """
     Get real Google SERP results for a keyword.
 
-    Strategy (waterfall, cached 1h):
+    Strategy (Google-first):
     1. DataForSEO API (premium, real Google SERP) — if credentials configured
-    2. SerpAPI (real Google SERP, 100 free/month) — if SERPAPI_KEY configured
-    3. Google Custom Search JSON API — legacy fallback
-    4. Explicit error state when no credentials
+    2. Explicit error state when no credentials — NO silent fallback
     """
     # Location mapping for DataForSEO
     dfs_location_map = {

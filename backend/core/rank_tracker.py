@@ -225,6 +225,75 @@ def export_keywords_csv(site_url: str) -> str:
     return output.getvalue()
 
 
+def export_keywords_excel(site_url: str) -> bytes:
+    """Export tracked keywords with latest rankings as styled XLSX bytes."""
+    try:
+        from openpyxl import Workbook
+        from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+    except ImportError:
+        raise RuntimeError("openpyxl not installed. Run: pip install openpyxl>=3.1.0")
+
+    keywords = get_tracked_keywords(site_url)
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Rank Tracker"
+
+    headers = ["Keyword", "Tag", "Vị trí", "Thay đổi", "Clicks", "Hiển thị", "CTR (%)", "Nguồn", "Cập nhật"]
+    header_font = Font(bold=True, color="FFFFFF", size=11)
+    header_fill = PatternFill("solid", fgColor="8B5CF6")
+    thin = Side(style="thin", color="E0E0E0")
+    border = Border(left=thin, right=thin, top=thin, bottom=thin)
+    center = Alignment(horizontal="center", vertical="center")
+
+    for col, h in enumerate(headers, start=1):
+        c = ws.cell(row=1, column=col, value=h)
+        c.font = header_font
+        c.fill = header_fill
+        c.alignment = center
+        c.border = border
+
+    for row_idx, kw in enumerate(keywords, start=2):
+        pos = kw.get("position")
+        change = kw.get("change")
+        values = [
+            kw.get("keyword", ""),
+            kw.get("tag", ""),
+            pos if pos else "—",
+            change if change is not None else "—",
+            kw.get("clicks", 0),
+            kw.get("impressions", 0),
+            kw.get("ctr", 0),
+            kw.get("source", ""),
+            kw.get("last_checked") or "—",
+        ]
+        for col, v in enumerate(values, start=1):
+            c = ws.cell(row=row_idx, column=col, value=v)
+            c.border = border
+            c.alignment = center
+            # Color position: top 3 green, top 10 blue, 11-20 amber, else red
+            if col == 3 and isinstance(v, int):
+                if v <= 3: c.font = Font(color="16A34A", bold=True)
+                elif v <= 10: c.font = Font(color="2563EB", bold=True)
+                elif v <= 20: c.font = Font(color="D97706", bold=True)
+                else: c.font = Font(color="DC2626", bold=True)
+            # Color change: positive green, negative red
+            if col == 4 and isinstance(v, int):
+                if v > 0: c.font = Font(color="16A34A")
+                elif v < 0: c.font = Font(color="DC2626")
+
+    # Auto-size columns
+    widths = [32, 16, 10, 12, 10, 12, 10, 12, 20]
+    for i, w in enumerate(widths, start=1):
+        ws.column_dimensions[chr(64 + i)].width = w
+
+    ws.freeze_panes = "A2"
+
+    buf = io.BytesIO()
+    wb.save(buf)
+    buf.seek(0)
+    return buf.getvalue()
+
+
 def check_ranking_alerts(site_url: str, threshold: int = 5) -> List[Dict[str, Any]]:
     """Check for keywords that dropped more than threshold positions."""
     keywords = get_tracked_keywords(site_url)
@@ -372,62 +441,3 @@ async def sync_rankings_from_gsc(site_url: str) -> Dict[str, Any]:
                 continue
 
         return {"status": "ok", "synced": synced_count, "total_keywords": len(keywords)}
-
-
-async def sync_rankings_from_serp(site_url: str) -> Dict[str, Any]:
-    """
-    Sync rankings using SerpAPI instead of GSC.
-    Searches each tracked keyword and finds the site's position in results.
-    Falls back to this when GSC OAuth is not configured.
-    """
-    from urllib.parse import urlparse
-    try:
-        from core.google_serp_scraper import GoogleSerpScraper
-    except ImportError:
-        return {"error": "SerpAPI scraper not available", "synced": 0}
-
-    conn = _get_db()
-    tracked = conn.execute(
-        "SELECT keyword FROM tracked_keywords WHERE site_url = ?",
-        (site_url,),
-    ).fetchall()
-    conn.close()
-
-    if not tracked:
-        return {"error": "Chưa có keyword nào được theo dõi", "synced": 0}
-
-    keywords = [r["keyword"] for r in tracked]
-    synced_count = 0
-    scraper = GoogleSerpScraper()
-
-    # Parse the site domain for matching
-    try:
-        site_domain = urlparse(site_url).netloc.replace("www.", "").rstrip("/")
-    except Exception:
-        site_domain = site_url.replace("https://", "").replace("http://", "").split("/")[0]
-
-    for kw in keywords:
-        try:
-            result = await scraper.search(keyword=kw, location="vn", num_results=20)
-            organic = result.get("organic_results", [])
-            found = False
-            for item in organic:
-                item_domain = (item.get("domain") or "").replace("www.", "")
-                if site_domain in item_domain or item_domain in site_domain:
-                    save_ranking(
-                        keyword=kw,
-                        site_url=site_url,
-                        position=item.get("position", 0),
-                        source="serpapi",
-                    )
-                    synced_count += 1
-                    found = True
-                    break
-            if not found:
-                save_ranking(kw, site_url, 0, source="serp_not_found")
-                synced_count += 1
-        except Exception:
-            continue
-
-    return {"status": "ok", "synced": synced_count, "total_keywords": len(keywords), "source": "serpapi"}
-

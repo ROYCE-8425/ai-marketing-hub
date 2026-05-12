@@ -288,23 +288,19 @@ export function SerpResultsPanel({ data }: { data: SerpLiveResponse }) {
         <span className={`serp-source-badge ${
           data.source === "dataforseo_live" ? "src-dataforseo" :
           data.source === "google_live" ? "src-dataforseo" :
-          data.source === "serpapi_google" ? "src-serpapi" :
-          data.source === "google_custom_search" ? "src-custom-search" :
           data.source === "missing_credentials" ? "src-error" :
           data.source === "api_error" ? "src-error" :
           data.source === "error" ? "src-error" : "src-dataforseo"
         }`}>
           {data.source === "dataforseo_live" ? "✅ Google SERP (DataForSEO)" :
-           data.source === "google_live" ? "✅ Google SERP (DataForSEO)" :
-           data.source === "serpapi_google" ? "✅ Google SERP (SerpAPI)" :
-           data.source === "google_custom_search" ? "🔎 Google Custom Search" :
+           data.source === "google_live" ? "✅ Google SERP" :
            data.source === "missing_credentials" ? "🟡 Cần cấu hình API" :
            data.source === "api_error" ? "🔴 Lỗi API" :
            data.source === "error" ? "🔴 Lỗi kết nối" : data.source}
         </span>
       </div>
 
-      {/* Provider note or error */}
+      {/* Warning note (mock data / network error) */}
       {(data.note || data.error) && (
         <div style={{
           padding: "0.6rem 1rem",

@@ -21,8 +21,7 @@ import { ContentCalendar } from "./components/ContentCalendarPanel";
 import { SiteManager } from "./components/SiteManager";
 import { AbTesting } from "./components/AbTesting";
 import FileConverter from "./components/FileConverter";
-import { SatelliteManager } from "./components/SatelliteManager";
-import UsageHistory from "./components/UsageHistory";
+import GoogleSetup from "./components/GoogleSetup";
 import { addToHistory } from "./lib/history";
 import type { AuditResponse } from "./types/seo";
 import type { CompetitorGapResponse, PlanContentResponse } from "./types/content";
@@ -74,7 +73,7 @@ class ErrorBoundary extends React.Component<
 
 // ─── Tab types ─────────────────────────────────────────────────────────────────
 
-type TabId = "dashboard" | "seo" | "cro" | "competitor" | "planner" | "tracker" | "serp" | "aikeys" | "ranktracker" | "spineditor" | "geo" | "techseo" | "report" | "backlinks" | "calendar" | "sites" | "abtest" | "fileconvert" | "satellite" | "usagehistory";
+type TabId = "dashboard" | "seo" | "cro" | "competitor" | "planner" | "tracker" | "serp" | "aikeys" | "ranktracker" | "spineditor" | "geo" | "techseo" | "report" | "backlinks" | "calendar" | "sites" | "abtest" | "fileconvert" | "googlesetup";
 
 interface NavItem { id: TabId; label: string; icon: string }
 interface NavGroup { group: string; icon: string; items: NavItem[] }
@@ -99,7 +98,6 @@ const NAV_GROUPS: NavGroup[] = [
     { id: "planner", label: "Viết nội dung AI", icon: "📝" },
     { id: "spineditor", label: "Spin Editor", icon: "🔄" },
     { id: "geo", label: "Tối ưu GEO", icon: "🧠" },
-    { id: "satellite", label: "Satellite Sites", icon: "🛰️" },
     { id: "calendar", label: "Lịch nội dung", icon: "📅" },
   ]},
   { group: "Công cụ", icon: "⚡", items: [
@@ -110,7 +108,7 @@ const NAV_GROUPS: NavGroup[] = [
   ]},
   { group: "Quản lý", icon: "⚙️", items: [
     { id: "sites", label: "Multi-site", icon: "🏢" },
-    { id: "usagehistory", label: "Lịch sử dụng", icon: "📊" },
+    { id: "googlesetup", label: "Cấu hình Google", icon: "🔐" },
   ]},
 ];
 
@@ -423,13 +421,6 @@ export default function App() {
   const [aiKeysLoading, setAiKeysLoading] = useState(false);
   const [aiKeysError, setAiKeysError] = useState<string | null>(null);
 
-  // SpinEditor-style keyword suggest state
-  const [aiKeysSubTab, setAiKeysSubTab] = useState<"gsc" | "suggest">("suggest");
-  const [suggestKeyword, setSuggestKeyword] = useState("");
-  const [suggestData, setSuggestData] = useState<any>(null);
-  const [suggestLoading, setSuggestLoading] = useState(false);
-  const [suggestError, setSuggestError] = useState<string | null>(null);
-
   const handleAiKeysAnalyze = async (e: React.FormEvent) => {
     e.preventDefault();
     setAiKeysLoading(true);
@@ -450,103 +441,6 @@ export default function App() {
       setAiKeysError(err instanceof Error ? err.message : "Error");
     } finally {
       setAiKeysLoading(false);
-    }
-  };
-
-  const handleSuggestKeyword = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!suggestKeyword.trim()) return;
-    setSuggestLoading(true);
-    setSuggestError(null);
-    setSuggestData(null);
-    try {
-      const res = await fetch(`${API_BASE}/keyword-suggest`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ keyword: suggestKeyword.trim(), check_metrics: true, max_keywords: 30 }),
-      });
-      if (!res.ok) {
-        const body = await res.json().catch(() => ({}));
-        throw new Error(body.detail ?? `HTTP ${res.status}`);
-      }
-      setSuggestData(await res.json());
-    } catch (err) {
-      setSuggestError(err instanceof Error ? err.message : "Error");
-    } finally {
-      setSuggestLoading(false);
-    }
-  };
-
-  // SpinEditor Import: paste data from SpinEditor → parse into table
-  const [showSpinImport, setShowSpinImport] = useState(false);
-  const [spinImportText, setSpinImportText] = useState("");
-
-  const handleSpinImport = () => {
-    if (!spinImportText.trim()) return;
-    const lines = spinImportText.trim().split("\n").filter(l => l.trim());
-    const keywords: any[] = [];
-    for (const line of lines) {
-      // Tab-separated or comma-separated
-      const parts = line.split(/\t|,/).map(p => p.trim());
-      if (parts.length >= 1 && parts[0]) {
-        const kw = parts[0];
-        // Skip header rows
-        if (kw.toLowerCase().includes("từ khóa") || kw.toLowerCase().includes("keyword")) continue;
-        const vol = parts[1] ? parseInt(parts[1].replace(/[^0-9]/g, "")) || null : null;
-        const allintitle = parts[2] ? parseInt(parts[2].replace(/[^0-9]/g, "")) || null : null;
-        const searchResults = parts[3] ? parseInt(parts[3].replace(/[^0-9]/g, "")) || null : null;
-        const kei = parts[4] ? parseFloat(parts[4].replace(/[^0-9.]/g, "")) || null : null;
-        const comp = parts[5]?.trim() || "--";
-        keywords.push({
-          keyword: kw,
-          search_volume: vol,
-          allintitle: allintitle,
-          total_results: searchResults,
-          kei: kei,
-          competition: comp || "--",
-        });
-      }
-    }
-    if (keywords.length > 0) {
-      setSuggestData({
-        seed_keyword: keywords[0]?.keyword?.split(" ")[0] || "imported",
-        total_suggestions: keywords.length,
-        keywords,
-        checked_metrics: true,
-        source_note: "📊 Dữ liệu THẬT từ SpinEditor — Import trực tiếp",
-      });
-      setShowSpinImport(false);
-      setSpinImportText("");
-    }
-  };
-
-  // SpinEditor Auto-Scrape handler
-  const [spinScrapeLoading, setSpinScrapeLoading] = useState(false);
-  const handleScrapeSpinEditor = async () => {
-    if (!suggestKeyword.trim()) return;
-    setSpinScrapeLoading(true);
-    setSuggestError(null);
-    setSuggestData(null);
-    try {
-      const res = await fetch(`${API_BASE}/spineditor/scrape`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ keyword: suggestKeyword.trim() }),
-      });
-      if (!res.ok) {
-        const body = await res.json().catch(() => ({}));
-        throw new Error(body.detail ?? `HTTP ${res.status}`);
-      }
-      const data = await res.json();
-      if (data.error) {
-        setSuggestError(data.error);
-      } else {
-        setSuggestData(data);
-      }
-    } catch (err) {
-      setSuggestError(err instanceof Error ? err.message : "Error");
-    } finally {
-      setSpinScrapeLoading(false);
     }
   };
 
@@ -1183,7 +1077,7 @@ export default function App() {
                   <label htmlFor="serp-loc" className="input-label">Khu vực ưu tiên</label>
                   <select id="serp-loc" className="text-input" value={serpLocation}
                     onChange={(e) => setSerpLocation(e.target.value)}
-                    title="Google Search ưu tiên kết quả theo khu vực. Từ khóa tiếng Việt luôn trả về kết quả VN.">
+                    title="DuckDuckGo ưu tiên kết quả theo khu vực. Từ khóa tiếng Việt luôn trả về kết quả VN.">
                     <option value="vn">🇻🇳 Việt Nam</option>
                     <option value="us">🇺🇸 Hoa Kỳ</option>
                     <option value="uk">🇬🇧 Anh</option>
@@ -1238,110 +1132,6 @@ export default function App() {
         {/* AI Keywords Tab */}
         {activeTab === "aikeys" && (
           <>
-            {/* Sub-tabs: SpinEditor-style Suggest vs GSC Analysis */}
-            <div style={{display:"flex",gap:4,marginBottom:12,background:"rgba(255,255,255,0.03)",borderRadius:12,padding:4,border:"1px solid rgba(255,255,255,0.06)"}}>
-              <button onClick={() => setAiKeysSubTab("suggest")} style={{flex:1,padding:"10px 16px",background:aiKeysSubTab==="suggest"?"rgba(139,92,246,0.12)":"transparent",border:"none",color:aiKeysSubTab==="suggest"?"#a78bfa":"rgba(255,255,255,0.5)",fontSize:13,fontWeight:500,borderRadius:8,cursor:"pointer"}}>⭐ Gợi ý từ khóa (SpinEditor)</button>
-              <button onClick={() => setAiKeysSubTab("gsc")} style={{flex:1,padding:"10px 16px",background:aiKeysSubTab==="gsc"?"rgba(139,92,246,0.12)":"transparent",border:"none",color:aiKeysSubTab==="gsc"?"#a78bfa":"rgba(255,255,255,0.5)",fontSize:13,fontWeight:500,borderRadius:8,cursor:"pointer"}}>📊 Phân tích GSC + AI</button>
-            </div>
-
-            {/* SpinEditor-style Keyword Suggest */}
-            {aiKeysSubTab === "suggest" && (
-              <>
-                <form className="audit-form" onSubmit={handleSuggestKeyword} noValidate>
-                  <div className="hint-box">
-                    ⭐ <strong>Gợi ý từ khóa — Phân tích từ SpinEditor:</strong> Nhập seed keyword → lấy gợi ý từ Google Suggest + kiểm tra Allintitle, KQ tìm kiếm, KEI, Độ cạnh tranh.
-                  </div>
-                  <div className="input-row">
-                    <div className="input-group" style={{flex:2}}>
-                      <label className="input-label">Nhập từ khóa cần gợi ý</label>
-                      <div className="input-wrap">
-                        <svg className="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" /></svg>
-                        <input type="text" className="text-input" placeholder="ví dụ: xe mitsubishi" value={suggestKeyword} onChange={e => setSuggestKeyword(e.target.value)} />
-                      </div>
-                    </div>
-                    <LoadingBtn loading={suggestLoading}>
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" /></svg>
-                      Gợi ý từ khóa
-                    </LoadingBtn>
-                    <button type="button" onClick={handleScrapeSpinEditor} disabled={spinScrapeLoading || !suggestKeyword.trim()} style={{display:"flex",alignItems:"center",gap:6,padding:"10px 18px",background:spinScrapeLoading?"rgba(245,158,11,0.05)":"rgba(245,158,11,0.1)",border:"1px solid rgba(245,158,11,0.25)",color:"#fbbf24",fontSize:13,fontWeight:600,borderRadius:10,cursor:suggestKeyword.trim()?"pointer":"not-allowed",opacity:suggestKeyword.trim()?1:0.5,whiteSpace:"nowrap"}}>
-                      {spinScrapeLoading ? "⏳ Đang cào..." : "🔄 Cào từ SpinEditor"}
-                    </button>
-                  </div>
-                  {suggestError && <p className="error-msg" role="alert">{suggestError}</p>}
-                </form>
-
-                {/* SpinEditor Import Box */}
-                <div style={{marginBottom:12}}>
-                  <button onClick={() => setShowSpinImport(!showSpinImport)} style={{background:"rgba(245,158,11,0.08)",border:"1px solid rgba(245,158,11,0.2)",color:"#fbbf24",padding:"8px 16px",borderRadius:8,cursor:"pointer",fontSize:12,fontWeight:600}}>
-                    {showSpinImport ? "✕ Đóng" : "📥 Import từ SpinEditor (dữ liệu thật)"}
-                  </button>
-                  {showSpinImport && (
-                    <div style={{marginTop:8,padding:16,background:"rgba(245,158,11,0.04)",borderRadius:12,border:"1px solid rgba(245,158,11,0.12)"}}>
-                      <p style={{fontSize:12,color:"rgba(255,255,255,0.6)",marginBottom:8}}>
-                        <strong>Hướng dẫn:</strong> Mở SpinEditor → Gợi ý từ khóa → Tìm keyword → Bấm <strong>"Copy All"</strong> → Paste vào đây.
-                        <br/>Hoặc chọn các dòng → Copy (Ctrl+C) → Paste vào. Định dạng: <code>từ khóa [tab] lượng tìm kiếm [tab] allintitle [tab] KQ tìm kiếm [tab] KEI [tab] cạnh tranh</code>
-                      </p>
-                      <textarea value={spinImportText} onChange={e => setSpinImportText(e.target.value)} placeholder={"xe khách\t33100\t--\t--\t--\t--\nxe khách phương trang\t27100\t--\t--\t--\t--"} style={{width:"100%",minHeight:120,background:"rgba(0,0,0,0.3)",border:"1px solid rgba(255,255,255,0.1)",borderRadius:8,padding:10,color:"#fff",fontSize:12,fontFamily:"monospace",resize:"vertical"}} />
-                      <div style={{display:"flex",gap:8,marginTop:8}}>
-                        <button onClick={handleSpinImport} style={{background:"rgba(245,158,11,0.15)",border:"1px solid rgba(245,158,11,0.3)",color:"#fbbf24",padding:"8px 20px",borderRadius:8,cursor:"pointer",fontSize:12,fontWeight:600}}>
-                          ✅ Import {spinImportText.split("\n").filter(l => l.trim()).length} dòng
-                        </button>
-                        <button onClick={() => { setSpinImportText(""); setShowSpinImport(false); }} style={{background:"transparent",border:"1px solid rgba(255,255,255,0.1)",color:"rgba(255,255,255,0.5)",padding:"8px 20px",borderRadius:8,cursor:"pointer",fontSize:12}}>Hủy</button>
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                {suggestData && (
-                  <div className="result-wrapper">
-                    <button className="reset-btn" onClick={() => setSuggestData(null)}>
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" /><path d="M3 3v5h5" /></svg>
-                      Tìm mới
-                    </button>
-                    <ResultPanel>
-                      <div className="result-header">
-                        <div className="result-meta">
-                          <h2 className="result-title">⭐ Gợi ý từ khóa: "{suggestData.seed_keyword}"</h2>
-                          <p className="result-keyword">📊 {suggestData.source_note} | Tìm thấy: <strong>{suggestData.total_suggestions} từ khóa</strong></p>
-                        </div>
-                      </div>
-                      <div style={{overflowX:"auto",marginTop:12}}>
-                        <table className="serp-table">
-                          <thead>
-                            <tr>
-                              <th style={{width:30}}></th>
-                              <th>Từ khóa</th>
-                              <th>Lượng tìm kiếm ↓</th>
-                              <th>Allintitle ↓</th>
-                              <th>KQ tìm kiếm ↓</th>
-                              <th>KEI</th>
-                              <th>Độ cạnh tranh</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {suggestData.keywords?.map((kw: any, i: number) => (
-                              <tr key={i}>
-                                <td style={{color:"rgba(255,255,255,0.3)"}}>{i+1}</td>
-                                <td style={{fontWeight:600,color:"var(--text-h)"}}>{kw.keyword}</td>
-                                <td>{kw.search_volume != null ? kw.search_volume.toLocaleString() : "--"}</td>
-                                <td>{kw.allintitle != null ? kw.allintitle.toLocaleString() : "--"}</td>
-                                <td>{kw.total_results != null ? kw.total_results.toLocaleString() : "--"}</td>
-                                <td style={{color: kw.kei && kw.kei > 100000 ? "var(--green)" : kw.kei && kw.kei > 10000 ? "var(--amber)" : "var(--text)"}}>{kw.kei != null ? kw.kei.toLocaleString() : "--"}</td>
-                                <td><span style={{padding:"2px 8px",borderRadius:6,fontSize:11,fontWeight:600,background: kw.competition==="Low"?"rgba(34,197,94,0.12)":kw.competition==="Medium"?"rgba(245,158,11,0.12)":kw.competition==="High"?"rgba(239,68,68,0.12)":"rgba(255,255,255,0.05)",color: kw.competition==="Low"?"#4ade80":kw.competition==="Medium"?"#fbbf24":kw.competition==="High"?"#f87171":"rgba(255,255,255,0.4)"}}>{kw.competition}</span></td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
-                    </ResultPanel>
-                  </div>
-                )}
-              </>
-            )}
-
-            {/* Original GSC + AI Analysis */}
-            {aiKeysSubTab === "gsc" && (
-            <>
             <form className="audit-form" onSubmit={handleAiKeysAnalyze} noValidate>
               <div className="hint-box">
                 🤖 <strong>Phân tích từ khóa AI:</strong> Lấy toàn bộ từ khóa từ Google Search Console, phân tích hiệu suất và đề xuất chiến lược từ khóa mới.
@@ -1498,8 +1288,6 @@ export default function App() {
                 )}
               </div>
             )}
-            </>
-            )}
           </>
         )}
 
@@ -1533,11 +1321,8 @@ export default function App() {
         {/* File Converter Tab */}
         {activeTab === "fileconvert" && <FileConverter />}
 
-        {/* Satellite Sites Tab */}
-        {activeTab === "satellite" && <SatelliteManager />}
-
-        {/* Usage History Tab */}
-        {activeTab === "usagehistory" && <UsageHistory />}
+        {/* Google Setup Tab */}
+        {activeTab === "googlesetup" && <GoogleSetup />}
 
       </main>
       </div>

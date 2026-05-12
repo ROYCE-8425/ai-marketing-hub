@@ -1,51 +1,77 @@
 """
-SERP Scraper — Multi-source Google SERP
+<<<<<<< HEAD
+SERP Scraper — Google Custom Search API ONLY
+=============================================
 
-Strategy (waterfall):
-1. DataForSEO API (if configured) — real Google organic SERP + SEO metrics
-2. SerpAPI (if configured) — real Google SERP, 100 free/month (with 1h cache)
-3. Google Custom Search JSON API (if configured) — Programmable Search
-4. Error state with clear message when no credentials configured
+Strategy:
+1. Google Custom Search JSON API — official Google results
+2. Mock data — when API not configured or failed
+
+NO DuckDuckGo. NO other search engines.
+"""
+
+import os
+from typing import Any, Dict, List
+from urllib.parse import urlparse
+
+import httpx
+
+
+LOCATION_MAP = {
+    "vn": {"gl": "vn", "hl": "vi", "label": "Việt Nam"},
+    "us": {"gl": "us", "hl": "en", "label": "Hoa Kỳ"},
+    "uk": {"gl": "uk", "hl": "en", "label": "Anh"},
+    "au": {"gl": "au", "hl": "en", "label": "Úc"},
+    "in": {"gl": "in", "hl": "en", "label": "Ấn Độ"},
+    "sg": {"gl": "sg", "hl": "en", "label": "Singapore"},
+    "jp": {"gl": "jp", "hl": "ja", "label": "Nhật Bản"},
+}
+
+
+def _mock_serp(keyword: str, loc_label: str, reason: str = "") -> Dict[str, Any]:
+    """Return mock SERP data with clear notice."""
+    kw = keyword.lower()
+    slug = kw.replace(" ", "-")
+    mock_results = [
+        {"position": i + 1, "title": t, "url": u, "domain": d, "snippet": s, "breadcrumb": ""}
+        for i, (t, u, d, s) in enumerate([
+            (f"Top 10 {keyword} - Hướng dẫn đầy đủ 2025", f"https://www.techradar.com/best/{slug}", "techradar.com", f"Chuyên gia đánh giá {kw} tốt nhất."),
+            (f"{keyword} - Đánh giá chuyên sâu", f"https://www.pcmag.com/picks/{slug}", "pcmag.com", f"PCMag đánh giá và xếp hạng {kw}."),
+            (f"{keyword} tốt nhất (Xếp hạng)", f"https://www.forbes.com/advisor/{slug}", "forbes.com", f"Forbes Advisor xếp hạng {kw}."),
+            (f"{keyword}: Hướng dẫn mua hàng", f"https://www.g2.com/categories/{slug}", "g2.com", f"So sánh {kw} dựa trên đánh giá ngườI dùng."),
+            (f"Cách chọn {keyword} phù hợp", "https://www.youtube.com/watch?v=example", "youtube.com", f"Video hướng dẫn chọn {kw}."),
+            (f"{keyword} - Wikipedia", f"https://vi.wikipedia.org/wiki/{slug}", "wikipedia.org", f"{keyword} là thuật ngữ dùng để chỉ..."),
+            (f"Reddit - {keyword} tốt nhất?", f"https://www.reddit.com/r/best_{slug}", "reddit.com", f"Cộng đồng đề xuất {kw} tốt nhất."),
+            (f"So sánh {keyword} 2025", f"https://www.capterra.com/compare/{slug}", "capterra.com", f"So sánh chi tiết các giải pháp {kw}."),
+            (f"{keyword} giá rẻ cho doanh nghiệp", f"https://www.hostinger.com/{slug}", "hostinger.com", f"Bắt đầu với {kw} chỉ từ 59.000đ/tháng."),
+            (f"{keyword} - Đánh giá Trustpilot", f"https://www.trustpilot.com/categories/{slug}", "trustpilot.com", f"Đọc đánh giá thực từ khách hàng về {kw}."),
+        ])
+    ]
+    return {
+        "keyword": keyword,
+        "location": loc_label,
+        "organic_results": mock_results[:10],
+        "serp_features": ["video_carousel", "knowledge_panel", "people_also_ask"],
+        "total_results": 10,
+        "results_count": 10,
+        "source": "mock_serp",
+        "error": reason or "Chưa cấu hình Google Custom Search API. Vào tab 'Cấu hình Google' để thêm GOOGLE_SEARCH_API_KEY + GOOGLE_SEARCH_CX.",
+    }
+=======
+SERP Scraper — Google-first via DataForSEO
+
+Strategy:
+1. DataForSEO API (if configured) — returns real Google SERP data
+2. Error state with clear message when credentials are missing (no fallback)
 
 All searches are async-safe and never hang.
-SERP results are cached in-memory for 1 hour to save quota.
+No DuckDuckGo fallback — Google-only architecture.
 """
 
 import asyncio
 import os
-import time
 from typing import Any, Dict, List, Optional
 from urllib.parse import urlparse
-
-
-# ─── In-memory SERP cache (TTL = 1 hour) ──────────────────────────────────────
-_serp_cache: Dict[str, Dict[str, Any]] = {}
-_CACHE_TTL = 3600  # 1 hour
-
-
-def _cache_key(keyword: str, location: str, num: int) -> str:
-    return f"{keyword.lower().strip()}|{location.lower()}|{num}"
-
-
-def _get_cached(keyword: str, location: str, num: int) -> Optional[Dict[str, Any]]:
-    key = _cache_key(keyword, location, num)
-    entry = _serp_cache.get(key)
-    if entry and (time.time() - entry["_ts"]) < _CACHE_TTL:
-        result = {k: v for k, v in entry.items() if k != "_ts"}
-        result["_cached"] = True
-        return result
-    if entry:
-        del _serp_cache[key]
-    return None
-
-
-def _set_cache(keyword: str, location: str, num: int, data: Dict[str, Any]):
-    key = _cache_key(keyword, location, num)
-    _serp_cache[key] = {**data, "_ts": time.time()}
-    # Evict old entries if cache grows too large
-    if len(_serp_cache) > 200:
-        oldest = min(_serp_cache, key=lambda k: _serp_cache[k]["_ts"])
-        del _serp_cache[oldest]
 
 
 LOCATION_MAP = {
@@ -69,45 +95,124 @@ def _try_dataforseo(keyword: str, location_code: int, language_code: str, limit:
     password = os.getenv("DATAFORSEO_PASSWORD")
     if not login or not password:
         return None
+>>>>>>> f70f382 (🔧 Chuyển SERP Live sang Google-first, loại bỏ DuckDuckGo)
 
     from core.dataforseo import DataForSEO
     client = DataForSEO(login=login, password=password)
     serp = client.get_serp_data(keyword, location_code=location_code, limit=limit)
 
+<<<<<<< HEAD
+async def _google_custom_search(keyword: str, location: str, num_results: int) -> List[Dict]:
+    """
+    Use Google Custom Search JSON API.
+    Free: 100 queries/day. Paid: $5 per 1000 queries.
+    Requires: GOOGLE_SEARCH_API_KEY + GOOGLE_SEARCH_CX env vars.
+    """
+    api_key = os.getenv("GOOGLE_SEARCH_API_KEY")
+    cx = os.getenv("GOOGLE_SEARCH_CX")
+    if not api_key or not cx:
+        return []
+
+    loc = LOCATION_MAP.get(location.lower(), LOCATION_MAP["vn"])
+    num = min(num_results, 10)
+
+    params = {
+        "key": api_key,
+        "cx": cx,
+        "q": keyword,
+        "num": num,
+        "gl": loc["gl"],
+        "hl": loc["hl"],
+    }
+
+    try:
+        async with httpx.AsyncClient(timeout=12.0) as client:
+            resp = await client.get(
+                "https://www.googleapis.com/customsearch/v1",
+                params=params,
+            )
+            resp.raise_for_status()
+            data = resp.json()
+
+        items = data.get("items", [])
+        results = []
+        for i, item in enumerate(items, 1):
+            link = item.get("link", "")
+            try:
+                domain = urlparse(link).netloc.replace("www.", "")
+            except Exception:
+                domain = ""
+            results.append({
+                "position": i,
+                "title": item.get("title", ""),
+                "url": link,
+                "domain": domain,
+                "snippet": item.get("snippet", ""),
+                "breadcrumb": item.get("formattedUrl", ""),
+            })
+        return results
+    except Exception:
+        return []
+
+
+class GoogleSerpScraper:
+    """SERP scraper: Google Custom Search API ONLY."""
+
+    async def search(self, keyword: str, location: str = "vn", num_results: int = 10) -> Dict[str, Any]:
+        loc = LOCATION_MAP.get(location.lower(), LOCATION_MAP["vn"])
+        num = max(5, min(20, num_results))
+
+        # Check if Google API is configured
+        has_google_api = bool(os.getenv("GOOGLE_SEARCH_API_KEY") and os.getenv("GOOGLE_SEARCH_CX"))
+
+        if not has_google_api:
+            return _mock_serp(
+                keyword,
+                loc.get("label", ""),
+                "Chưa cấu hình Google Custom Search API. Vào tab 'Cấu hình Google' để thêm GOOGLE_SEARCH_API_KEY + GOOGLE_SEARCH_CX."
+            )
+
+        # Call Google Custom Search API
+        google_results = await _google_custom_search(keyword, location, num)
+
+        if google_results:
+            features = self._detect_features(google_results)
+            return {
+                "keyword": keyword,
+                "location": loc.get("label", ""),
+                "organic_results": google_results,
+                "serp_features": features,
+                "total_results": len(google_results),
+                "results_count": len(google_results),
+                "source": "google_custom_search",
+                "note": "Kết quả từ Google Custom Search API (chính xác)",
+            }
+
+        # API configured but failed (quota exceeded, invalid key, etc.)
+        return _mock_serp(
+            keyword,
+            loc.get("label", ""),
+            "Google Search API trả lỗi hoặc hết quota (100 query/ngày). Vui lòng kiểm tra API key, CX, hoặc đợi ngày mai."
+        )
+
+    def _detect_features(self, results: List[Dict]) -> List[str]:
+        """Detect SERP features from result domains."""
+        features = []
+        domains = [r.get("domain", "") for r in results]
+        if any("youtube.com" in d for d in domains):
+            features.append("video_carousel")
+        if any("wikipedia.org" in d for d in domains):
+            features.append("knowledge_panel")
+        return features
+=======
     if "error" in serp:
         raise RuntimeError(serp["error"])
 
     return serp
 
 
-def _try_serpapi(keyword: str, location: str, num_results: int) -> Optional[Dict[str, Any]]:
-    """
-    Attempt to use SerpAPI to get real Google SERP data.
-    Returns None if API key is missing.
-    """
-    from core.serpapi_search import search_serpapi
-    return search_serpapi(keyword, location=location, num_results=num_results)
-
-
-def _try_google_custom_search(keyword: str, location: str, num_results: int) -> Optional[Dict[str, Any]]:
-    """
-    Attempt to use Google Custom Search JSON API.
-    Returns None if credentials are missing.
-    """
-    from core.google_custom_search import search_google_cse
-    return search_google_cse(keyword, location=location, num_results=num_results)
-
-
 class GoogleSerpScraper:
-    """
-    Multi-source Google SERP scraper.
-
-    Priority:
-    1. DataForSEO (premium, real Google organic SERP + SEO metrics)
-    2. SerpAPI (real Google SERP, 100 free searches/month)
-    3. Google Custom Search JSON API (Programmable Search)
-    4. Error state (no credentials)
-    """
+    """Google SERP scraper via DataForSEO API (real Google data)."""
 
     async def search(self, keyword: str, location: str = "vn", num_results: int = 10) -> Dict[str, Any]:
         loc = LOCATION_MAP.get(location.lower(), LOCATION_MAP["vn"])
@@ -115,68 +220,52 @@ class GoogleSerpScraper:
         language_code = loc["language_code"]
         num = max(5, min(20, num_results))
 
-        # ── Check cache first (saves SerpAPI quota) ──
-        cached = _get_cached(keyword, location, num)
-        if cached:
-            return cached
-
-        # ── Strategy 1: DataForSEO (premium, real Google SERP) ──
+        # Try DataForSEO (real Google SERP)
         try:
             raw = await asyncio.wait_for(
                 asyncio.to_thread(_try_dataforseo, keyword, location_code, language_code, num),
                 timeout=20.0,
             )
-            if raw is not None:
-                result = self._format_dataforseo(raw, keyword, loc)
-                _set_cache(keyword, location, num, result)
-                return result
-        except RuntimeError:
-            pass
-        except Exception:
-            pass
+            if raw is None:
+                # No credentials configured
+                return {
+                    "keyword": keyword,
+                    "location": loc.get("label", ""),
+                    "organic_results": [],
+                    "serp_features": [],
+                    "total_results": 0,
+                    "results_count": 0,
+                    "source": "missing_credentials",
+                    "error": "Cần cấu hình DataForSEO API để lấy Google SERP. "
+                             "Set DATAFORSEO_LOGIN và DATAFORSEO_PASSWORD trong backend/.env. "
+                             "Đăng ký tại https://dataforseo.com",
+                }
 
-        # ── Strategy 2: SerpAPI (real Google SERP, free 100/month) ──
-        try:
-            serpapi_result = await asyncio.wait_for(
-                asyncio.to_thread(_try_serpapi, keyword, location.lower(), num),
-                timeout=20.0,
-            )
-            if serpapi_result is not None:
-                if serpapi_result.get("source") != "api_error":
-                    serpapi_result["location"] = loc.get("label", "")
-                    _set_cache(keyword, location, num, serpapi_result)
-                    return serpapi_result
-        except Exception:
-            pass
+            # Format DataForSEO response to standard format
+            return self._format_dataforseo(raw, keyword, loc)
 
-        # ── Strategy 3: Google Custom Search JSON API ──
-        try:
-            cse_result = await asyncio.wait_for(
-                asyncio.to_thread(_try_google_custom_search, keyword, location.lower(), num),
-                timeout=15.0,
-            )
-            if cse_result is not None:
-                if cse_result.get("source") != "api_error":
-                    cse_result["location"] = loc.get("label", "")
-                    _set_cache(keyword, location, num, cse_result)
-                    return cse_result
-        except Exception:
-            pass
-
-        # ── Strategy 4: No credentials configured ──
-        return {
-            "keyword": keyword,
-            "location": loc.get("label", ""),
-            "organic_results": [],
-            "serp_features": [],
-            "total_results": 0,
-            "results_count": 0,
-            "source": "missing_credentials",
-            "error": "Cần cấu hình ít nhất một SERP provider:\n"
-                     "• SerpAPI: set SERPAPI_KEY (miễn phí 100 searches/tháng tại https://serpapi.com)\n"
-                     "• DataForSEO: set DATAFORSEO_LOGIN + DATAFORSEO_PASSWORD\n"
-                     "Xem LOCAL-DEV.md để biết chi tiết.",
-        }
+        except RuntimeError as exc:
+            return {
+                "keyword": keyword,
+                "location": loc.get("label", ""),
+                "organic_results": [],
+                "serp_features": [],
+                "total_results": 0,
+                "results_count": 0,
+                "source": "api_error",
+                "error": f"DataForSEO API lỗi: {str(exc)[:200]}",
+            }
+        except Exception as exc:
+            return {
+                "keyword": keyword,
+                "location": loc.get("label", ""),
+                "organic_results": [],
+                "serp_features": [],
+                "total_results": 0,
+                "results_count": 0,
+                "source": "error",
+                "error": f"Không thể kết nối DataForSEO. Kiểm tra credentials và kết nối mạng. ({str(exc)[:100]})",
+            }
 
     def _format_dataforseo(self, raw: Dict[str, Any], keyword: str, loc: Dict) -> Dict[str, Any]:
         """Format DataForSEO response to our standard SERP format."""
@@ -206,11 +295,12 @@ class GoogleSerpScraper:
             "serp_features": raw.get("features", []),
             "total_results": raw.get("total_results", len(organic)),
             "results_count": len(organic),
-            "source": "dataforseo_live",
+            "source": "google_live",
             "search_volume": raw.get("search_volume"),
             "cpc": raw.get("cpc"),
             "competition": raw.get("competition"),
         }
+>>>>>>> f70f382 (🔧 Chuyển SERP Live sang Google-first, loại bỏ DuckDuckGo)
 
 
 async def scrape_google_serp(keyword: str, location: str = "vn", num_results: int = 10) -> Dict[str, Any]:

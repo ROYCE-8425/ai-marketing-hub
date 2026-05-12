@@ -180,7 +180,7 @@ https://xe.baogiaothong.vn/mitsubishi-xpander-2025.htm
 ### Bấm: **Tìm kiếm SERP**
 
 ### Kết quả nhận được:
-- ✅ Danh sách top 10-20 trang xếp hạng (Google SERP thật qua DataForSEO — cần cấu hình API)
+- ✅ Danh sách top 10-20 trang xếp hạng (dữ liệu thật từ DuckDuckGo)
 - ✅ Phân tích sâu: so sánh độ dài nội dung đối thủ
 - ✅ Xuất CSV để phân tích offline
 
