@@ -262,3 +262,71 @@ async def spin_paragraphs(
         "tone": tone,
     }
 
+
+async def spin_for_satellite(
+    content: str,
+    num_versions: int = 3,
+    level: str = "medium",
+    tone: str = "neutral",
+    preserve_keywords: Optional[List[str]] = None,
+    backlink_url: str = "",
+    backlink_keyword: str = "",
+) -> Dict[str, Any]:
+    """
+    Generate multiple unique spin versions for satellite site posting.
+    Each version includes backlink injection and HTML formatting.
+    """
+    if not content or len(content.strip()) < 20:
+        return {"error": "Nội dung quá ngắn (cần ít nhất 20 ký tự)"}
+    if not GROQ_API_KEY:
+        return {"error": "Chưa cấu hình GROQ_API_KEY"}
+
+    num_versions = min(5, max(1, num_versions))
+    prompt = _build_prompt(content.strip(), level, tone, preserve_keywords, "vi")
+
+    # Higher temperature spread for more variety
+    temps = [0.7 + (i * 0.1) for i in range(num_versions)]
+    tasks = [_call_groq(prompt, t) for t in temps]
+    results_raw = await asyncio.gather(*tasks)
+
+    versions = []
+    for i, rewritten in enumerate(results_raw):
+        if not rewritten:
+            continue
+
+        sim = _similarity(content.strip(), rewritten)
+        uniqueness = round((1 - sim) * 100, 1)
+
+        # Convert to HTML paragraphs
+        paragraphs = [p.strip() for p in rewritten.split("\n") if p.strip()]
+        content_html = "\n".join(f"<p>{p}</p>" for p in paragraphs)
+
+        # Inject backlink if provided
+        if backlink_url and backlink_keyword:
+            from core.satellite_manager import inject_backlink
+            content_html = inject_backlink(
+                content_html, backlink_url, backlink_keyword,
+                position="end" if i == 0 else "middle",
+            )
+
+        versions.append({
+            "version": i + 1,
+            "content_text": rewritten,
+            "content_html": content_html,
+            "uniqueness_percent": uniqueness,
+            "word_count": len(rewritten.split()),
+        })
+
+    if not versions:
+        return {"error": "Không thể tạo bản spin — thử lại sau"}
+
+    versions.sort(key=lambda v: v["uniqueness_percent"], reverse=True)
+
+    return {
+        "versions": versions,
+        "total_versions": len(versions),
+        "best_uniqueness": versions[0]["uniqueness_percent"],
+        "level": level,
+        "tone": tone,
+    }
+

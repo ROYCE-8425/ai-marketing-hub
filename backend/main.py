@@ -1,23 +1,9 @@
-"""
-AI Marketing Hub — FastAPI Backend (Phase 20)
-
-Phase 5: Publish to WordPress + Opportunity & Performance Scoring
-Phase 6: Live Data Connectors — GSC, GA4, DataForSEO
-Phase 7: Anti-Detection & Content Polish — Humanize AI text
-Phase 8: Live SERP Results — Real Google rankings
-Phase 9: Dashboard Overview, History & Export
-Phase 10-13: Rank Tracker, Spin Editor, DataForSEO, GEO Optimizer
-Phase 14: Backlink Analyzer
-Phase 15: Content Calendar
-Phase 16: Technical SEO Scanner
-Phase 17: AI Report Generator
-Phase 18: Multi-site Manager
-Phase 19: SEO A/B Testing
-Phase 20: MarkItDown File Converter (PDF/Word/Excel/PPT → Markdown)
-"""
-
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.responses import Response
+import time
+import json
 
 from routers import api_seo
 from routers import api_content
@@ -30,19 +16,108 @@ from routers import api_phase2
 from routers import api_phase3
 from routers import api_convert
 from routers import api_auth
+from routers import api_satellite
 
 app = FastAPI(
     title="AI Marketing Hub — Backend",
-    version="3.1.0",
+    version="3.2.0",
     description=(
         "AI Marketing Hub API — Phase 20: SEO Audit, CRO, Competitor Gap, "
         "Content Planning, Publish, Opportunity Scoring, Live Data Connectors, "
         "Content Polish, Live SERP, Dashboard, Rank Tracker, Spin Editor, "
         "GEO Optimizer, Backlinks, Content Calendar, Technical SEO, "
-        "AI Reports, Multi-site, A/B Testing, File Converter (MarkItDown)"
+        "AI Reports, Multi-site, A/B Testing, File Converter, Usage History"
     ),
 )
 
+
+# ── Usage History Middleware ─────────────────────────────────────────────────
+
+class UsageHistoryMiddleware(BaseHTTPMiddleware):
+    """Auto-log all API requests and responses."""
+
+    SKIP_PATHS = {"/health", "/docs", "/openapi.json", "/favicon.ico"}
+
+    async def dispatch(self, request: Request, call_next):
+        path = request.url.path
+
+        # Skip non-API and static paths
+        if path in self.SKIP_PATHS or not path.startswith("/api"):
+            return await call_next(request)
+
+        start = time.time()
+        input_data = None
+        error_msg = None
+
+        # Capture request body
+        try:
+            body = await request.body()
+            if body:
+                input_data = json.loads(body)
+        except Exception:
+            input_data = None
+
+        # Execute request
+        try:
+            response = await call_next(request)
+            status = response.status_code
+
+            # Capture response body
+            output_data = None
+            response_body = b""
+            async for chunk in response.body_iterator:
+                response_body += chunk if isinstance(chunk, bytes) else chunk.encode()
+
+            try:
+                output_data = json.loads(response_body)
+            except Exception:
+                output_data = response_body[:500].decode("utf-8", errors="replace") if response_body else None
+
+            duration = (time.time() - start) * 1000
+
+            # Log to usage history
+            try:
+                from core.usage_history import log_usage
+                log_usage(
+                    endpoint=path,
+                    method=request.method,
+                    input_data=input_data,
+                    output_data=output_data,
+                    status_code=status,
+                    duration_ms=duration,
+                    error=error_msg,
+                )
+            except Exception:
+                pass  # Don't fail request due to logging
+
+            # Return new response with captured body
+            return Response(
+                content=response_body,
+                status_code=status,
+                headers=dict(response.headers),
+                media_type=response.media_type,
+            )
+
+        except Exception as e:
+            duration = (time.time() - start) * 1000
+            error_msg = str(e)
+            try:
+                from core.usage_history import log_usage
+                log_usage(
+                    endpoint=path,
+                    method=request.method,
+                    input_data=input_data,
+                    output_data=None,
+                    status_code=500,
+                    duration_ms=duration,
+                    error=error_msg,
+                )
+            except Exception:
+                pass
+            raise
+
+
+app.add_middleware(UsageHistoryMiddleware)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -63,6 +138,7 @@ app.include_router(api_phase2.router)
 app.include_router(api_phase3.router)
 app.include_router(api_convert.router)
 app.include_router(api_auth.router)
+app.include_router(api_satellite.router)
 
 
 @app.on_event("startup")
@@ -88,5 +164,28 @@ async def auto_setup():
 
 @app.get("/health")
 async def health():
-    return {"status": "ok", "phase": 20, "version": "3.1.0"}
+    return {"status": "ok", "phase": 20, "version": "3.2.0"}
 
+
+# ── Usage History API ────────────────────────────────────────────────────────
+
+@app.get("/api/usage-history")
+async def get_history(limit: int = 50, endpoint: str = None):
+    """Lịch sử sử dụng — xem toàn bộ API calls."""
+    from core.usage_history import get_usage_history
+    return get_usage_history(limit=limit, endpoint_filter=endpoint)
+
+
+@app.get("/api/usage-stats")
+async def get_stats():
+    """Thống kê sử dụng — tổng calls, success rate, errors."""
+    from core.usage_history import get_usage_stats
+    return get_usage_stats()
+
+
+@app.delete("/api/usage-history")
+async def clear_usage_history():
+    """Xóa lịch sử sử dụng."""
+    from core.usage_history import clear_history
+    clear_history()
+    return {"status": "ok", "message": "Đã xóa lịch sử"}

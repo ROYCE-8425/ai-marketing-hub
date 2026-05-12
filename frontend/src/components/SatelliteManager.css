@@ -1,0 +1,530 @@
+/* ── Satellite Manager ────────────────────────────────────────────────────── */
+
+.satellite-manager {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* Tabs */
+.sat-tabs {
+  display: flex;
+  gap: 4px;
+  background: rgba(255,255,255,0.03);
+  border-radius: 12px;
+  padding: 4px;
+  border: 1px solid rgba(255,255,255,0.06);
+}
+
+.sat-tab {
+  flex: 1;
+  padding: 10px 16px;
+  background: transparent;
+  border: none;
+  color: rgba(255,255,255,0.5);
+  font-size: 13px;
+  font-weight: 500;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.sat-tab:hover {
+  color: rgba(255,255,255,0.8);
+  background: rgba(255,255,255,0.04);
+}
+
+.sat-tab.active {
+  color: #a78bfa;
+  background: rgba(139,92,246,0.12);
+  box-shadow: 0 0 12px rgba(139,92,246,0.1);
+}
+
+.sat-tab .sat-badge {
+  background: rgba(139,92,246,0.2);
+  color: #a78bfa;
+  font-size: 11px;
+  padding: 1px 7px;
+  border-radius: 10px;
+  font-weight: 600;
+}
+
+/* Cards */
+.sat-card {
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 14px;
+  padding: 1.25rem;
+}
+
+.sat-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.sat-card-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.9);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Site List */
+.sat-site-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 12px;
+}
+
+.sat-site-item {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 12px;
+  padding: 1rem;
+  transition: all 0.2s ease;
+}
+
+.sat-site-item:hover {
+  border-color: rgba(139,92,246,0.3);
+  background: rgba(139,92,246,0.04);
+}
+
+.sat-site-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.9);
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.sat-site-url {
+  font-size: 12px;
+  color: rgba(255,255,255,0.4);
+  margin-bottom: 8px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sat-site-meta {
+  display: flex;
+  gap: 12px;
+  font-size: 12px;
+  color: rgba(255,255,255,0.5);
+}
+
+.sat-platform-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.sat-platform-badge.blogger {
+  background: rgba(245,124,0,0.12);
+  color: #fb923c;
+}
+
+.sat-platform-badge.wordpress {
+  background: rgba(33,150,243,0.12);
+  color: #60a5fa;
+}
+
+.sat-site-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.sat-site-actions button {
+  flex: 1;
+  padding: 6px 10px;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.03);
+  color: rgba(255,255,255,0.6);
+  border-radius: 8px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.sat-site-actions button:hover {
+  background: rgba(139,92,246,0.1);
+  color: #a78bfa;
+  border-color: rgba(139,92,246,0.25);
+}
+
+.sat-site-actions .delete-btn:hover {
+  background: rgba(239,68,68,0.1);
+  color: #f87171;
+  border-color: rgba(239,68,68,0.25);
+}
+
+/* Add Site Form */
+.sat-add-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.sat-add-form .full-width {
+  grid-column: 1 / -1;
+}
+
+.sat-form-group label {
+  display: block;
+  font-size: 12px;
+  color: rgba(255,255,255,0.5);
+  margin-bottom: 4px;
+  font-weight: 500;
+}
+
+.sat-form-group input,
+.sat-form-group select {
+  width: 100%;
+  padding: 8px 12px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 8px;
+  color: rgba(255,255,255,0.9);
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.sat-form-group input:focus,
+.sat-form-group select:focus {
+  border-color: rgba(139,92,246,0.4);
+}
+
+.sat-form-group select {
+  cursor: pointer;
+}
+
+/* Spin & Post Panel */
+.sat-spin-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.sat-textarea {
+  width: 100%;
+  min-height: 200px;
+  padding: 12px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 10px;
+  color: rgba(255,255,255,0.9);
+  font-size: 13px;
+  line-height: 1.7;
+  resize: vertical;
+  outline: none;
+  font-family: inherit;
+}
+
+.sat-textarea:focus {
+  border-color: rgba(139,92,246,0.4);
+}
+
+.sat-options-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: flex-end;
+}
+
+.sat-options-row .sat-form-group {
+  flex: 1;
+  min-width: 150px;
+}
+
+/* Post Results */
+.sat-results {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.sat-result-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 10px;
+}
+
+.sat-result-item.success {
+  border-color: rgba(34,197,94,0.2);
+}
+
+.sat-result-item.failed {
+  border-color: rgba(239,68,68,0.2);
+}
+
+.sat-result-status {
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.sat-result-info {
+  flex: 1;
+}
+
+.sat-result-info h4 {
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.85);
+  margin: 0 0 4px;
+}
+
+.sat-result-info p {
+  font-size: 12px;
+  color: rgba(255,255,255,0.45);
+  margin: 0;
+}
+
+.sat-result-link {
+  color: #a78bfa;
+  text-decoration: none;
+  font-size: 12px;
+}
+
+.sat-result-link:hover {
+  text-decoration: underline;
+}
+
+/* Post History */
+.sat-post-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sat-post-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.05);
+  border-radius: 10px;
+  transition: all 0.2s ease;
+}
+
+.sat-post-item:hover {
+  background: rgba(255,255,255,0.04);
+}
+
+.sat-post-icon {
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.sat-post-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.sat-post-title {
+  font-size: 13px;
+  font-weight: 500;
+  color: rgba(255,255,255,0.85);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sat-post-meta {
+  display: flex;
+  gap: 10px;
+  font-size: 11px;
+  color: rgba(255,255,255,0.4);
+  margin-top: 2px;
+}
+
+.sat-post-status {
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.sat-post-status.published {
+  background: rgba(34,197,94,0.12);
+  color: #4ade80;
+}
+
+.sat-post-status.failed {
+  background: rgba(239,68,68,0.12);
+  color: #f87171;
+}
+
+/* Buttons */
+.sat-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 18px;
+  border: none;
+  border-radius: 9px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.sat-btn-primary {
+  background: linear-gradient(135deg, #8b5cf6, #6366f1);
+  color: #fff;
+  box-shadow: 0 2px 12px rgba(139,92,246,0.25);
+}
+
+.sat-btn-primary:hover {
+  box-shadow: 0 4px 20px rgba(139,92,246,0.35);
+  transform: translateY(-1px);
+}
+
+.sat-btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.sat-btn-secondary {
+  background: rgba(255,255,255,0.06);
+  color: rgba(255,255,255,0.7);
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+.sat-btn-secondary:hover {
+  background: rgba(255,255,255,0.1);
+  color: #fff;
+}
+
+.sat-btn-danger {
+  background: rgba(239,68,68,0.1);
+  color: #f87171;
+}
+
+.sat-btn-danger:hover {
+  background: rgba(239,68,68,0.2);
+}
+
+/* Empty state */
+.sat-empty {
+  text-align: center;
+  padding: 3rem 2rem;
+  color: rgba(255,255,255,0.35);
+}
+
+.sat-empty-icon {
+  font-size: 48px;
+  margin-bottom: 12px;
+}
+
+.sat-empty h3 {
+  font-size: 16px;
+  color: rgba(255,255,255,0.6);
+  margin-bottom: 6px;
+}
+
+.sat-empty p {
+  font-size: 13px;
+  margin-bottom: 16px;
+}
+
+/* Stats row */
+.sat-stats {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 4px;
+}
+
+.sat-stat {
+  flex: 1;
+  padding: 14px;
+  background: rgba(255,255,255,0.025);
+  border: 1px solid rgba(255,255,255,0.05);
+  border-radius: 12px;
+  text-align: center;
+}
+
+.sat-stat-value {
+  font-size: 22px;
+  font-weight: 700;
+  color: #a78bfa;
+}
+
+.sat-stat-label {
+  font-size: 11px;
+  color: rgba(255,255,255,0.4);
+  margin-top: 2px;
+}
+
+/* Spin animation */
+@keyframes sat-spin {
+  to { transform: rotate(360deg); }
+}
+
+.sat-spinning {
+  animation: sat-spin 1s linear infinite;
+  display: inline-block;
+}
+
+/* Preview */
+.sat-preview {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 10px;
+  padding: 1rem;
+  max-height: 300px;
+  overflow-y: auto;
+  font-size: 13px;
+  line-height: 1.7;
+  color: rgba(255,255,255,0.75);
+}
+
+.sat-preview p {
+  margin-bottom: 0.8em;
+}
+
+.sat-version-tabs {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.sat-version-tab {
+  padding: 4px 12px;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: transparent;
+  color: rgba(255,255,255,0.5);
+  border-radius: 6px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.sat-version-tab.active {
+  background: rgba(139,92,246,0.15);
+  color: #a78bfa;
+  border-color: rgba(139,92,246,0.3);
+}
