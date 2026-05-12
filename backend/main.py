@@ -189,3 +189,8 @@ async def clear_usage_history():
     from core.usage_history import clear_history
     clear_history()
     return {"status": "ok", "message": "Đã xóa lịch sử"}
+
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)
