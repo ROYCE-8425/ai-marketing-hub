@@ -151,7 +151,7 @@ class AboveFoldAnalyzer:
                 'present': False,
                 'text': None,
                 'score': 0,
-                'issues': ['No H1 headline found'],
+                'issues': ['Thiếu tiêu đề H1'],
                 'quality': 'missing'
             }
 
@@ -162,7 +162,7 @@ class AboveFoldAnalyzer:
         for pattern in self.WEAK_HEADLINE_PATTERNS:
             if re.search(pattern, h1_text, re.IGNORECASE):
                 score -= 30
-                issues.append(f'Weak headline pattern detected')
+                issues.append('Tiêu đề yếu hoặc quá chung chung')
                 break
 
         # Check for strong patterns
@@ -179,15 +179,15 @@ class AboveFoldAnalyzer:
         # Check length
         if len(h1_text) > 80:
             score -= 10
-            issues.append(f'Headline too long ({len(h1_text)} chars)')
+            issues.append(f'Tiêu đề quá dài ({len(h1_text)} ký tự)')
         elif len(h1_text) < 20:
             score -= 10
-            issues.append(f'Headline too short ({len(h1_text)} chars)')
+            issues.append(f'Tiêu đề quá ngắn ({len(h1_text)} ký tự)')
 
         # Check if it appears early (within first few lines)
         if h1_line_index and h1_line_index > 10:
             score -= 10
-            issues.append('Headline appears too late in content')
+            issues.append('Tiêu đề xuất hiện quá muộn trong nội dung')
 
         # Determine quality
         if score >= 80:
@@ -235,9 +235,9 @@ class AboveFoldAnalyzer:
 
         issues = []
         if score < 60:
-            issues.append('Value proposition not clear above the fold')
+            issues.append('Giá trị cốt lõi chưa rõ ràng trên màn hình đầu')
         if not has_specifics and score > 0:
-            issues.append('Value proposition lacks specifics (numbers, results)')
+            issues.append('Giá trị cốt lõi thiếu số liệu cụ thể (con số, kết quả)')
 
         return {
             'present': score > 0,
@@ -265,7 +265,7 @@ class AboveFoldAnalyzer:
                 'present': False,
                 'count': 0,
                 'score': 0,
-                'issues': ['No CTA visible above the fold'],
+                'issues': ['Không có CTA trên màn hình đầu'],
                 'first_cta_position': None
             }
 
@@ -293,7 +293,7 @@ class AboveFoldAnalyzer:
             'first_cta': ctas_found[0]['text'],
             'first_cta_position': first_position,
             'has_action_verb': has_action_verb,
-            'issues': [] if score >= 70 else ['CTA could be more prominent']
+            'issues': [] if score >= 70 else ['CTA cần nổi bật hơn']
         }
 
     def _analyze_trust_signal(self, above_fold: str) -> Dict[str, Any]:
@@ -313,7 +313,7 @@ class AboveFoldAnalyzer:
                 'present': False,
                 'count': 0,
                 'score': 30,  # Not critical, but recommended
-                'issues': ['No trust signal above the fold'],
+                'issues': ['Chưa có tín hiệu uy tín trên màn hình đầu'],
                 'signals': []
             }
 
@@ -345,14 +345,14 @@ class AboveFoldAnalyzer:
             issues.append({
                 'severity': 'critical',
                 'element': 'headline',
-                'issue': 'Missing headline (H1)'
+                'issue': 'Thiếu tiêu đề H1'
             })
 
         if not cta['present']:
             issues.append({
                 'severity': 'critical',
                 'element': 'cta',
-                'issue': 'No CTA visible above the fold'
+                'issue': 'Không có CTA trên màn hình đầu'
             })
 
         # Warnings
@@ -360,14 +360,14 @@ class AboveFoldAnalyzer:
             issues.append({
                 'severity': 'warning',
                 'element': 'headline',
-                'issue': 'Headline is weak or generic'
+                'issue': 'Tiêu đề yếu hoặc quá chung chung'
             })
 
         if not value_prop['present'] or value_prop['clarity'] == 'unclear':
             issues.append({
                 'severity': 'warning',
                 'element': 'value_prop',
-                'issue': 'Value proposition not clear'
+                'issue': 'Giá trị cốt lõi chưa rõ ràng'
             })
 
         # Suggestions
@@ -375,14 +375,14 @@ class AboveFoldAnalyzer:
             issues.append({
                 'severity': 'suggestion',
                 'element': 'trust',
-                'issue': 'Consider adding trust signal above the fold'
+                'issue': 'Nên thêm tín hiệu uy tín trên màn hình đầu'
             })
 
         if cta['present'] and not cta.get('has_action_verb', True):
             issues.append({
                 'severity': 'suggestion',
                 'element': 'cta',
-                'issue': 'CTA could use stronger action verb'
+                'issue': 'CTA nên dùng động từ mạnh hơn'
             })
 
         return issues
@@ -395,31 +395,31 @@ class AboveFoldAnalyzer:
             if issue['element'] == 'headline':
                 if issue['severity'] == 'critical':
                     recommendations.append(
-                        'Add a benefit-focused H1 headline immediately.'
+                        'Thêm tiêu đề H1 tập trung vào lợi ích ngay lập tức.'
                     )
                 else:
                     recommendations.append(
-                        'Strengthen headline: use numbers, questions, or benefit verbs.'
+                        'Cải thiện tiêu đề: sử dụng con số, câu hỏi, hoặc động từ lợi ích.'
                     )
 
             elif issue['element'] == 'cta':
                 if issue['severity'] == 'critical':
                     recommendations.append(
-                        'Add a prominent CTA button above the fold.'
+                        'Thêm nút CTA nổi bật trên màn hình đầu.'
                     )
                 else:
                     recommendations.append(
-                        'Start CTA with action verb (Start, Get, Try).'
+                        'Bắt đầu CTA bằng động từ hành động (Bắt đầu, Nhận, Dùng thử).'
                     )
 
             elif issue['element'] == 'value_prop':
                 recommendations.append(
-                    'Clarify value proposition: state what visitor gets and how quickly.'
+                    'Làm rõ giá trị cốt lõi: nêu rõ khách nhận được gì và nhanh như thế nào.'
                 )
 
             elif issue['element'] == 'trust':
                 recommendations.append(
-                    'Add trust signal: customer count, rating, or short testimonial.'
+                    'Thêm tín hiệu uy tín: số khách hàng, đánh giá, hoặc nhận xét ngắn.'
                 )
 
         return recommendations
@@ -427,15 +427,15 @@ class AboveFoldAnalyzer:
     def _get_grade(self, score: float) -> str:
         """Convert score to letter grade"""
         if score >= 90:
-            return "A (Excellent)"
+            return "A (Xuất sắc)"
         elif score >= 80:
-            return "B (Good)"
+            return "B (Tốt)"
         elif score >= 70:
-            return "C (Acceptable)"
+            return "C (Chấp nhận được)"
         elif score >= 60:
-            return "D (Needs Work)"
+            return "D (Cần cải thiện)"
         else:
-            return "F (Poor)"
+            return "F (Yếu)"
 
 
 # Convenience function

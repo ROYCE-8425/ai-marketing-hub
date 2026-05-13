@@ -607,8 +607,10 @@ body {
   font-size: 13px;
   color: var(--text);
   white-space: nowrap;
-  width: 160px;
+  width: 280px;
   flex-shrink: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .category-track {
   flex: 1;
@@ -877,7 +879,7 @@ body {
 }
 .cro-category-list { display: flex; flex-direction: column; gap: 6px; }
 .cro-mini-bar { display: flex; align-items: center; gap: 10px; }
-.cro-mini-bar-name { font-size: 12px; color: var(--text); white-space: nowrap; width: 110px; flex-shrink: 0; }
+.cro-mini-bar-name { font-size: 12px; color: var(--text); white-space: nowrap; width: 220px; flex-shrink: 0; overflow: hidden; text-overflow: ellipsis; }
 .cro-mini-track { flex: 1; height: 5px; background: var(--surface2); border-radius: 99px; overflow: hidden; }
 .cro-mini-fill { height: 100%; border-radius: 99px; }
 .cro-mini-score { font-size: 12px; font-family: "DM Mono", monospace; font-weight: 700; width: 28px; text-align: right; flex-shrink: 0; }

@@ -196,40 +196,40 @@ def _build_sales_risk_alerts(
 
     # CRO risk
     if not cro["passes_audit"] or cro["score"] < 60:
-        alerts.append({"severity": "high", "message": "Low CRO score — page unlikely to convert visitors."})
+        alerts.append({"severity": "high", "message": "\u0110i\u1ec3m CRO th\u1ea5p \u2014 trang kh\u00f3 chuy\u1ec3n \u0111\u1ed5i kh\u00e1ch truy c\u1eadp."})
     if cro["summary"]["critical_failures"] > 0:
-        alerts.append({"severity": "high", "message": f"{cro['summary']['critical_failures']} critical CRO failure(s) detected."})
+        alerts.append({"severity": "high", "message": f"Ph\u00e1t hi\u1ec7n {cro['summary']['critical_failures']} l\u1ed7i CRO nghi\u00eam tr\u1ecdng."})
 
     # CTA risk
     if cta["summary"]["total_ctas"] == 0:
-        alerts.append({"severity": "high", "message": "No CTAs found — visitors have no clear action to take."})
+        alerts.append({"severity": "high", "message": "Kh\u00f4ng t\u00ecm th\u1ea5y CTA n\u00e0o \u2014 kh\u00e1ch kh\u00f4ng c\u00f3 h\u00e0nh \u0111\u1ed9ng r\u00f5 r\u00e0ng."})
     elif not cta["distribution"]["has_above_fold"]:
-        alerts.append({"severity": "medium", "message": "No CTA above the fold — first impression has no conversion path."})
+        alerts.append({"severity": "medium", "message": "Kh\u00f4ng c\u00f3 CTA tr\u00ean m\u00e0n h\u00ecnh \u0111\u1ea7u \u2014 \u1ea5n t\u01b0\u1ee3ng \u0111\u1ea7u kh\u00f4ng c\u00f3 l\u1ed9 tr\u00ecnh chuy\u1ec3n \u0111\u1ed5i."})
     if cta["summary"]["goal_alignment_score"] < 50:
-        alerts.append({"severity": "medium", "message": "CTAs not aligned with conversion goal."})
+        alerts.append({"severity": "medium", "message": "CTA ch\u01b0a ph\u00f9 h\u1ee3p v\u1edbi m\u1ee5c ti\u00eau chuy\u1ec3n \u0111\u1ed5i."})
 
     # Trust risk
     if not trust["details"]["testimonials"]["count"] > 0:
         if not trust["details"]["social_proof"]["has_any"]:
-            alerts.append({"severity": "high", "message": "No social proof — low trust signals for new visitors."})
+            alerts.append({"severity": "high", "message": "Ch\u01b0a c\u00f3 b\u1eb1ng ch\u1ee9ng x\u00e3 h\u1ed9i \u2014 \u0111\u1ed9 tin c\u1eady th\u1ea5p v\u1edbi kh\u00e1ch m\u1edbi."})
     if not trust["details"]["risk_reversals"]["has_any"]:
-        alerts.append({"severity": "medium", "message": "No risk reversal (guarantee/trial/no-card) — visitors may hesitate to convert."})
+        alerts.append({"severity": "medium", "message": "Ch\u01b0a c\u00f3 cam k\u1ebft gi\u1ea3m r\u1ee7i ro (b\u1ea3o h\u00e0nh/d\u00f9ng th\u1eed/ho\u00e0n ti\u1ec1n) \u2014 kh\u00e1ch c\u00f3 th\u1ec3 do d\u1ef1."})
 
     # Above-fold risk
     if not atf["passes_5_second_test"]:
-        alerts.append({"severity": "high", "message": "Page fails the 5-second test — visitors likely leave immediately."})
+        alerts.append({"severity": "high", "message": "Trang kh\u00f4ng \u0111\u1ea1t b\u00e0i test 5 gi\u00e2y \u2014 kh\u00e1ch c\u00f3 th\u1ec3 r\u1eddi ngay."})
     if not atf["cta"]["present"]:
-        alerts.append({"severity": "high", "message": "No CTA visible above the fold."})
+        alerts.append({"severity": "high", "message": "Kh\u00f4ng c\u00f3 CTA hi\u1ec3n th\u1ecb tr\u00ean m\u00e0n h\u00ecnh \u0111\u1ea7u."})
 
     return alerts
 
 
 def _cro_grade(score: float) -> str:
-    if score >= 90: return "A (Excellent)"
-    if score >= 80: return "B (Good)"
-    if score >= 70: return "C (Acceptable)"
-    if score >= 60: return "D (Needs Work)"
-    return "F (Poor)"
+    if score >= 90: return "A (Xu\u1ea5t s\u1eafc)"
+    if score >= 80: return "B (T\u1ed1t)"
+    if score >= 70: return "C (Ch\u1ea5p nh\u1eadn \u0111\u01b0\u1ee3c)"
+    if score >= 60: return "D (C\u1ea7n c\u1ea3i thi\u1ec7n)"
+    return "F (Y\u1ebfu)"
 
 
 # ─── Endpoints ──────────────────────────────────────────────────────────────────

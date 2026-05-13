@@ -67276,5 +67276,1229 @@
     "duration_ms": 206.4,
     "error": null,
     "success": true
+  },
+  {
+    "id": 113,
+    "timestamp": "2026-05-13T08:32:56.382325",
+    "endpoint": "/api/ga4-overview",
+    "method": "POST",
+    "input": {
+      "days": 30
+    },
+    "output": {
+      "fetched_at": "2026-05-13T08:32:56.344361",
+      "period_days": 30,
+      "data_source": "error",
+      "property_id": "",
+      "overview": {},
+      "traffic_sources": [],
+      "top_pages": [],
+      "daily_sessions": [],
+      "error": "GA4_PROPERTY_ID chưa được cấu hình. Vào Google Analytics → Admin → Property Details để lấy Property ID."
+    },
+    "status_code": 200,
+    "duration_ms": 9.5,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 114,
+    "timestamp": "2026-05-13T08:32:56.447881",
+    "endpoint": "/api/serp/live",
+    "method": "POST",
+    "input": {
+      "keyword": "mitsubishi binh phuoc",
+      "location": "vn",
+      "num_results": 10
+    },
+    "output": null,
+    "status_code": 500,
+    "duration_ms": 95.1,
+    "error": "invalid character '—' (U+2014) (google_serp_scraper.py, line 61)",
+    "success": false
+  },
+  {
+    "id": 115,
+    "timestamp": "2026-05-13T08:32:56.506683",
+    "endpoint": "/api/ai-keywords",
+    "method": "POST",
+    "input": {},
+    "output": {
+      "analyzed_at": "2026-05-13T08:32:56.342724",
+      "site_url": "",
+      "gsc_keywords": [],
+      "total_clicks": 0,
+      "total_impressions": 0,
+      "ai_analysis": "",
+      "recommended_keywords": [],
+      "keyword_clusters": [],
+      "content_strategy": [],
+      "top_performing": [],
+      "quick_wins": [],
+      "summary": "Cần kết nối Google Search Console để lấy dữ liệu từ khóa thật trước khi phân tích.",
+      "data_source": "no_data",
+      "ai_provider": "none",
+      "error": "Chưa có dữ liệu GSC. Cấu hình Google Search Console để phân tích từ khóa thật."
+    },
+    "status_code": 200,
+    "duration_ms": 155.4,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 116,
+    "timestamp": "2026-05-13T08:32:56.576972",
+    "endpoint": "/api/ga4-overview",
+    "method": "POST",
+    "input": {
+      "days": 30
+    },
+    "output": {
+      "fetched_at": "2026-05-13T08:32:56.345070",
+      "period_days": 30,
+      "data_source": "error",
+      "property_id": "",
+      "overview": {},
+      "traffic_sources": [],
+      "top_pages": [],
+      "daily_sessions": [],
+      "error": "GA4_PROPERTY_ID chưa được cấu hình. Vào Google Analytics → Admin → Property Details để lấy Property ID."
+    },
+    "status_code": 200,
+    "duration_ms": 217.1,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 117,
+    "timestamp": "2026-05-13T08:32:56.637830",
+    "endpoint": "/api/serp/live",
+    "method": "POST",
+    "input": {
+      "keyword": "mitsubishi binh phuoc",
+      "location": "vn",
+      "num_results": 10
+    },
+    "output": null,
+    "status_code": 500,
+    "duration_ms": 279.7,
+    "error": "invalid character '—' (U+2014) (google_serp_scraper.py, line 61)",
+    "success": false
+  },
+  {
+    "id": 118,
+    "timestamp": "2026-05-13T08:32:56.696014",
+    "endpoint": "/api/ai-keywords",
+    "method": "POST",
+    "input": {},
+    "output": {
+      "analyzed_at": "2026-05-13T08:32:56.344971",
+      "site_url": "",
+      "gsc_keywords": [],
+      "total_clicks": 0,
+      "total_impressions": 0,
+      "ai_analysis": "",
+      "recommended_keywords": [],
+      "keyword_clusters": [],
+      "content_strategy": [],
+      "top_performing": [],
+      "quick_wins": [],
+      "summary": "Cần kết nối Google Search Console để lấy dữ liệu từ khóa thật trước khi phân tích.",
+      "data_source": "no_data",
+      "ai_provider": "none",
+      "error": "Chưa có dữ liệu GSC. Cấu hình Google Search Console để phân tích từ khóa thật."
+    },
+    "status_code": 200,
+    "duration_ms": 341.5,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 119,
+    "timestamp": "2026-05-13T08:33:02.292525",
+    "endpoint": "/api/ga4-overview",
+    "method": "POST",
+    "input": {
+      "days": 30
+    },
+    "output": {
+      "fetched_at": "2026-05-13T08:33:02.266858",
+      "period_days": 30,
+      "data_source": "error",
+      "property_id": "",
+      "overview": {},
+      "traffic_sources": [],
+      "top_pages": [],
+      "daily_sessions": [],
+      "error": "GA4_PROPERTY_ID chưa được cấu hình. Vào Google Analytics → Admin → Property Details để lấy Property ID."
+    },
+    "status_code": 200,
+    "duration_ms": 1.6,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 120,
+    "timestamp": "2026-05-13T08:33:02.362882",
+    "endpoint": "/api/ai-keywords",
+    "method": "POST",
+    "input": {},
+    "output": {
+      "analyzed_at": "2026-05-13T08:33:02.266567",
+      "site_url": "",
+      "gsc_keywords": [],
+      "total_clicks": 0,
+      "total_impressions": 0,
+      "ai_analysis": "",
+      "recommended_keywords": [],
+      "keyword_clusters": [],
+      "content_strategy": [],
+      "top_performing": [],
+      "quick_wins": [],
+      "summary": "Cần kết nối Google Search Console để lấy dữ liệu từ khóa thật trước khi phân tích.",
+      "data_source": "no_data",
+      "ai_provider": "none",
+      "error": "Chưa có dữ liệu GSC. Cấu hình Google Search Console để phân tích từ khóa thật."
+    },
+    "status_code": 200,
+    "duration_ms": 79.1,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 121,
+    "timestamp": "2026-05-13T08:33:02.424788",
+    "endpoint": "/api/serp/live",
+    "method": "POST",
+    "input": {
+      "keyword": "mitsubishi binh phuoc",
+      "location": "vn",
+      "num_results": 10
+    },
+    "output": null,
+    "status_code": 500,
+    "duration_ms": 139.9,
+    "error": "invalid character '—' (U+2014) (google_serp_scraper.py, line 61)",
+    "success": false
+  },
+  {
+    "id": 122,
+    "timestamp": "2026-05-13T08:33:02.486974",
+    "endpoint": "/api/ga4-overview",
+    "method": "POST",
+    "input": {
+      "days": 30
+    },
+    "output": {
+      "fetched_at": "2026-05-13T08:33:02.406145",
+      "period_days": 30,
+      "data_source": "error",
+      "property_id": "",
+      "overview": {},
+      "traffic_sources": [],
+      "top_pages": [],
+      "daily_sessions": [],
+      "error": "GA4_PROPERTY_ID chưa được cấu hình. Vào Google Analytics → Admin → Property Details để lấy Property ID."
+    },
+    "status_code": 200,
+    "duration_ms": 202.0,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 123,
+    "timestamp": "2026-05-13T08:33:02.547204",
+    "endpoint": "/api/serp/live",
+    "method": "POST",
+    "input": {
+      "keyword": "mitsubishi binh phuoc",
+      "location": "vn",
+      "num_results": 10
+    },
+    "output": null,
+    "status_code": 500,
+    "duration_ms": 126.1,
+    "error": "invalid character '—' (U+2014) (google_serp_scraper.py, line 61)",
+    "success": false
+  },
+  {
+    "id": 124,
+    "timestamp": "2026-05-13T08:33:02.605523",
+    "endpoint": "/api/ai-keywords",
+    "method": "POST",
+    "input": {},
+    "output": {
+      "analyzed_at": "2026-05-13T08:33:02.406109",
+      "site_url": "",
+      "gsc_keywords": [],
+      "total_clicks": 0,
+      "total_impressions": 0,
+      "ai_analysis": "",
+      "recommended_keywords": [],
+      "keyword_clusters": [],
+      "content_strategy": [],
+      "top_performing": [],
+      "quick_wins": [],
+      "summary": "Cần kết nối Google Search Console để lấy dữ liệu từ khóa thật trước khi phân tích.",
+      "data_source": "no_data",
+      "ai_provider": "none",
+      "error": "Chưa có dữ liệu GSC. Cấu hình Google Search Console để phân tích từ khóa thật."
+    },
+    "status_code": 200,
+    "duration_ms": 322.2,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 125,
+    "timestamp": "2026-05-13T08:33:23.708427",
+    "endpoint": "/api/audit-url",
+    "method": "POST",
+    "input": {
+      "url": "https://fongfog.site",
+      "primary_keyword": "Cosplay"
+    },
+    "output": {
+      "primary_keyword": "Cosplay",
+      "keyword_analysis": {
+        "word_count": 1015,
+        "primary_keyword": {
+          "keyword": "Cosplay",
+          "exact_matches": 0,
+          "total_occurrences": 0,
+          "density": 0.0,
+          "target_density": 1.5,
+          "density_status": "too_low",
+          "positions": [],
+          "critical_placements": {
+            "in_first_100_words": false,
+            "in_conclusion": false,
+            "in_h1": false,
+            "in_h2_headings": "0/0",
+            "h2_keyword_ratio": 0
+          },
+          "section_distribution": [
+            {
+              "section_index": 0,
+              "section_type": "intro",
+              "header": "",
+              "keyword_count": 0,
+              "word_count": 1015,
+              "density": 0.0
+            }
+          ]
+        },
+        "keyword_stuffing": {
+          "risk_level": "none",
+          "warnings": [],
+          "safe": true
+        },
+        "distribution_heatmap": [
+          {
+            "section": "Section 1",
+            "keyword_count": 0,
+            "heat_level": 0,
+            "density": 0.0
+          }
+        ],
+        "lsi_keywords": [
+          "studio",
+          "ngay",
+          "trong",
+          "concept",
+          "file",
+          "fongfog",
+          "makeup",
+          "albums",
+          "inbox",
+          "sale"
+        ],
+        "recommendations": [
+          "⚠️ Primary keyword density is too low (0.0%). Target is 1.5%. Add Cosplay naturally in more paragraphs.",
+          "⚠️ Primary keyword missing from first 100 words - add it to the introduction",
+          "⚠️ Primary keyword missing from H1 headline - include it in the title",
+          "ℹ️ Primary keyword appears in only 0/0 H2 headings. Aim for 2-3 H2s with keyword variations.",
+          "ℹ️ Consider mentioning primary keyword in the conclusion for better optimization"
+        ]
+      },
+      "seo_quality": {
+        "overall_score": 56.8,
+        "grade": "F (Yếu)",
+        "publishing_ready": false,
+        "category_scores": {
+          "content": 60,
+          "keyword_optimization": 50,
+          "meta_elements": 45,
+          "structure": 55,
+          "links": 65,
+          "readability": 75
+        },
+        "critical_issues": [
+          "Nội dung quá ngắn (1015 từ). Tối thiểu cần 2000 từ.",
+          "Từ khóa chính \"Cosplay\" chưa xuất hiện trong H1",
+          "Từ khóa chính \"Cosplay\" chưa xuất hiện trong 100 từ đầu tiên",
+          "Thiếu meta description",
+          "Thiếu tiêu đề H1"
+        ],
+        "warnings": [
+          "Đoạn văn quá dài (trung bình 1015 từ). Nên chia thành đoạn 2-4 câu.",
+          "Keyword density quá thấp (0.0%). Nên đạt 1.0-2.0%",
+          "Từ khóa chính \"Cosplay\" chưa có trong meta title",
+          "Quá ít mục H2 (0). Nên bổ sung thêm (khuyến nghị: 6).",
+          "Internal links quá ít (hiện tại: 0). Nên bổ sung thêm 3 liên kết nội bộ (khuyến nghị: 5).",
+          "External links quá ít (hiện tại: 0). Nên bổ sung nguồn uy tín (khuyến nghị: 3).",
+          "Câu trung bình dài 56.4 từ. Nên dưới 25 từ để dễ đọc hơn.",
+          "10 câu quá dài (>37.5 từ). Nên tách thành các câu ngắn hơn."
+        ],
+        "suggestions": [
+          "Chưa có danh sách (bullet/numbered list). Nên sử dụng để tăng khả năng quét nội dung."
+        ],
+        "details": {
+          "word_count": 1015,
+          "h2_count": 0,
+          "has_h1": false,
+          "keyword_in_h1": false,
+          "keyword_in_first_100": false
+        }
+      },
+      "cro_analysis": {
+        "overall_cro_score": 15.2,
+        "cro_grade": "F (Yếu)",
+        "cro_checklist": {
+          "score": 21,
+          "grade": "F (Yếu)",
+          "passes_audit": false,
+          "summary": {
+            "total_checks": 28,
+            "passed": 6,
+            "failed": 22,
+            "critical_failures": 6,
+            "warnings": 9
+          },
+          "critical_failures": [
+            "headline: Có tiêu đề (Headline)",
+            "value_proposition: Có giá trị cốt lõi",
+            "social_proof: Có đánh giá khách hàng",
+            "ctas: Có CTA",
+            "ctas: CTA trên màn hình đầu",
+            "risk_reversal: Có dùng thử miễn phí"
+          ],
+          "warnings": [
+            "headline: Tiêu đề chứa lợi ích",
+            "headline: Tiêu đề không chung chung",
+            "social_proof: Hiển thị số khách hàng",
+            "ctas: Số lượng CTA phù hợp",
+            "objection_handling: Có mục FAQ hoặc Hỏi-Đáp",
+            "risk_reversal: Không cần thẻ tín dụng",
+            "risk_reversal: Cam kết giảm rủi ro gần CTA",
+            "structure: Đủ số mục nội dung",
+            "structure: Độ dài nội dung phù hợp"
+          ],
+          "category_scores": {
+            "headline": 0,
+            "value_proposition": 67,
+            "social_proof": 25,
+            "ctas": 40,
+            "objection_handling": 0,
+            "risk_reversal": 0,
+            "urgency": 50,
+            "structure": 0
+          },
+          "recommendations": [
+            {
+              "priority": "critical",
+              "category": "headline",
+              "check": "Có tiêu đề (Headline)",
+              "recommendation": "Thiếu tiêu đề H1"
+            },
+            {
+              "priority": "critical",
+              "category": "value_proposition",
+              "check": "Có giá trị cốt lõi",
+              "recommendation": "Chưa có giá trị cốt lõi rõ ràng"
+            },
+            {
+              "priority": "critical",
+              "category": "social_proof",
+              "check": "Có đánh giá khách hàng",
+              "recommendation": "Nên thêm đánh giá khách hàng"
+            },
+            {
+              "priority": "critical",
+              "category": "ctas",
+              "check": "Có CTA",
+              "recommendation": "Không tìm thấy CTA"
+            },
+            {
+              "priority": "critical",
+              "category": "ctas",
+              "check": "CTA trên màn hình đầu",
+              "recommendation": "Nên thêm CTA trên màn hình đầu"
+            },
+            {
+              "priority": "critical",
+              "category": "risk_reversal",
+              "check": "Có dùng thử miễn phí",
+              "recommendation": "Nên thêm ưu đãi dùng thử"
+            },
+            {
+              "priority": "important",
+              "category": "headline",
+              "check": "Tiêu đề chứa lợi ích",
+              "recommendation": "Chưa có lợi ích rõ ràng trong tiêu đề"
+            },
+            {
+              "priority": "important",
+              "category": "headline",
+              "check": "Tiêu đề không chung chung",
+              "recommendation": "Phát hiện mẫu tiêu đề chung chung"
+            },
+            {
+              "priority": "important",
+              "category": "social_proof",
+              "check": "Hiển thị số khách hàng",
+              "recommendation": "Nên thêm số lượng khách hàng"
+            },
+            {
+              "priority": "important",
+              "category": "ctas",
+              "check": "Số lượng CTA phù hợp",
+              "recommendation": "0 CTA (khuyến nghị: 3-6)"
+            }
+          ]
+        },
+        "cta_analysis": {
+          "total_ctas": 0,
+          "avg_quality_score": 0,
+          "distribution_score": 0,
+          "goal_alignment_score": 20,
+          "overall_effectiveness": 6.0,
+          "ctas_found": [],
+          "distribution": {
+            "first_cta_position": null,
+            "has_above_fold": false,
+            "has_closing": false,
+            "distribution_quality": "none"
+          },
+          "recommendations": [
+            {
+              "priority": "high",
+              "category": "distribution",
+              "issue": "No CTA above the fold",
+              "recommendation": "Add a prominent CTA in the first 20% of the page, ideally right after the headline."
+            },
+            {
+              "priority": "high",
+              "category": "distribution",
+              "issue": "No closing CTA",
+              "recommendation": "Add a strong CTA at the end of the page to capture visitors who read through."
+            },
+            {
+              "priority": "high",
+              "category": "goal_alignment",
+              "issue": "CTAs not aligned with trial goal",
+              "recommendation": "Use goal-specific CTA text. Examples: Start Your Free Trial, Try Free for 14 Days"
+            },
+            {
+              "priority": "medium",
+              "category": "distribution",
+              "issue": "Only 0 CTA(s) found",
+              "recommendation": "Add CTAs throughout the page. Aim for 3-5 CTAs distributed across sections."
+            }
+          ]
+        },
+        "above_fold_analysis": {
+          "overall_score": 7.0,
+          "grade": "F (Yếu)",
+          "passes_5_second_test": false,
+          "element_scores": {
+            "headline": 0,
+            "value_prop": 10,
+            "cta": 0,
+            "trust": 30
+          },
+          "headline_quality": "missing",
+          "headline_text": null,
+          "cta_above_fold": false,
+          "cta_text": null,
+          "trust_signal_above_fold": false,
+          "issues": [
+            {
+              "severity": "critical",
+              "element": "headline",
+              "issue": "Thiếu tiêu đề H1"
+            },
+            {
+              "severity": "critical",
+              "element": "cta",
+              "issue": "Không có CTA trên màn hình đầu"
+            },
+            {
+              "severity": "warning",
+              "element": "value_prop",
+              "issue": "Giá trị cốt lõi chưa rõ ràng"
+            },
+            {
+              "severity": "suggestion",
+              "element": "trust",
+              "issue": "Nên thêm tín hiệu uy tín trên màn hình đầu"
+            }
+          ],
+          "recommendations": [
+            "Thêm tiêu đề H1 tập trung vào lợi ích ngay lập tức.",
+            "Thêm nút CTA nổi bật trên màn hình đầu.",
+            "Làm rõ giá trị cốt lõi: nêu rõ khách nhận được gì và nhanh như thế nào.",
+            "Thêm tín hiệu uy tín: số khách hàng, đánh giá, hoặc nhận xét ngắn."
+          ]
+        },
+        "trust_signals": {
+          "overall_score": 0,
+          "grade": "F (Yếu)",
+          "summary": {
+            "testimonials_found": 0,
+            "has_social_proof": false,
+            "has_risk_reversal": false,
+            "authority_signals": 0,
+            "security_present": false
+          },
+          "strengths": [],
+          "weaknesses": [
+            "Chưa có đánh giá khách hàng",
+            "Chưa có bằng chứng xã hội",
+            "Chưa có cam kết giảm rủi ro"
+          ],
+          "testimonials": [],
+          "social_proof": {
+            "customer_counts": [],
+            "specific_results": []
+          },
+          "risk_reversals": {
+            "free_trial_found": false,
+            "no_credit_card_found": false,
+            "cancel_anytime_found": false,
+            "guarantee_found": false
+          },
+          "authority_signals": {
+            "media_mentions": false,
+            "awards": false,
+            "years_in_business": false
+          },
+          "recommendations": [
+            {
+              "priority": "high",
+              "category": "testimonials",
+              "issue": "Chưa có đánh giá khách hàng",
+              "recommendation": "Thêm 2-3 đánh giá khách hàng có tên và kết quả cụ thể."
+            },
+            {
+              "priority": "high",
+              "category": "social_proof",
+              "issue": "Chưa hiển thị số lượng khách hàng",
+              "recommendation": "Thêm số lượng khách hàng (ví dụ: \"50.000+ khách hàng tin tưởng\" hoặc \"Hàng nghìn khách hàng\")."
+            },
+            {
+              "priority": "high",
+              "category": "risk_reversal",
+              "issue": "Chưa có cam kết giảm rủi ro",
+              "recommendation": "Thêm cam kết giảm rủi ro gần CTA: thời gian dùng thử, không cần thẻ, hoặc bảo hành/hoàn tiền."
+            },
+            {
+              "priority": "medium",
+              "category": "social_proof",
+              "issue": "Chưa có kết quả cụ thể",
+              "recommendation": "Thêm kết quả cụ thể của khách hàng với số liệu (ví dụ: \"tăng lượng truy cập 300%\")."
+            },
+            {
+              "priority": "low",
+              "category": "authority",
+              "issue": "Chưa có tín hiệu uy tín",
+              "recommendation": "Nên thêm: số năm hoạt động, báo chí đưa tin, giải thưởng, hoặc đối tác."
+            }
+          ]
+        },
+        "sales_risk_alerts": [
+          {
+            "severity": "high",
+            "message": "Điểm CRO thấp — trang khó chuyển đổi khách truy cập."
+          },
+          {
+            "severity": "high",
+            "message": "Phát hiện 6 lỗi CRO nghiêm trọng."
+          },
+          {
+            "severity": "high",
+            "message": "Không tìm thấy CTA nào — khách không có hành động rõ ràng."
+          },
+          {
+            "severity": "medium",
+            "message": "CTA chưa phù hợp với mục tiêu chuyển đổi."
+          },
+          {
+            "severity": "high",
+            "message": "Chưa có bằng chứng xã hội — độ tin cậy thấp với khách mới."
+          },
+          {
+            "severity": "medium",
+            "message": "Chưa có cam kết giảm rủi ro (bảo hành/dùng thử/hoàn tiền) — khách có thể do dự."
+          },
+          {
+            "severity": "high",
+            "message": "Trang không đạt bài test 5 giây — khách có thể rời ngay."
+          },
+          {
+            "severity": "high",
+            "message": "Không có CTA hiển thị trên màn hình đầu."
+          }
+        ]
+      }
+    },
+    "status_code": 200,
+    "duration_ms": 6434.0,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 126,
+    "timestamp": "2026-05-13T08:36:03.214792",
+    "endpoint": "/api/ga4-overview",
+    "method": "POST",
+    "input": {
+      "days": 30
+    },
+    "output": {
+      "fetched_at": "2026-05-13T08:36:03.186548",
+      "period_days": 30,
+      "data_source": "error",
+      "property_id": "",
+      "overview": {},
+      "traffic_sources": [],
+      "top_pages": [],
+      "daily_sessions": [],
+      "error": "GA4_PROPERTY_ID chưa được cấu hình. Vào Google Analytics → Admin → Property Details để lấy Property ID."
+    },
+    "status_code": 200,
+    "duration_ms": 2.8,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 127,
+    "timestamp": "2026-05-13T08:36:03.281154",
+    "endpoint": "/api/ai-keywords",
+    "method": "POST",
+    "input": {},
+    "output": {
+      "analyzed_at": "2026-05-13T08:36:03.185966",
+      "site_url": "",
+      "gsc_keywords": [],
+      "total_clicks": 0,
+      "total_impressions": 0,
+      "ai_analysis": "",
+      "recommended_keywords": [],
+      "keyword_clusters": [],
+      "content_strategy": [],
+      "top_performing": [],
+      "quick_wins": [],
+      "summary": "Cần kết nối Google Search Console để lấy dữ liệu từ khóa thật trước khi phân tích.",
+      "data_source": "no_data",
+      "ai_provider": "none",
+      "error": "Chưa có dữ liệu GSC. Cấu hình Google Search Console để phân tích từ khóa thật."
+    },
+    "status_code": 200,
+    "duration_ms": 80.1,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 128,
+    "timestamp": "2026-05-13T08:36:03.343066",
+    "endpoint": "/api/serp/live",
+    "method": "POST",
+    "input": {
+      "keyword": "mitsubishi binh phuoc",
+      "location": "vn",
+      "num_results": 10
+    },
+    "output": null,
+    "status_code": 500,
+    "duration_ms": 139.6,
+    "error": "invalid character '—' (U+2014) (google_serp_scraper.py, line 61)",
+    "success": false
+  },
+  {
+    "id": 129,
+    "timestamp": "2026-05-13T08:36:03.417653",
+    "endpoint": "/api/ga4-overview",
+    "method": "POST",
+    "input": {
+      "days": 30
+    },
+    "output": {
+      "fetched_at": "2026-05-13T08:36:03.323027",
+      "period_days": 30,
+      "data_source": "error",
+      "property_id": "",
+      "overview": {},
+      "traffic_sources": [],
+      "top_pages": [],
+      "daily_sessions": [],
+      "error": "GA4_PROPERTY_ID chưa được cấu hình. Vào Google Analytics → Admin → Property Details để lấy Property ID."
+    },
+    "status_code": 200,
+    "duration_ms": 201.9,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 130,
+    "timestamp": "2026-05-13T08:36:03.489071",
+    "endpoint": "/api/ai-keywords",
+    "method": "POST",
+    "input": {},
+    "output": {
+      "analyzed_at": "2026-05-13T08:36:03.264110",
+      "site_url": "",
+      "gsc_keywords": [],
+      "total_clicks": 0,
+      "total_impressions": 0,
+      "ai_analysis": "",
+      "recommended_keywords": [],
+      "keyword_clusters": [],
+      "content_strategy": [],
+      "top_performing": [],
+      "quick_wins": [],
+      "summary": "Cần kết nối Google Search Console để lấy dữ liệu từ khóa thật trước khi phân tích.",
+      "data_source": "no_data",
+      "ai_provider": "none",
+      "error": "Chưa có dữ liệu GSC. Cấu hình Google Search Console để phân tích từ khóa thật."
+    },
+    "status_code": 200,
+    "duration_ms": 286.5,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 131,
+    "timestamp": "2026-05-13T08:36:03.549702",
+    "endpoint": "/api/serp/live",
+    "method": "POST",
+    "input": {
+      "keyword": "mitsubishi binh phuoc",
+      "location": "vn",
+      "num_results": 10
+    },
+    "output": null,
+    "status_code": 500,
+    "duration_ms": 346.5,
+    "error": "invalid character '—' (U+2014) (google_serp_scraper.py, line 61)",
+    "success": false
+  },
+  {
+    "id": 132,
+    "timestamp": "2026-05-13T08:36:12.599772",
+    "endpoint": "/api/audit-url",
+    "method": "POST",
+    "input": {
+      "url": "https://fongfog.site",
+      "primary_keyword": "cosplay"
+    },
+    "output": {
+      "primary_keyword": "cosplay",
+      "keyword_analysis": {
+        "word_count": 1015,
+        "primary_keyword": {
+          "keyword": "cosplay",
+          "exact_matches": 0,
+          "total_occurrences": 0,
+          "density": 0.0,
+          "target_density": 1.5,
+          "density_status": "too_low",
+          "positions": [],
+          "critical_placements": {
+            "in_first_100_words": false,
+            "in_conclusion": false,
+            "in_h1": false,
+            "in_h2_headings": "0/0",
+            "h2_keyword_ratio": 0
+          },
+          "section_distribution": [
+            {
+              "section_index": 0,
+              "section_type": "intro",
+              "header": "",
+              "keyword_count": 0,
+              "word_count": 1015,
+              "density": 0.0
+            }
+          ]
+        },
+        "keyword_stuffing": {
+          "risk_level": "none",
+          "warnings": [],
+          "safe": true
+        },
+        "distribution_heatmap": [
+          {
+            "section": "Section 1",
+            "keyword_count": 0,
+            "heat_level": 0,
+            "density": 0.0
+          }
+        ],
+        "lsi_keywords": [
+          "studio",
+          "ngay",
+          "trong",
+          "concept",
+          "file",
+          "fongfog",
+          "makeup",
+          "albums",
+          "inbox",
+          "sale"
+        ],
+        "recommendations": [
+          "⚠️ Primary keyword density is too low (0.0%). Target is 1.5%. Add cosplay naturally in more paragraphs.",
+          "⚠️ Primary keyword missing from first 100 words - add it to the introduction",
+          "⚠️ Primary keyword missing from H1 headline - include it in the title",
+          "ℹ️ Primary keyword appears in only 0/0 H2 headings. Aim for 2-3 H2s with keyword variations.",
+          "ℹ️ Consider mentioning primary keyword in the conclusion for better optimization"
+        ]
+      },
+      "seo_quality": {
+        "overall_score": 56.8,
+        "grade": "F (Yếu)",
+        "publishing_ready": false,
+        "category_scores": {
+          "content": 60,
+          "keyword_optimization": 50,
+          "meta_elements": 45,
+          "structure": 55,
+          "links": 65,
+          "readability": 75
+        },
+        "critical_issues": [
+          "Nội dung quá ngắn (1015 từ). Tối thiểu cần 2000 từ.",
+          "Từ khóa chính \"cosplay\" chưa xuất hiện trong H1",
+          "Từ khóa chính \"cosplay\" chưa xuất hiện trong 100 từ đầu tiên",
+          "Thiếu meta description",
+          "Thiếu tiêu đề H1"
+        ],
+        "warnings": [
+          "Đoạn văn quá dài (trung bình 1015 từ). Nên chia thành đoạn 2-4 câu.",
+          "Keyword density quá thấp (0.0%). Nên đạt 1.0-2.0%",
+          "Từ khóa chính \"cosplay\" chưa có trong meta title",
+          "Quá ít mục H2 (0). Nên bổ sung thêm (khuyến nghị: 6).",
+          "Internal links quá ít (hiện tại: 0). Nên bổ sung thêm 3 liên kết nội bộ (khuyến nghị: 5).",
+          "External links quá ít (hiện tại: 0). Nên bổ sung nguồn uy tín (khuyến nghị: 3).",
+          "Câu trung bình dài 56.4 từ. Nên dưới 25 từ để dễ đọc hơn.",
+          "10 câu quá dài (>37.5 từ). Nên tách thành các câu ngắn hơn."
+        ],
+        "suggestions": [
+          "Chưa có danh sách (bullet/numbered list). Nên sử dụng để tăng khả năng quét nội dung."
+        ],
+        "details": {
+          "word_count": 1015,
+          "h2_count": 0,
+          "has_h1": false,
+          "keyword_in_h1": false,
+          "keyword_in_first_100": false
+        }
+      },
+      "cro_analysis": {
+        "overall_cro_score": 15.2,
+        "cro_grade": "F (Yếu)",
+        "cro_checklist": {
+          "score": 21,
+          "grade": "F (Yếu)",
+          "passes_audit": false,
+          "summary": {
+            "total_checks": 28,
+            "passed": 6,
+            "failed": 22,
+            "critical_failures": 6,
+            "warnings": 9
+          },
+          "critical_failures": [
+            "headline: Có tiêu đề (Headline)",
+            "value_proposition: Có giá trị cốt lõi",
+            "social_proof: Có đánh giá khách hàng",
+            "ctas: Có CTA",
+            "ctas: CTA trên màn hình đầu",
+            "risk_reversal: Có dùng thử miễn phí"
+          ],
+          "warnings": [
+            "headline: Tiêu đề chứa lợi ích",
+            "headline: Tiêu đề không chung chung",
+            "social_proof: Hiển thị số khách hàng",
+            "ctas: Số lượng CTA phù hợp",
+            "objection_handling: Có mục FAQ hoặc Hỏi-Đáp",
+            "risk_reversal: Không cần thẻ tín dụng",
+            "risk_reversal: Cam kết giảm rủi ro gần CTA",
+            "structure: Đủ số mục nội dung",
+            "structure: Độ dài nội dung phù hợp"
+          ],
+          "category_scores": {
+            "headline": 0,
+            "value_proposition": 67,
+            "social_proof": 25,
+            "ctas": 40,
+            "objection_handling": 0,
+            "risk_reversal": 0,
+            "urgency": 50,
+            "structure": 0
+          },
+          "recommendations": [
+            {
+              "priority": "critical",
+              "category": "headline",
+              "check": "Có tiêu đề (Headline)",
+              "recommendation": "Thiếu tiêu đề H1"
+            },
+            {
+              "priority": "critical",
+              "category": "value_proposition",
+              "check": "Có giá trị cốt lõi",
+              "recommendation": "Chưa có giá trị cốt lõi rõ ràng"
+            },
+            {
+              "priority": "critical",
+              "category": "social_proof",
+              "check": "Có đánh giá khách hàng",
+              "recommendation": "Nên thêm đánh giá khách hàng"
+            },
+            {
+              "priority": "critical",
+              "category": "ctas",
+              "check": "Có CTA",
+              "recommendation": "Không tìm thấy CTA"
+            },
+            {
+              "priority": "critical",
+              "category": "ctas",
+              "check": "CTA trên màn hình đầu",
+              "recommendation": "Nên thêm CTA trên màn hình đầu"
+            },
+            {
+              "priority": "critical",
+              "category": "risk_reversal",
+              "check": "Có dùng thử miễn phí",
+              "recommendation": "Nên thêm ưu đãi dùng thử"
+            },
+            {
+              "priority": "important",
+              "category": "headline",
+              "check": "Tiêu đề chứa lợi ích",
+              "recommendation": "Chưa có lợi ích rõ ràng trong tiêu đề"
+            },
+            {
+              "priority": "important",
+              "category": "headline",
+              "check": "Tiêu đề không chung chung",
+              "recommendation": "Phát hiện mẫu tiêu đề chung chung"
+            },
+            {
+              "priority": "important",
+              "category": "social_proof",
+              "check": "Hiển thị số khách hàng",
+              "recommendation": "Nên thêm số lượng khách hàng"
+            },
+            {
+              "priority": "important",
+              "category": "ctas",
+              "check": "Số lượng CTA phù hợp",
+              "recommendation": "0 CTA (khuyến nghị: 3-6)"
+            }
+          ]
+        },
+        "cta_analysis": {
+          "total_ctas": 0,
+          "avg_quality_score": 0,
+          "distribution_score": 0,
+          "goal_alignment_score": 20,
+          "overall_effectiveness": 6.0,
+          "ctas_found": [],
+          "distribution": {
+            "first_cta_position": null,
+            "has_above_fold": false,
+            "has_closing": false,
+            "distribution_quality": "none"
+          },
+          "recommendations": [
+            {
+              "priority": "high",
+              "category": "distribution",
+              "issue": "No CTA above the fold",
+              "recommendation": "Add a prominent CTA in the first 20% of the page, ideally right after the headline."
+            },
+            {
+              "priority": "high",
+              "category": "distribution",
+              "issue": "No closing CTA",
+              "recommendation": "Add a strong CTA at the end of the page to capture visitors who read through."
+            },
+            {
+              "priority": "high",
+              "category": "goal_alignment",
+              "issue": "CTAs not aligned with trial goal",
+              "recommendation": "Use goal-specific CTA text. Examples: Start Your Free Trial, Try Free for 14 Days"
+            },
+            {
+              "priority": "medium",
+              "category": "distribution",
+              "issue": "Only 0 CTA(s) found",
+              "recommendation": "Add CTAs throughout the page. Aim for 3-5 CTAs distributed across sections."
+            }
+          ]
+        },
+        "above_fold_analysis": {
+          "overall_score": 7.0,
+          "grade": "F (Yếu)",
+          "passes_5_second_test": false,
+          "element_scores": {
+            "headline": 0,
+            "value_prop": 10,
+            "cta": 0,
+            "trust": 30
+          },
+          "headline_quality": "missing",
+          "headline_text": null,
+          "cta_above_fold": false,
+          "cta_text": null,
+          "trust_signal_above_fold": false,
+          "issues": [
+            {
+              "severity": "critical",
+              "element": "headline",
+              "issue": "Thiếu tiêu đề H1"
+            },
+            {
+              "severity": "critical",
+              "element": "cta",
+              "issue": "Không có CTA trên màn hình đầu"
+            },
+            {
+              "severity": "warning",
+              "element": "value_prop",
+              "issue": "Giá trị cốt lõi chưa rõ ràng"
+            },
+            {
+              "severity": "suggestion",
+              "element": "trust",
+              "issue": "Nên thêm tín hiệu uy tín trên màn hình đầu"
+            }
+          ],
+          "recommendations": [
+            "Thêm tiêu đề H1 tập trung vào lợi ích ngay lập tức.",
+            "Thêm nút CTA nổi bật trên màn hình đầu.",
+            "Làm rõ giá trị cốt lõi: nêu rõ khách nhận được gì và nhanh như thế nào.",
+            "Thêm tín hiệu uy tín: số khách hàng, đánh giá, hoặc nhận xét ngắn."
+          ]
+        },
+        "trust_signals": {
+          "overall_score": 0,
+          "grade": "F (Yếu)",
+          "summary": {
+            "testimonials_found": 0,
+            "has_social_proof": false,
+            "has_risk_reversal": false,
+            "authority_signals": 0,
+            "security_present": false
+          },
+          "strengths": [],
+          "weaknesses": [
+            "Chưa có đánh giá khách hàng",
+            "Chưa có bằng chứng xã hội",
+            "Chưa có cam kết giảm rủi ro"
+          ],
+          "testimonials": [],
+          "social_proof": {
+            "customer_counts": [],
+            "specific_results": []
+          },
+          "risk_reversals": {
+            "free_trial_found": false,
+            "no_credit_card_found": false,
+            "cancel_anytime_found": false,
+            "guarantee_found": false
+          },
+          "authority_signals": {
+            "media_mentions": false,
+            "awards": false,
+            "years_in_business": false
+          },
+          "recommendations": [
+            {
+              "priority": "high",
+              "category": "testimonials",
+              "issue": "Chưa có đánh giá khách hàng",
+              "recommendation": "Thêm 2-3 đánh giá khách hàng có tên và kết quả cụ thể."
+            },
+            {
+              "priority": "high",
+              "category": "social_proof",
+              "issue": "Chưa hiển thị số lượng khách hàng",
+              "recommendation": "Thêm số lượng khách hàng (ví dụ: \"50.000+ khách hàng tin tưởng\" hoặc \"Hàng nghìn khách hàng\")."
+            },
+            {
+              "priority": "high",
+              "category": "risk_reversal",
+              "issue": "Chưa có cam kết giảm rủi ro",
+              "recommendation": "Thêm cam kết giảm rủi ro gần CTA: thời gian dùng thử, không cần thẻ, hoặc bảo hành/hoàn tiền."
+            },
+            {
+              "priority": "medium",
+              "category": "social_proof",
+              "issue": "Chưa có kết quả cụ thể",
+              "recommendation": "Thêm kết quả cụ thể của khách hàng với số liệu (ví dụ: \"tăng lượng truy cập 300%\")."
+            },
+            {
+              "priority": "low",
+              "category": "authority",
+              "issue": "Chưa có tín hiệu uy tín",
+              "recommendation": "Nên thêm: số năm hoạt động, báo chí đưa tin, giải thưởng, hoặc đối tác."
+            }
+          ]
+        },
+        "sales_risk_alerts": [
+          {
+            "severity": "high",
+            "message": "Điểm CRO thấp — trang khó chuyển đổi khách truy cập."
+          },
+          {
+            "severity": "high",
+            "message": "Phát hiện 6 lỗi CRO nghiêm trọng."
+          },
+          {
+            "severity": "high",
+            "message": "Không tìm thấy CTA nào — khách không có hành động rõ ràng."
+          },
+          {
+            "severity": "medium",
+            "message": "CTA chưa phù hợp với mục tiêu chuyển đổi."
+          },
+          {
+            "severity": "high",
+            "message": "Chưa có bằng chứng xã hội — độ tin cậy thấp với khách mới."
+          },
+          {
+            "severity": "medium",
+            "message": "Chưa có cam kết giảm rủi ro (bảo hành/dùng thử/hoàn tiền) — khách có thể do dự."
+          },
+          {
+            "severity": "high",
+            "message": "Trang không đạt bài test 5 giây — khách có thể rời ngay."
+          },
+          {
+            "severity": "high",
+            "message": "Không có CTA hiển thị trên màn hình đầu."
+          }
+        ]
+      }
+    },
+    "status_code": 200,
+    "duration_ms": 540.6,
+    "error": null,
+    "success": true
   }
 ]

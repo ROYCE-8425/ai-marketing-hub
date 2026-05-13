@@ -105,10 +105,10 @@ class CROChecker:
 
         # Check: Headline present
         checks.append({
-            'name': 'Headline present',
+            'name': 'Có tiêu đề (Headline)',
             'passed': bool(h1_text),
             'importance': 'critical',
-            'detail': h1_text[:60] if h1_text else 'No H1 found'
+            'detail': h1_text[:60] if h1_text else 'Thiếu tiêu đề H1'
         })
 
         # Check: Headline contains benefit
@@ -116,29 +116,29 @@ class CROChecker:
                          'easy', 'fast', 'simple', 'free', 'without']
         has_benefit = any(word in h1_text.lower() for word in benefit_words) if h1_text else False
         checks.append({
-            'name': 'Headline contains benefit',
+            'name': 'Tiêu đề chứa lợi ích',
             'passed': has_benefit,
             'importance': 'important',
-            'detail': 'Benefit word found' if has_benefit else 'No clear benefit in headline'
+            'detail': 'Có từ lợi ích' if has_benefit else 'Chưa có lợi ích rõ ràng trong tiêu đề'
         })
 
         # Check: Headline length
         good_length = 20 <= len(h1_text) <= 70 if h1_text else False
         checks.append({
-            'name': 'Headline optimal length (20-70 chars)',
+            'name': 'Độ dài tiêu đề tối ưu (20-70 ký tự)',
             'passed': good_length,
             'importance': 'nice_to_have',
-            'detail': f'{len(h1_text)} characters' if h1_text else 'N/A'
+            'detail': f'{len(h1_text)} ký tự' if h1_text else 'N/A'
         })
 
         # Check: Headline not generic
         generic_patterns = [r'^Welcome', r'^The\s+best', r'^Introducing', r'^We\s+']
         is_generic = any(re.search(p, h1_text, re.IGNORECASE) for p in generic_patterns) if h1_text else True
         checks.append({
-            'name': 'Headline not generic',
+            'name': 'Tiêu đề không chung chung',
             'passed': not is_generic,
             'importance': 'important',
-            'detail': 'Appears unique' if not is_generic else 'Generic pattern detected'
+            'detail': 'Tiêu đề độc đáo' if not is_generic else 'Phát hiện mẫu tiêu đề chung chung'
         })
 
         passed = sum(1 for c in checks if c['passed'])
@@ -162,29 +162,29 @@ class CROChecker:
         ]
         has_vp = any(re.search(p, above_fold, re.IGNORECASE) for p in vp_patterns)
         checks.append({
-            'name': 'Value proposition present',
+            'name': 'Có giá trị cốt lõi',
             'passed': has_vp,
             'importance': 'critical',
-            'detail': 'Value proposition found above fold' if has_vp else 'No clear value proposition'
+            'detail': 'Có giá trị cốt lõi trên màn hình đầu' if has_vp else 'Chưa có giá trị cốt lõi rõ ràng'
         })
 
         # Check: Specificity (numbers/results)
         has_specifics = bool(re.search(r'\d+%?|\$\d+|\d+\s+(?:minutes?|days?)', above_fold))
         checks.append({
-            'name': 'Value proposition has specifics',
+            'name': 'Giá trị cốt lõi có số liệu',
             'passed': has_specifics,
             'importance': 'important',
-            'detail': 'Specific numbers found' if has_specifics else 'Add specific numbers/results'
+            'detail': 'Có số liệu cụ thể' if has_specifics else 'Nên thêm số liệu/kết quả cụ thể'
         })
 
         # Check: Target audience clear
         audience_patterns = [r'podcasters?', r'creators?', r'you(?:r)?', r'businesses?']
         addresses_audience = any(re.search(p, above_fold, re.IGNORECASE) for p in audience_patterns)
         checks.append({
-            'name': 'Addresses target audience',
+            'name': 'Xác định đối tượng mục tiêu',
             'passed': addresses_audience,
             'importance': 'nice_to_have',
-            'detail': 'Audience addressed' if addresses_audience else 'Make audience clearer'
+            'detail': 'Có nhắc đến đối tượng' if addresses_audience else 'Nên làm rõ đối tượng hơn'
         })
 
         passed = sum(1 for c in checks if c['passed'])
@@ -203,29 +203,29 @@ class CROChecker:
             content, re.IGNORECASE
         ))
         checks.append({
-            'name': 'Customer count displayed',
+            'name': 'Hiển thị số khách hàng',
             'passed': has_count,
             'importance': 'important',
-            'detail': 'Customer count found' if has_count else 'Add customer count'
+            'detail': 'Có số khách hàng' if has_count else 'Nên thêm số lượng khách hàng'
         })
 
         # Check: Testimonials
         testimonial_count = len(re.findall(r'"[^"]{20,200}"', content))
         has_testimonials = testimonial_count >= 1
         checks.append({
-            'name': 'Has testimonial(s)',
+            'name': 'Có đánh giá khách hàng',
             'passed': has_testimonials,
             'importance': 'critical' if self.page_type == 'seo' else 'important',
-            'detail': f'{testimonial_count} testimonial(s) found' if has_testimonials else 'Add testimonials'
+            'detail': f'{testimonial_count} đánh giá' if has_testimonials else 'Nên thêm đánh giá khách hàng'
         })
 
         # Check: Testimonials have attribution
         has_attribution = bool(re.search(r'—\s*\*?\*?[A-Z][a-z]+', content))
         checks.append({
-            'name': 'Testimonials have names',
-            'passed': has_attribution or not has_testimonials,  # Pass if no testimonials to attribute
+            'name': 'Đánh giá có tên người viết',
+            'passed': has_attribution or not has_testimonials,
             'importance': 'important',
-            'detail': 'Attribution found' if has_attribution else 'Add names to testimonials'
+            'detail': 'Có nguồn xác thực' if has_attribution else 'Nên thêm tên cho đánh giá'
         })
 
         # Check: Specific results in testimonials
@@ -234,10 +234,10 @@ class CROChecker:
             content
         ))
         checks.append({
-            'name': 'Testimonials include specific results',
+            'name': 'Đánh giá có kết quả cụ thể',
             'passed': has_specific_results,
             'importance': 'nice_to_have',
-            'detail': 'Specific results found' if has_specific_results else 'Add numbers to testimonials'
+            'detail': 'Có số liệu cụ thể' if has_specific_results else 'Nên thêm số liệu vào đánh giá'
         })
 
         passed = sum(1 for c in checks if c['passed'])
@@ -257,10 +257,10 @@ class CROChecker:
 
         # Check: CTA present
         checks.append({
-            'name': 'Has CTA(s)',
+            'name': 'Có CTA',
             'passed': cta_count >= 1,
             'importance': 'critical',
-            'detail': f'{cta_count} CTA(s) found' if cta_count else 'No CTAs found'
+            'detail': f'{cta_count} CTA' if cta_count else 'Không tìm thấy CTA'
         })
 
         # Check: CTA count appropriate
@@ -270,10 +270,10 @@ class CROChecker:
             good_count = 2 <= cta_count <= 4
 
         checks.append({
-            'name': 'Appropriate CTA count',
+            'name': 'Số lượng CTA phù hợp',
             'passed': good_count,
             'importance': 'important',
-            'detail': f'{cta_count} CTAs (target: {"3-6" if self.page_type == "seo" else "2-4"})'
+            'detail': f'{cta_count} CTA (khuyến nghị: {"3-6" if self.page_type == "seo" else "2-4"})'
         })
 
         # Check: CTA has action verb
@@ -284,20 +284,20 @@ class CROChecker:
             for cta in cta_texts
         )
         checks.append({
-            'name': 'CTA has action verb',
+            'name': 'CTA có động từ hành động',
             'passed': has_action or cta_count == 0,
             'importance': 'important',
-            'detail': 'Action verb found' if has_action else 'Add action verb to CTA'
+            'detail': 'Có động từ hành động' if has_action else 'Nên thêm động từ hành động vào CTA'
         })
 
         # Check: CTA above fold
         above_fold = content[:700]
         cta_above = bool(re.search(cta_pattern, above_fold))
         checks.append({
-            'name': 'CTA visible above fold',
+            'name': 'CTA trên màn hình đầu',
             'passed': cta_above,
             'importance': 'critical',
-            'detail': 'CTA above fold' if cta_above else 'Add CTA above the fold'
+            'detail': 'Có CTA trên màn hình đầu' if cta_above else 'Nên thêm CTA trên màn hình đầu'
         })
 
         # Check: Goal-aligned CTA
@@ -313,10 +313,10 @@ class CROChecker:
         ) if patterns else True
 
         checks.append({
-            'name': f'CTA aligned with {self.conversion_goal} goal',
+            'name': f'CTA phù hợp mục tiêu {self.conversion_goal}',
             'passed': goal_aligned or cta_count == 0,
             'importance': 'important',
-            'detail': 'Goal-aligned' if goal_aligned else f'Use {self.conversion_goal}-focused CTA text'
+            'detail': 'Phù hợp mục tiêu' if goal_aligned else f'Nên dùng CTA tập trung vào {self.conversion_goal}'
         })
 
         passed = sum(1 for c in checks if c['passed'])
@@ -336,10 +336,10 @@ class CROChecker:
         has_qa = len(re.findall(qa_pattern, content)) >= 2
 
         checks.append({
-            'name': 'FAQ or Q&A section',
+            'name': 'Có mục FAQ hoặc Hỏi-Đáp',
             'passed': has_faq or has_qa,
             'importance': 'important' if self.page_type == 'seo' else 'nice_to_have',
-            'detail': 'FAQ section found' if has_faq or has_qa else 'Add FAQ section'
+            'detail': 'Có mục FAQ' if has_faq or has_qa else 'Nên thêm mục FAQ'
         })
 
         # Check: Addresses common objections
@@ -354,10 +354,10 @@ class CROChecker:
             if re.search(p, content, re.IGNORECASE)
         )
         checks.append({
-            'name': 'Addresses potential objections',
+            'name': 'Xử lý phản đối thường gặp',
             'passed': objections_addressed >= 2,
             'importance': 'nice_to_have',
-            'detail': f'{objections_addressed} objection areas addressed'
+            'detail': f'{objections_addressed} loại phản đối được giải đáp'
         })
 
         passed = sum(1 for c in checks if c['passed'])
@@ -376,28 +376,28 @@ class CROChecker:
             content, re.IGNORECASE
         ))
         checks.append({
-            'name': 'Free trial mentioned',
+            'name': 'Có dùng thử miễn phí',
             'passed': has_trial,
             'importance': 'critical' if self.conversion_goal == 'trial' else 'important',
-            'detail': 'Free trial mentioned' if has_trial else 'Add free trial offer'
+            'detail': 'Có nhắc đến dùng thử miễn phí' if has_trial else 'Nên thêm ưu đãi dùng thử'
         })
 
         # Check: No credit card
         has_no_card = bool(re.search(r'no\s+credit\s+card', content, re.IGNORECASE))
         checks.append({
-            'name': 'No credit card required',
+            'name': 'Không cần thẻ tín dụng',
             'passed': has_no_card,
             'importance': 'important',
-            'detail': 'No card required mentioned' if has_no_card else 'Add "no credit card required"'
+            'detail': 'Có nhắc không cần thẻ' if has_no_card else 'Nên thêm "không cần thẻ tín dụng"'
         })
 
         # Check: Cancel anytime
         has_cancel = bool(re.search(r'cancel\s+(?:any\s*time|whenever)', content, re.IGNORECASE))
         checks.append({
-            'name': 'Cancel anytime mentioned',
+            'name': 'Hủy bất kỳ lúc nào',
             'passed': has_cancel,
             'importance': 'nice_to_have',
-            'detail': 'Cancel policy mentioned' if has_cancel else 'Add cancel policy'
+            'detail': 'Có chính sách hủy' if has_cancel else 'Nên thêm chính sách hủy'
         })
 
         # Check: Risk reversal near CTA
@@ -413,10 +413,10 @@ class CROChecker:
                 break
 
         checks.append({
-            'name': 'Risk reversal near CTA',
+            'name': 'Cam kết giảm rủi ro gần CTA',
             'passed': risk_near_cta,
             'importance': 'important',
-            'detail': 'Risk reversal near CTA' if risk_near_cta else 'Add risk reversal near CTA buttons'
+            'detail': 'Có cam kết gần CTA' if risk_near_cta else 'Nên thêm cam kết giảm rủi ro gần nút CTA'
         })
 
         passed = sum(1 for c in checks if c['passed'])
@@ -442,18 +442,18 @@ class CROChecker:
 
         # Check: Has some urgency (but not required)
         checks.append({
-            'name': 'Uses urgency appropriately',
+            'name': 'Sử dụng tính khẩn cấp phù hợp',
             'passed': urgency_count >= 1,
             'importance': 'nice_to_have',
-            'detail': f'{urgency_count} urgency elements' if urgency_count else 'Consider adding mild urgency'
+            'detail': f'{urgency_count} yếu tố khẩn cấp' if urgency_count else 'Nên thêm yếu tố khẩn cấp nhẹ'
         })
 
         # Check: Not over-using urgency
         checks.append({
-            'name': 'Urgency not excessive',
+            'name': 'Tính khẩn cấp không quá mức',
             'passed': urgency_count <= 5,
             'importance': 'important',
-            'detail': 'Appropriate urgency level' if urgency_count <= 5 else 'Reduce urgency - may seem pushy'
+            'detail': 'Mức khẩn cấp phù hợp' if urgency_count <= 5 else 'Giảm bớt khẩn cấp — có thể gây cảm giác ép buộc'
         })
 
         passed = sum(1 for c in checks if c['passed'])
@@ -474,28 +474,28 @@ class CROChecker:
             good_sections = h2_count >= 2
 
         checks.append({
-            'name': 'Has adequate sections',
+            'name': 'Đủ số mục nội dung',
             'passed': good_sections,
             'importance': 'important',
-            'detail': f'{h2_count} sections (H2s)'
+            'detail': f'{h2_count} mục (H2)'
         })
 
         # Check: Uses bullet lists
         has_lists = bool(re.search(r'^\s*[-*]\s+', content, re.MULTILINE))
         checks.append({
-            'name': 'Uses bullet lists',
+            'name': 'Sử dụng danh sách',
             'passed': has_lists,
             'importance': 'nice_to_have',
-            'detail': 'Bullet lists found' if has_lists else 'Add bullet lists for scannability'
+            'detail': 'Có danh sách' if has_lists else 'Nên thêm danh sách để dễ quét'
         })
 
         # Check: Uses bold for emphasis
         bold_count = len(re.findall(r'\*\*[^*]+\*\*', content))
         checks.append({
-            'name': 'Uses bold for emphasis',
+            'name': 'Sử dụng in đậm nhấn mạnh',
             'passed': bold_count >= 3,
             'importance': 'nice_to_have',
-            'detail': f'{bold_count} bold elements'
+            'detail': f'{bold_count} đoạn in đậm'
         })
 
         # Check: Word count appropriate
@@ -506,10 +506,10 @@ class CROChecker:
             good_length = 400 <= word_count <= 800
 
         checks.append({
-            'name': 'Appropriate content length',
+            'name': 'Độ dài nội dung phù hợp',
             'passed': good_length,
             'importance': 'important',
-            'detail': f'{word_count} words (target: {"1500-2500" if self.page_type == "seo" else "400-800"})'
+            'detail': f'{word_count} từ (khuyến nghị: {"1500-2500" if self.page_type == "seo" else "400-800"})'
         })
 
         passed = sum(1 for c in checks if c['passed'])
@@ -555,15 +555,15 @@ class CROChecker:
     def _get_grade(self, score: int) -> str:
         """Convert score to letter grade"""
         if score >= 90:
-            return "A (Excellent)"
+            return "A (Xuất sắc)"
         elif score >= 80:
-            return "B (Good)"
+            return "B (Tốt)"
         elif score >= 70:
-            return "C (Acceptable)"
+            return "C (Chấp nhận được)"
         elif score >= 60:
-            return "D (Needs Work)"
+            return "D (Cần cải thiện)"
         else:
-            return "F (Poor)"
+            return "F (Yếu)"
 
 
 # Convenience function

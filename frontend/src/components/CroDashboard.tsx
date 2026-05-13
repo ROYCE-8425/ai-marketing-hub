@@ -1,3 +1,4 @@
+import { CRO_CATEGORY_LABELS, ATF_ELEMENT_LABELS, localizeCategory } from "../lib/i18n";
 import type {
   CroAnalysis,
   SalesRiskAlert,
@@ -75,19 +76,19 @@ function CtaCard({ cta }: { cta: CtaAnalysis }) {
     : "#ef4444";
 
   return (
-    <GlassCard title="Call-to-Action Analysis" accent="#22d3ee">
+    <GlassCard title="Phân tích CTA (Call-to-Action)" accent="#22d3ee">
       <div className="cta-grid">
         <div className="cta-stat">
           <span className="cta-stat-num" style={{ color: qualityColor }}>
             {cta.total_ctas}
           </span>
-          <span className="cta-stat-lbl">CTAs Found</span>
+          <span className="cta-stat-lbl">Số lượng CTA</span>
         </div>
         <div className="cta-stat">
           <span className="cta-stat-num" style={{ color: qualityColor }}>
             {cta.avg_quality_score}
           </span>
-          <span className="cta-stat-lbl">Quality Score</span>
+          <span className="cta-stat-lbl">Điểm chất lượng</span>
         </div>
         <div className="cta-stat">
           <span className="cta-stat-num">
@@ -95,7 +96,7 @@ function CtaCard({ cta }: { cta: CtaAnalysis }) {
               ? `${cta.distribution.first_cta_position.toFixed(0)}%`
               : "—"}
           </span>
-          <span className="cta-stat-lbl">First CTA Position</span>
+          <span className="cta-stat-lbl">Vị trí CTA đầu tiên</span>
         </div>
         <div className="cta-stat">
           <span
@@ -104,15 +105,15 @@ function CtaCard({ cta }: { cta: CtaAnalysis }) {
               color: cta.distribution.has_above_fold ? "#10b981" : "#ef4444",
             }}
           >
-            {cta.distribution.has_above_fold ? "Yes" : "No"}
+            {cta.distribution.has_above_fold ? "Có" : "Không"}
           </span>
-          <span className="cta-stat-lbl">Above Fold</span>
+          <span className="cta-stat-lbl">Trên màn hình đầu</span>
         </div>
       </div>
 
       {cta.ctas_found.length > 0 && (
         <div className="cta-list">
-          <p className="cta-list-title">CTAs Detected</p>
+          <p className="cta-list-title">Danh sách CTA</p>
           {cta.ctas_found.map((c, i) => (
             <div key={i} className="cta-item">
               <span className="cta-item-text">"{c.text}"</span>
@@ -151,7 +152,7 @@ function AboveFoldCard({ atf }: { atf: AboveFoldAnalysis }) {
   const passColor = atf.passes_5_second_test ? "#10b981" : "#ef4444";
 
   return (
-    <GlassCard title="Above the Fold — First Impression" accent="#a78bfa">
+    <GlassCard title="Above the Fold (Màn hình đầu tiên)" accent="#a78bfa">
       <div className="atf-summary">
         <div
           className="atf-pass-badge"
@@ -163,7 +164,7 @@ function AboveFoldCard({ atf }: { atf: AboveFoldAnalysis }) {
           }}
         >
           <span style={{ color: passColor, fontWeight: 700 }}>
-            {atf.passes_5_second_test ? "✓ Passes 5-Second Test" : "✗ Fails 5-Second Test"}
+            {atf.passes_5_second_test ? "✓ Đạt bài test 5 giây" : "✗ Không đạt bài test 5 giây"}
           </span>
         </div>
         <div className="atf-score-large" style={{ color: passColor }}>
@@ -175,10 +176,10 @@ function AboveFoldCard({ atf }: { atf: AboveFoldAnalysis }) {
       <div className="element-grid">
         {(
           [
-            { key: "headline", label: "Headline" },
-            { key: "value_prop", label: "Value Prop" },
-            { key: "cta", label: "CTA" },
-            { key: "trust", label: "Trust" },
+            { key: "headline", label: ATF_ELEMENT_LABELS.headline },
+            { key: "value_prop", label: ATF_ELEMENT_LABELS.value_prop },
+            { key: "cta", label: ATF_ELEMENT_LABELS.cta },
+            { key: "trust", label: ATF_ELEMENT_LABELS.trust },
           ] as const
         ).map(({ key, label }) => {
           const score = atf.element_scores[key];
@@ -200,7 +201,7 @@ function AboveFoldCard({ atf }: { atf: AboveFoldAnalysis }) {
 
       {atf.headline_text && (
         <div className="atf-hl-preview">
-          <span className="atf-hl-label">Headline</span>
+          <span className="atf-hl-label">Tiêu đề</span>
           <p className="atf-hl-text">"{atf.headline_text}"</p>
           <span className={`atf-hl-quality ${atf.headline_quality}`}>
             {atf.headline_quality}
@@ -210,7 +211,7 @@ function AboveFoldCard({ atf }: { atf: AboveFoldAnalysis }) {
 
       {atf.cta_text && (
         <div className="atf-cta-preview">
-          <span className="atf-hl-label">First CTA</span>
+          <span className="atf-hl-label">CTA đầu tiên</span>
           <p className="atf-hl-text" style={{ color: "#22d3ee" }}>
             "{atf.cta_text}"
           </p>
@@ -237,7 +238,7 @@ function TrustCard({ trust }: { trust: TrustSignals }) {
     : "#ef4444";
 
   return (
-    <GlassCard title="Trust & Social Proof" accent="#10b981">
+    <GlassCard title="Trust Signals (Tín hiệu uy tín)" accent="#10b981">
       <div className="trust-score-row">
         <div className="trust-score-circle" style={{ borderColor: scoreColor }}>
           <span style={{ color: scoreColor }}>{trust.overall_score}</span>
@@ -246,22 +247,22 @@ function TrustCard({ trust }: { trust: TrustSignals }) {
         <div className="trust-meta">
           <div className="trust-meta-item">
             <span className={`trust-dot ${trust.summary.testimonials_found > 0 ? "on" : "off"}`} />
-            <span>{trust.summary.testimonials_found} testimonial(s)</span>
+            <span>{trust.summary.testimonials_found} đánh giá khách hàng</span>
           </div>
           <div className="trust-meta-item">
             <span className={`trust-dot ${trust.summary.has_social_proof ? "on" : "off"}`} />
-            <span>Social proof</span>
+            <span>Bằng chứng xã hội</span>
           </div>
           <div className="trust-meta-item">
             <span className={`trust-dot ${trust.summary.has_risk_reversal ? "on" : "off"}`} />
-            <span>Risk reversal</span>
+            <span>Cam kết giảm rủi ro</span>
           </div>
         </div>
       </div>
 
       {trust.testimonials.length > 0 && (
         <div className="testimonial-list">
-          <p className="section-label">Testimonials</p>
+          <p className="section-label">Đánh giá khách hàng</p>
           {trust.testimonials.map((t, i) => (
             <div key={i} className="testimonial-item">
               <p className="testimonial-quote">"{t.quote}"</p>
@@ -275,25 +276,25 @@ function TrustCard({ trust }: { trust: TrustSignals }) {
 
       <div className="trust-signal-chips">
         <div className="trust-chip-row">
-          <span className="trust-chip-label">Free Trial</span>
+          <span className="trust-chip-label">Dùng thử miễn phí</span>
           <span className={`trust-chip ${trust.risk_reversals.free_trial_found ? "on" : "off"}`}>
             {trust.risk_reversals.free_trial_found ? "✓" : "✗"}
           </span>
         </div>
         <div className="trust-chip-row">
-          <span className="trust-chip-label">No Credit Card</span>
+          <span className="trust-chip-label">Không cần thẻ tín dụng</span>
           <span className={`trust-chip ${trust.risk_reversals.no_credit_card_found ? "on" : "off"}`}>
             {trust.risk_reversals.no_credit_card_found ? "✓" : "✗"}
           </span>
         </div>
         <div className="trust-chip-row">
-          <span className="trust-chip-label">Cancel Anytime</span>
+          <span className="trust-chip-label">Hủy bất kỳ lúc nào</span>
           <span className={`trust-chip ${trust.risk_reversals.cancel_anytime_found ? "on" : "off"}`}>
             {trust.risk_reversals.cancel_anytime_found ? "✓" : "✗"}
           </span>
         </div>
         <div className="trust-chip-row">
-          <span className="trust-chip-label">Guarantee</span>
+          <span className="trust-chip-label">Bảo hành / Hoàn tiền</span>
           <span className={`trust-chip ${trust.risk_reversals.guarantee_found ? "on" : "off"}`}>
             {trust.risk_reversals.guarantee_found ? "✓" : "✗"}
           </span>
@@ -302,7 +303,7 @@ function TrustCard({ trust }: { trust: TrustSignals }) {
 
       {trust.weaknesses.length > 0 && (
         <div className="trust-weaknesses">
-          <p className="section-label">Weaknesses</p>
+          <p className="section-label">Điểm yếu</p>
           {trust.weaknesses.map((w, i) => (
             <p key={i} className="trust-weak">• {w}</p>
           ))}
@@ -316,14 +317,14 @@ function TrustCard({ trust }: { trust: TrustSignals }) {
 
 function CroChecklistCard({ checklist }: { checklist: CroChecklist }) {
   return (
-    <GlassCard title="CRO Checklist" accent="#f59e0b">
+    <GlassCard title="CRO Checklist (Danh sách kiểm tra)" accent="#f59e0b">
       <div className="check-summary">
-        <span className="check-pass">{checklist.summary.passed} passed</span>
+        <span className="check-pass">{checklist.summary.passed} đạt</span>
         <span className="check-sep">/</span>
         <span className="check-total">{checklist.summary.total_checks}</span>
         {checklist.critical_failures.length > 0 && (
           <span className="check-critical">
-            {checklist.critical_failures.length} critical
+            {checklist.critical_failures.length} nghiêm trọng
           </span>
         )}
       </div>
@@ -332,7 +333,7 @@ function CroChecklistCard({ checklist }: { checklist: CroChecklist }) {
         {Object.entries(checklist.category_scores).map(([name, score]) => (
           <CategoryMiniBar
             key={name}
-            name={name.replace(/_/g, " ")}
+            name={localizeCategory(name, CRO_CATEGORY_LABELS)}
             score={score}
           />
         ))}
@@ -340,7 +341,7 @@ function CroChecklistCard({ checklist }: { checklist: CroChecklist }) {
 
       {checklist.critical_failures.length > 0 && (
         <div className="critical-list">
-          <p className="section-label">Critical Failures</p>
+          <p className="section-label">Lỗi nghiêm trọng</p>
           {checklist.critical_failures.map((f, i) => (
             <p key={i} className="critical-item">✗ {f}</p>
           ))}
@@ -369,7 +370,7 @@ export function CroDashboard({ cro }: { cro: CroAnalysis }) {
             <svg width="14" height="14" viewBox="0 0 24 24" fill="#ef4444" aria-hidden="true">
               <path d="M12 2L2 22h20L12 2zm0 15v2m0-4h.01" stroke="#ef4444" strokeWidth="2" fill="none" strokeLinecap="round" />
             </svg>
-            Sales Risk Alerts
+            Cảnh báo rủi ro bán hàng
           </p>
           <div className="risk-alerts-grid">
             {cro.sales_risk_alerts.map((alert, i) => (
@@ -381,17 +382,17 @@ export function CroDashboard({ cro }: { cro: CroAnalysis }) {
 
       {/* CRO Overview pills */}
       <div className="cro-overview-row">
-        <ScorePill label="CRO Score" score={cro.overall_cro_score} />
+        <ScorePill label="Điểm CRO" score={cro.overall_cro_score} />
         <ScorePill
-          label="CTA Effectiveness"
+          label="Hiệu quả CTA"
           score={cro.cta_analysis.overall_effectiveness}
         />
         <ScorePill
-          label="Above Fold"
+          label="Above the Fold"
           score={cro.above_fold_analysis.overall_score}
         />
         <ScorePill
-          label="Trust Score"
+          label="Điểm uy tín (Trust)"
           score={cro.trust_signals.overall_score}
         />
       </div>

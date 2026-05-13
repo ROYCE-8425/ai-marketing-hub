@@ -26,6 +26,7 @@ import { addToHistory } from "./lib/history";
 import type { AuditResponse } from "./types/seo";
 import type { CompetitorGapResponse, PlanContentResponse } from "./types/content";
 import { API_BASE } from "./lib/apiConfig";
+import { SEO_CATEGORY_LABELS, localizeCategory } from "./lib/i18n";
 import "./index.css";
 
 // ─── Error Boundary ──────────────────────────────────────────────────────────
@@ -224,28 +225,28 @@ function SeoPanel({ data }: { data: AuditResponse }) {
       <div className="result-header">
         <ScoreRing score={Math.round(q.overall_score)} grade={q.grade} />
         <div className="result-meta">
-          <h2 className="result-title">SEO Audit Report</h2>
-          <p className="result-keyword">Keyword: <strong>{data.primary_keyword}</strong></p>
-          <p className="result-wordcount">{kw.word_count.toLocaleString()} words analyzed</p>
-          {q.publishing_ready && <span className="publishing-ready">Publishing Ready</span>}
+          <h2 className="result-title">Báo cáo SEO Audit</h2>
+          <p className="result-keyword">Từ khóa: <strong>{data.primary_keyword}</strong></p>
+          <p className="result-wordcount">Đã phân tích {kw.word_count.toLocaleString()} từ</p>
+          {q.publishing_ready && <span className="publishing-ready">Sẵn sàng xuất bản</span>}
         </div>
       </div>
       <div className="section-block">
-        <h3 className="section-title">Category Scores</h3>
+        <h3 className="section-title">Điểm theo danh mục (Category Scores)</h3>
         {Object.entries(q.category_scores).map(([name, score]) => (
-          <CategoryBar key={name} name={name.replace(/_/g, " ")} score={Math.round(score)} />
+          <CategoryBar key={name} name={localizeCategory(name, SEO_CATEGORY_LABELS)} score={Math.round(score)} />
         ))}
       </div>
       <div className="section-block">
-        <h3 className="section-title">Keyword Analysis</h3>
+        <h3 className="section-title">Phân tích từ khóa (Keyword Analysis)</h3>
         <div className="result-grid">
-          <ResultCard label="Density" value={`${kw.primary_keyword.density}%`} />
-          <ResultCard label="Status" value={kw.primary_keyword.density_status} />
-          <ResultCard label="Exact Matches" value={kw.primary_keyword.exact_matches} />
-          <ResultCard label="Stuffing Risk" value={kw.keyword_stuffing.risk_level} />
+          <ResultCard label="Mật độ (Density)" value={`${kw.primary_keyword.density}%`} />
+          <ResultCard label="Trạng thái" value={kw.primary_keyword.density_status} />
+          <ResultCard label="Khớp chính xác" value={kw.primary_keyword.exact_matches} />
+          <ResultCard label="Rủi ro nhồi từ khóa" value={kw.keyword_stuffing.risk_level} />
         </div>
         <div className="lsi-row">
-          <span className="lsi-label">LSI Keywords</span>
+          <span className="lsi-label">Từ khóa LSI</span>
           <div className="lsi-tags">
             {kw.lsi_keywords.slice(0, 10).map((k) => (
               <span key={k} className="lsi-tag">{k}</span>
@@ -254,7 +255,7 @@ function SeoPanel({ data }: { data: AuditResponse }) {
         </div>
       </div>
       <div className="section-block">
-        <h3 className="section-title">Distribution Heatmap</h3>
+        <h3 className="section-title">Phân bố từ khóa (Heatmap)</h3>
         <div className="heatmap-list">
           {kw.distribution_heatmap.map((s, i) => (
             <div key={i} className="heatmap-row">
@@ -267,7 +268,7 @@ function SeoPanel({ data }: { data: AuditResponse }) {
       </div>
       {q.critical_issues.length > 0 && (
         <div className="section-block">
-          <h3 className="section-title critical-title">Critical Issues</h3>
+          <h3 className="section-title critical-title">Lỗi nghiêm trọng</h3>
           <div className="issues-list">
             {q.critical_issues.map((t, i) => <IssueBadge key={i} text={t} type="critical" />)}
           </div>
@@ -275,7 +276,7 @@ function SeoPanel({ data }: { data: AuditResponse }) {
       )}
       {q.warnings.length > 0 && (
         <div className="section-block">
-          <h3 className="section-title warning-title">Warnings</h3>
+          <h3 className="section-title warning-title">Cảnh báo</h3>
           <div className="issues-list">
             {q.warnings.map((t, i) => <IssueBadge key={i} text={t} type="warning" />)}
           </div>
@@ -283,7 +284,7 @@ function SeoPanel({ data }: { data: AuditResponse }) {
       )}
       {q.suggestions.length > 0 && (
         <div className="section-block">
-          <h3 className="section-title">Suggestions</h3>
+          <h3 className="section-title">Đề xuất cải thiện</h3>
           <div className="issues-list">
             {q.suggestions.map((t, i) => <IssueBadge key={i} text={t} type="suggestion" />)}
           </div>

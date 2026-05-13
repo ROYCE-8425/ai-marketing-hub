@@ -388,15 +388,15 @@ class TrustSignalAnalyzer:
     def _get_grade(self, score: int) -> str:
         """Convert score to letter grade"""
         if score >= 90:
-            return "A (Excellent)"
+            return "A (Xuất sắc)"
         elif score >= 80:
-            return "B (Good)"
+            return "B (Tốt)"
         elif score >= 70:
-            return "C (Average)"
+            return "C (Trung bình)"
         elif score >= 60:
-            return "D (Needs Work)"
+            return "D (Cần cải thiện)"
         else:
-            return "F (Poor)"
+            return "F (Yếu)"
 
     def _generate_recommendations(self, results: Dict[str, Any]) -> List[Dict[str, Any]]:
         """Generate prioritized recommendations"""
@@ -407,22 +407,22 @@ class TrustSignalAnalyzer:
             recommendations.append({
                 'priority': 'high',
                 'category': 'testimonials',
-                'issue': 'No testimonials found',
-                'recommendation': 'Add 2-3 customer testimonials with names and specific results.'
+                'issue': 'Chưa có đánh giá khách hàng',
+                'recommendation': 'Thêm 2-3 đánh giá khách hàng có tên và kết quả cụ thể.'
             })
         elif not results['testimonials']['has_specifics']:
             recommendations.append({
                 'priority': 'medium',
                 'category': 'testimonials',
-                'issue': 'Testimonials lack specifics',
-                'recommendation': 'Update testimonials to include specific numbers (e.g., "grew by 300%", "10,000 downloads").'
+                'issue': 'Đánh giá thiếu số liệu cụ thể',
+                'recommendation': 'Cập nhật đánh giá với số liệu cụ thể (ví dụ: "tăng 300%", "10.000 lượt tải").'
             })
         elif not results['testimonials']['has_attributed']:
             recommendations.append({
                 'priority': 'medium',
                 'category': 'testimonials',
-                'issue': 'Testimonials missing attribution',
-                'recommendation': 'Add names and titles to testimonials (e.g., "Sarah M., The Creative Hour").'
+                'issue': 'Đánh giá thiếu nguồn xác thực',
+                'recommendation': 'Thêm tên và chức danh cho đánh giá (ví dụ: "Nguyễn Văn A, CEO Startup X").'
             })
 
         # Social proof
@@ -430,16 +430,16 @@ class TrustSignalAnalyzer:
             recommendations.append({
                 'priority': 'high',
                 'category': 'social_proof',
-                'issue': 'No customer count',
-                'recommendation': 'Add customer count (e.g., "Join 50,000+ customers" or "Trusted by thousands").'
+                'issue': 'Chưa hiển thị số lượng khách hàng',
+                'recommendation': 'Thêm số lượng khách hàng (ví dụ: "50.000+ khách hàng tin tưởng" hoặc "Hàng nghìn khách hàng").'
             })
 
         if not results['social_proof']['has_specific_results']:
             recommendations.append({
                 'priority': 'medium',
                 'category': 'social_proof',
-                'issue': 'No specific results',
-                'recommendation': 'Include specific customer results with numbers (e.g., "grew audience by 300%").'
+                'issue': 'Chưa có kết quả cụ thể',
+                'recommendation': 'Thêm kết quả cụ thể của khách hàng với số liệu (ví dụ: "tăng lượng truy cập 300%").'
             })
 
         # Risk reversals
@@ -447,15 +447,15 @@ class TrustSignalAnalyzer:
             recommendations.append({
                 'priority': 'high',
                 'category': 'risk_reversal',
-                'issue': 'No risk reversal',
-                'recommendation': 'Add risk reversal near CTAs: free trial length, no credit card, or guarantee.'
+                'issue': 'Chưa có cam kết giảm rủi ro',
+                'recommendation': 'Thêm cam kết giảm rủi ro gần CTA: thời gian dùng thử, không cần thẻ, hoặc bảo hành/hoàn tiền.'
             })
         elif not results['risk_reversals']['is_strong']:
             recommendations.append({
                 'priority': 'medium',
                 'category': 'risk_reversal',
-                'issue': 'Weak risk reversal',
-                'recommendation': 'Strengthen risk reversal by adding: trial length, no credit card required, AND cancel anytime.'
+                'issue': 'Cam kết giảm rủi ro yếu',
+                'recommendation': 'Tăng cường cam kết: thời gian dùng thử + không cần thẻ tín dụng + hủy bất kỳ lúc nào.'
             })
 
         # Authority
@@ -463,8 +463,8 @@ class TrustSignalAnalyzer:
             recommendations.append({
                 'priority': 'low',
                 'category': 'authority',
-                'issue': 'No authority signals',
-                'recommendation': 'Consider adding: years in business, media mentions, awards, or partnerships.'
+                'issue': 'Chưa có tín hiệu uy tín',
+                'recommendation': 'Nên thêm: số năm hoạt động, báo chí đưa tin, giải thưởng, hoặc đối tác.'
             })
 
         return sorted(recommendations, key=lambda x: {'high': 0, 'medium': 1, 'low': 2}[x['priority']])
@@ -474,13 +474,13 @@ class TrustSignalAnalyzer:
         strengths = []
 
         if results['testimonials']['has_strong']:
-            strengths.append("Strong testimonials with specific results")
+            strengths.append("Đánh giá khách hàng chất lượng cao với kết quả cụ thể")
         if results['social_proof']['has_customer_count']:
-            strengths.append(f"Customer count displayed")
+            strengths.append("Có hiển thị số lượng khách hàng")
         if results['risk_reversals']['is_strong']:
-            strengths.append("Strong risk reversal (multiple elements)")
+            strengths.append("Cam kết giảm rủi ro mạnh (nhiều yếu tố)")
         if results['authority']['count'] >= 2:
-            strengths.append(f"Multiple authority signals ({results['authority']['count']})")
+            strengths.append(f"Nhiều tín hiệu uy tín ({results['authority']['count']})")
 
         return strengths
 
@@ -489,14 +489,14 @@ class TrustSignalAnalyzer:
         weaknesses = []
 
         if results['testimonials']['count'] == 0:
-            weaknesses.append("No testimonials")
+            weaknesses.append("Chưa có đánh giá khách hàng")
         elif not results['testimonials']['has_attributed']:
-            weaknesses.append("Testimonials lack attribution")
+            weaknesses.append("Đánh giá khách hàng thiếu nguồn xác thực")
 
         if not results['social_proof']['has_any']:
-            weaknesses.append("No social proof")
+            weaknesses.append("Chưa có bằng chứng xã hội")
         if not results['risk_reversals']['has_any']:
-            weaknesses.append("No risk reversal")
+            weaknesses.append("Chưa có cam kết giảm rủi ro")
 
         return weaknesses
 

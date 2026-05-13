@@ -233,22 +233,22 @@ class SEOQualityRater:
         # Word count scoring
         if word_count < min_words:
             score -= 30
-            critical.append(f"Content is too short ({word_count} words). Minimum is {min_words} words.")
+            critical.append(f"Nội dung quá ngắn ({word_count} từ). Tối thiểu cần {min_words} từ.")
         elif word_count < optimal_words:
             score -= 10
-            warnings.append(f"Content could be longer ({word_count} words). Optimal is {optimal_words}+ words.")
+            warnings.append(f"Nội dung nên dài hơn ({word_count} từ). Khuyến nghị {optimal_words}+ từ.")
         elif word_count > max_words:
             score -= 5
-            suggestions.append(f"Content is quite long ({word_count} words). Consider breaking into multiple articles if over {max_words} words.")
+            suggestions.append(f"Nội dung khá dài ({word_count} từ). Nên tách thành nhiều bài nếu vượt {max_words} từ.")
 
         # Paragraph length
         avg_para = structure['avg_paragraph_length']
         if avg_para > 150:
             score -= 10
-            warnings.append(f"Paragraphs are too long (avg {avg_para:.0f} words). Break into 2-4 sentence paragraphs.")
+            warnings.append(f"Đoạn văn quá dài (trung bình {avg_para:.0f} từ). Nên chia thành đoạn 2-4 câu.")
         elif avg_para < 30:
             score -= 5
-            suggestions.append(f"Paragraphs are very short (avg {avg_para:.0f} words). Add more detail where appropriate.")
+            suggestions.append(f"Đoạn văn quá ngắn (trung bình {avg_para:.0f} từ). Nên bổ sung thêm chi tiết.")
 
         return {
             'score': max(0, score),
@@ -274,7 +274,7 @@ class SEOQualityRater:
         if not primary_keyword:
             return {
                 'score': 50,
-                'critical': ['No primary keyword specified'],
+                'critical': ['Chưa chỉ định từ khóa chính'],
                 'warnings': [],
                 'suggestions': []
             }
@@ -282,12 +282,12 @@ class SEOQualityRater:
         # Keyword in H1
         if not structure['keyword_in_h1']:
             score -= 20
-            critical.append(f"Primary keyword '{primary_keyword}' missing from H1 heading")
+            critical.append(f"Từ khóa chính \"{primary_keyword}\" chưa xuất hiện trong H1")
 
         # Keyword in first 100 words
         if not structure['keyword_in_first_100']:
             score -= 15
-            critical.append(f"Primary keyword '{primary_keyword}' missing from first 100 words")
+            critical.append(f"Từ khóa chính \"{primary_keyword}\" chưa xuất hiện trong 100 từ đầu tiên")
 
         # Keyword in H2 headings
         h2_count = structure['h2_count']
@@ -298,8 +298,8 @@ class SEOQualityRater:
             if ratio < target_ratio:
                 score -= 10
                 warnings.append(
-                    f"Keyword appears in only {h2_with_kw}/{h2_count} H2 headings. "
-                    f"Target is at least {int(target_ratio * 100)}% (2-3 H2s)"
+                    f"Từ khóa chỉ xuất hiện trong {h2_with_kw}/{h2_count} tiêu đề H2. "
+                    f"Nên đạt ít nhất {int(target_ratio * 100)}% (2-3 H2)"
                 )
 
         # Keyword density
@@ -310,20 +310,20 @@ class SEOQualityRater:
             if keyword_density < min_density:
                 score -= 15
                 warnings.append(
-                    f"Keyword density is too low ({keyword_density}%). "
-                    f"Target is {min_density}-{max_density}%"
+                    f"Keyword density quá thấp ({keyword_density}%). "
+                    f"Nên đạt {min_density}-{max_density}%"
                 )
             elif keyword_density > max_density * 1.5:
                 score -= 20
                 critical.append(
-                    f"Keyword density is too high ({keyword_density}%). "
-                    f"Risk of keyword stuffing. Target is {min_density}-{max_density}%"
+                    f"Keyword density quá cao ({keyword_density}%). "
+                    f"Có nguy cơ nhồi từ khóa. Nên đạt {min_density}-{max_density}%"
                 )
             elif keyword_density > max_density:
                 score -= 10
                 warnings.append(
-                    f"Keyword density is slightly high ({keyword_density}%). "
-                    f"Target is {min_density}-{max_density}%"
+                    f"Keyword density hơi cao ({keyword_density}%). "
+                    f"Nên đạt {min_density}-{max_density}%"
                 )
 
         # Secondary keywords
@@ -332,7 +332,7 @@ class SEOQualityRater:
             missing_keywords = [kw for kw in secondary_keywords if kw.lower() not in content_lower]
             if missing_keywords:
                 score -= 5
-                suggestions.append(f"Secondary keywords not found: {', '.join(missing_keywords)}")
+                suggestions.append(f"Thiếu từ khóa phụ: {', '.join(missing_keywords)}")
 
         return {
             'score': max(0, score),
@@ -356,7 +356,7 @@ class SEOQualityRater:
         # Meta title
         if not meta_title:
             score -= 40
-            critical.append("Meta title is missing")
+            critical.append("Thiếu meta title")
         else:
             title_len = len(meta_title)
             min_len = self.guidelines['meta_title_length_min']
@@ -364,19 +364,19 @@ class SEOQualityRater:
 
             if title_len < min_len:
                 score -= 15
-                warnings.append(f"Meta title too short ({title_len} chars). Target is {min_len}-{max_len} chars.")
+                warnings.append(f"Meta title quá ngắn ({title_len} ký tự). Nên đạt {min_len}-{max_len} ký tự.")
             elif title_len > max_len + 10:
                 score -= 10
-                warnings.append(f"Meta title too long ({title_len} chars). Target is {min_len}-{max_len} chars.")
+                warnings.append(f"Meta title quá dài ({title_len} ký tự). Nên đạt {min_len}-{max_len} ký tự.")
 
             if primary_keyword and primary_keyword.lower() not in meta_title.lower():
                 score -= 15
-                warnings.append(f"Primary keyword '{primary_keyword}' not in meta title")
+                warnings.append(f"Từ khóa chính \"{primary_keyword}\" chưa có trong meta title")
 
         # Meta description
         if not meta_description:
             score -= 40
-            critical.append("Meta description is missing")
+            critical.append("Thiếu meta description")
         else:
             desc_len = len(meta_description)
             min_len = self.guidelines['meta_description_length_min']
@@ -384,14 +384,14 @@ class SEOQualityRater:
 
             if desc_len < min_len:
                 score -= 15
-                warnings.append(f"Meta description too short ({desc_len} chars). Target is {min_len}-{max_len} chars.")
+                warnings.append(f"Meta description quá ngắn ({desc_len} ký tự). Nên đạt {min_len}-{max_len} ký tự.")
             elif desc_len > max_len + 10:
                 score -= 10
-                warnings.append(f"Meta description too long ({desc_len} chars). Target is {min_len}-{max_len} chars.")
+                warnings.append(f"Meta description quá dài ({desc_len} ký tự). Nên đạt {min_len}-{max_len} ký tự.")
 
             if primary_keyword and primary_keyword.lower() not in meta_description.lower():
                 score -= 10
-                suggestions.append(f"Primary keyword '{primary_keyword}' not in meta description")
+                suggestions.append(f"Từ khóa chính \"{primary_keyword}\" chưa có trong meta description")
 
         return {
             'score': max(0, score),
@@ -410,10 +410,10 @@ class SEOQualityRater:
         # H1 check
         if not structure['has_h1']:
             score -= 30
-            critical.append("Missing H1 heading")
+            critical.append("Thiếu tiêu đề H1")
         elif structure['h1_count'] > 1:
             score -= 20
-            critical.append(f"Multiple H1 headings found ({structure['h1_count']}). Should only have one.")
+            critical.append(f"Có nhiều H1 ({structure['h1_count']}). Chỉ nên có duy nhất 1 H1.")
 
         # H2 count
         h2_count = structure['h2_count']
@@ -422,10 +422,10 @@ class SEOQualityRater:
 
         if h2_count < min_h2:
             score -= 15
-            warnings.append(f"Too few H2 sections ({h2_count}). Add more main sections (target: {optimal_h2}).")
+            warnings.append(f"Quá ít mục H2 ({h2_count}). Nên bổ sung thêm (khuyến nghị: {optimal_h2}).")
         elif h2_count < optimal_h2:
             score -= 5
-            suggestions.append(f"Could use more H2 sections ({h2_count}). Optimal is {optimal_h2} sections.")
+            suggestions.append(f"Nên thêm mục H2 ({h2_count} hiện tại). Khuyến nghị {optimal_h2} mục.")
 
         return {
             'score': max(0, score),
@@ -460,12 +460,12 @@ class SEOQualityRater:
         if internal_count < min_internal:
             score -= 20
             warnings.append(
-                f"Too few internal links ({internal_count}). "
-                f"Add {min_internal - internal_count} more (target: {optimal_internal})."
+                f"Internal links quá ít (hiện tại: {internal_count}). "
+                f"Nên bổ sung thêm {min_internal - internal_count} liên kết nội bộ (khuyến nghị: {optimal_internal})."
             )
         elif internal_count < optimal_internal:
             score -= 5
-            suggestions.append(f"Could add more internal links ({internal_count}). Optimal is {optimal_internal}.")
+            suggestions.append(f"Nên thêm internal links ({internal_count} hiện tại). Khuyến nghị {optimal_internal}.")
 
         # External links
         min_external = self.guidelines['min_external_links']
@@ -474,12 +474,12 @@ class SEOQualityRater:
         if external_count < min_external:
             score -= 15
             warnings.append(
-                f"Too few external links ({external_count}). "
-                f"Add authoritative sources (target: {optimal_external})."
+                f"External links quá ít (hiện tại: {external_count}). "
+                f"Nên bổ sung nguồn uy tín (khuyến nghị: {optimal_external})."
             )
         elif external_count < optimal_external:
             score -= 5
-            suggestions.append(f"Could add more external links ({external_count}). Optimal is {optimal_external}.")
+            suggestions.append(f"Nên thêm external links ({external_count} hiện tại). Khuyến nghị {optimal_external}.")
 
         return {
             'score': max(0, score),
@@ -506,8 +506,8 @@ class SEOQualityRater:
         if avg_sentence_length > max_sentence:
             score -= 10
             warnings.append(
-                f"Average sentence length is {avg_sentence_length:.1f} words. "
-                f"Target is under {max_sentence} words for better readability."
+                f"Câu trung bình dài {avg_sentence_length:.1f} từ. "
+                f"Nên dưới {max_sentence} từ để dễ đọc hơn."
             )
 
         # Very long sentences
@@ -515,8 +515,8 @@ class SEOQualityRater:
         if len(long_sentences) > len(sentences) * 0.2:  # More than 20% are too long
             score -= 10
             warnings.append(
-                f"{len(long_sentences)} sentences are very long (>{max_sentence * 1.5} words). "
-                "Break them into shorter sentences."
+                f"{len(long_sentences)} câu quá dài (>{max_sentence * 1.5} từ). "
+                "Nên tách thành các câu ngắn hơn."
             )
 
         # Lists and formatting
@@ -525,7 +525,7 @@ class SEOQualityRater:
 
         if bullet_lists + numbered_lists == 0:
             score -= 5
-            suggestions.append("No lists found. Use bullet points or numbered lists to improve scannability.")
+            suggestions.append("Chưa có danh sách (bullet/numbered list). Nên sử dụng để tăng khả năng quét nội dung.")
 
         return {
             'score': max(0, score),
@@ -537,15 +537,15 @@ class SEOQualityRater:
     def _get_grade(self, score: float) -> str:
         """Convert score to letter grade"""
         if score >= 90:
-            return "A (Excellent)"
+            return "A (Xuất sắc)"
         elif score >= 80:
-            return "B (Good)"
+            return "B (Tốt)"
         elif score >= 70:
-            return "C (Average)"
+            return "C (Trung bình)"
         elif score >= 60:
-            return "D (Needs Work)"
+            return "D (Cần cải thiện)"
         else:
-            return "F (Poor)"
+            return "F (Yếu)"
 
 
 # Convenience function
