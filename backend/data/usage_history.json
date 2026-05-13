@@ -66868,5 +66868,413 @@
     "duration_ms": 1473.7,
     "error": null,
     "success": true
+  },
+  {
+    "id": 112,
+    "timestamp": "2026-05-13T07:45:08.000257",
+    "endpoint": "/api/audit-url",
+    "method": "POST",
+    "input": {
+      "url": "https://fongfog.site",
+      "primary_keyword": "Cosplay"
+    },
+    "output": {
+      "primary_keyword": "Cosplay",
+      "keyword_analysis": {
+        "word_count": 1015,
+        "primary_keyword": {
+          "keyword": "Cosplay",
+          "exact_matches": 0,
+          "total_occurrences": 0,
+          "density": 0.0,
+          "target_density": 1.5,
+          "density_status": "too_low",
+          "positions": [],
+          "critical_placements": {
+            "in_first_100_words": false,
+            "in_conclusion": false,
+            "in_h1": false,
+            "in_h2_headings": "0/0",
+            "h2_keyword_ratio": 0
+          },
+          "section_distribution": [
+            {
+              "section_index": 0,
+              "section_type": "intro",
+              "header": "",
+              "keyword_count": 0,
+              "word_count": 1015,
+              "density": 0.0
+            }
+          ]
+        },
+        "keyword_stuffing": {
+          "risk_level": "none",
+          "warnings": [],
+          "safe": true
+        },
+        "distribution_heatmap": [
+          {
+            "section": "Section 1",
+            "keyword_count": 0,
+            "heat_level": 0,
+            "density": 0.0
+          }
+        ],
+        "lsi_keywords": [
+          "studio",
+          "ngay",
+          "trong",
+          "concept",
+          "file",
+          "fongfog",
+          "makeup",
+          "albums",
+          "inbox",
+          "sale"
+        ],
+        "recommendations": [
+          "⚠️ Primary keyword density is too low (0.0%). Target is 1.5%. Add Cosplay naturally in more paragraphs.",
+          "⚠️ Primary keyword missing from first 100 words - add it to the introduction",
+          "⚠️ Primary keyword missing from H1 headline - include it in the title",
+          "ℹ️ Primary keyword appears in only 0/0 H2 headings. Aim for 2-3 H2s with keyword variations.",
+          "ℹ️ Consider mentioning primary keyword in the conclusion for better optimization"
+        ]
+      },
+      "seo_quality": {
+        "overall_score": 56.8,
+        "grade": "F (Poor)",
+        "publishing_ready": false,
+        "category_scores": {
+          "content": 60,
+          "keyword_optimization": 50,
+          "meta_elements": 45,
+          "structure": 55,
+          "links": 65,
+          "readability": 75
+        },
+        "critical_issues": [
+          "Content is too short (1015 words). Minimum is 2000 words.",
+          "Primary keyword 'Cosplay' missing from H1 heading",
+          "Primary keyword 'Cosplay' missing from first 100 words",
+          "Meta description is missing",
+          "Missing H1 heading"
+        ],
+        "warnings": [
+          "Paragraphs are too long (avg 1015 words). Break into 2-4 sentence paragraphs.",
+          "Keyword density is too low (0.0%). Target is 1.0-2.0%",
+          "Primary keyword 'Cosplay' not in meta title",
+          "Too few H2 sections (0). Add more main sections (target: 6).",
+          "Too few internal links (0). Add 3 more (target: 5).",
+          "Too few external links (0). Add authoritative sources (target: 3).",
+          "Average sentence length is 56.4 words. Target is under 25 words for better readability.",
+          "10 sentences are very long (>37.5 words). Break them into shorter sentences."
+        ],
+        "suggestions": [
+          "No lists found. Use bullet points or numbered lists to improve scannability."
+        ],
+        "details": {
+          "word_count": 1015,
+          "h2_count": 0,
+          "has_h1": false,
+          "keyword_in_h1": false,
+          "keyword_in_first_100": false
+        }
+      },
+      "cro_analysis": {
+        "overall_cro_score": 15.2,
+        "cro_grade": "F (Poor)",
+        "cro_checklist": {
+          "score": 21,
+          "grade": "F (Poor)",
+          "passes_audit": false,
+          "summary": {
+            "total_checks": 28,
+            "passed": 6,
+            "failed": 22,
+            "critical_failures": 6,
+            "warnings": 9
+          },
+          "critical_failures": [
+            "headline: Headline present",
+            "value_proposition: Value proposition present",
+            "social_proof: Has testimonial(s)",
+            "ctas: Has CTA(s)",
+            "ctas: CTA visible above fold",
+            "risk_reversal: Free trial mentioned"
+          ],
+          "warnings": [
+            "headline: Headline contains benefit",
+            "headline: Headline not generic",
+            "social_proof: Customer count displayed",
+            "ctas: Appropriate CTA count",
+            "objection_handling: FAQ or Q&A section",
+            "risk_reversal: No credit card required",
+            "risk_reversal: Risk reversal near CTA",
+            "structure: Has adequate sections",
+            "structure: Appropriate content length"
+          ],
+          "category_scores": {
+            "headline": 0,
+            "value_proposition": 67,
+            "social_proof": 25,
+            "ctas": 40,
+            "objection_handling": 0,
+            "risk_reversal": 0,
+            "urgency": 50,
+            "structure": 0
+          },
+          "recommendations": [
+            {
+              "priority": "critical",
+              "category": "headline",
+              "check": "Headline present",
+              "recommendation": "No H1 found"
+            },
+            {
+              "priority": "critical",
+              "category": "value_proposition",
+              "check": "Value proposition present",
+              "recommendation": "No clear value proposition"
+            },
+            {
+              "priority": "critical",
+              "category": "social_proof",
+              "check": "Has testimonial(s)",
+              "recommendation": "Add testimonials"
+            },
+            {
+              "priority": "critical",
+              "category": "ctas",
+              "check": "Has CTA(s)",
+              "recommendation": "No CTAs found"
+            },
+            {
+              "priority": "critical",
+              "category": "ctas",
+              "check": "CTA visible above fold",
+              "recommendation": "Add CTA above the fold"
+            },
+            {
+              "priority": "critical",
+              "category": "risk_reversal",
+              "check": "Free trial mentioned",
+              "recommendation": "Add free trial offer"
+            },
+            {
+              "priority": "important",
+              "category": "headline",
+              "check": "Headline contains benefit",
+              "recommendation": "No clear benefit in headline"
+            },
+            {
+              "priority": "important",
+              "category": "headline",
+              "check": "Headline not generic",
+              "recommendation": "Generic pattern detected"
+            },
+            {
+              "priority": "important",
+              "category": "social_proof",
+              "check": "Customer count displayed",
+              "recommendation": "Add customer count"
+            },
+            {
+              "priority": "important",
+              "category": "ctas",
+              "check": "Appropriate CTA count",
+              "recommendation": "0 CTAs (target: 3-6)"
+            }
+          ]
+        },
+        "cta_analysis": {
+          "total_ctas": 0,
+          "avg_quality_score": 0,
+          "distribution_score": 0,
+          "goal_alignment_score": 20,
+          "overall_effectiveness": 6.0,
+          "ctas_found": [],
+          "distribution": {
+            "first_cta_position": null,
+            "has_above_fold": false,
+            "has_closing": false,
+            "distribution_quality": "none"
+          },
+          "recommendations": [
+            {
+              "priority": "high",
+              "category": "distribution",
+              "issue": "No CTA above the fold",
+              "recommendation": "Add a prominent CTA in the first 20% of the page, ideally right after the headline."
+            },
+            {
+              "priority": "high",
+              "category": "distribution",
+              "issue": "No closing CTA",
+              "recommendation": "Add a strong CTA at the end of the page to capture visitors who read through."
+            },
+            {
+              "priority": "high",
+              "category": "goal_alignment",
+              "issue": "CTAs not aligned with trial goal",
+              "recommendation": "Use goal-specific CTA text. Examples: Start Your Free Trial, Try Free for 14 Days"
+            },
+            {
+              "priority": "medium",
+              "category": "distribution",
+              "issue": "Only 0 CTA(s) found",
+              "recommendation": "Add CTAs throughout the page. Aim for 3-5 CTAs distributed across sections."
+            }
+          ]
+        },
+        "above_fold_analysis": {
+          "overall_score": 7.0,
+          "grade": "F (Poor)",
+          "passes_5_second_test": false,
+          "element_scores": {
+            "headline": 0,
+            "value_prop": 10,
+            "cta": 0,
+            "trust": 30
+          },
+          "headline_quality": "missing",
+          "headline_text": null,
+          "cta_above_fold": false,
+          "cta_text": null,
+          "trust_signal_above_fold": false,
+          "issues": [
+            {
+              "severity": "critical",
+              "element": "headline",
+              "issue": "Missing headline (H1)"
+            },
+            {
+              "severity": "critical",
+              "element": "cta",
+              "issue": "No CTA visible above the fold"
+            },
+            {
+              "severity": "warning",
+              "element": "value_prop",
+              "issue": "Value proposition not clear"
+            },
+            {
+              "severity": "suggestion",
+              "element": "trust",
+              "issue": "Consider adding trust signal above the fold"
+            }
+          ],
+          "recommendations": [
+            "Add a benefit-focused H1 headline immediately.",
+            "Add a prominent CTA button above the fold.",
+            "Clarify value proposition: state what visitor gets and how quickly.",
+            "Add trust signal: customer count, rating, or short testimonial."
+          ]
+        },
+        "trust_signals": {
+          "overall_score": 0,
+          "grade": "F (Poor)",
+          "summary": {
+            "testimonials_found": 0,
+            "has_social_proof": false,
+            "has_risk_reversal": false,
+            "authority_signals": 0,
+            "security_present": false
+          },
+          "strengths": [],
+          "weaknesses": [
+            "No testimonials",
+            "No social proof",
+            "No risk reversal"
+          ],
+          "testimonials": [],
+          "social_proof": {
+            "customer_counts": [],
+            "specific_results": []
+          },
+          "risk_reversals": {
+            "free_trial_found": false,
+            "no_credit_card_found": false,
+            "cancel_anytime_found": false,
+            "guarantee_found": false
+          },
+          "authority_signals": {
+            "media_mentions": false,
+            "awards": false,
+            "years_in_business": false
+          },
+          "recommendations": [
+            {
+              "priority": "high",
+              "category": "testimonials",
+              "issue": "No testimonials found",
+              "recommendation": "Add 2-3 customer testimonials with names and specific results."
+            },
+            {
+              "priority": "high",
+              "category": "social_proof",
+              "issue": "No customer count",
+              "recommendation": "Add customer count (e.g., \"Join 50,000+ customers\" or \"Trusted by thousands\")."
+            },
+            {
+              "priority": "high",
+              "category": "risk_reversal",
+              "issue": "No risk reversal",
+              "recommendation": "Add risk reversal near CTAs: free trial length, no credit card, or guarantee."
+            },
+            {
+              "priority": "medium",
+              "category": "social_proof",
+              "issue": "No specific results",
+              "recommendation": "Include specific customer results with numbers (e.g., \"grew audience by 300%\")."
+            },
+            {
+              "priority": "low",
+              "category": "authority",
+              "issue": "No authority signals",
+              "recommendation": "Consider adding: years in business, media mentions, awards, or partnerships."
+            }
+          ]
+        },
+        "sales_risk_alerts": [
+          {
+            "severity": "high",
+            "message": "Low CRO score — page unlikely to convert visitors."
+          },
+          {
+            "severity": "high",
+            "message": "6 critical CRO failure(s) detected."
+          },
+          {
+            "severity": "high",
+            "message": "No CTAs found — visitors have no clear action to take."
+          },
+          {
+            "severity": "medium",
+            "message": "CTAs not aligned with conversion goal."
+          },
+          {
+            "severity": "high",
+            "message": "No social proof — low trust signals for new visitors."
+          },
+          {
+            "severity": "medium",
+            "message": "No risk reversal (guarantee/trial/no-card) — visitors may hesitate to convert."
+          },
+          {
+            "severity": "high",
+            "message": "Page fails the 5-second test — visitors likely leave immediately."
+          },
+          {
+            "severity": "high",
+            "message": "No CTA visible above the fold."
+          }
+        ]
+      }
+    },
+    "status_code": 200,
+    "duration_ms": 206.4,
+    "error": null,
+    "success": true
   }
 ]
