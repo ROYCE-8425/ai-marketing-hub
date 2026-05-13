@@ -68500,5 +68500,1390 @@
     "duration_ms": 540.6,
     "error": null,
     "success": true
+  },
+  {
+    "id": 133,
+    "timestamp": "2026-05-13T08:42:56.728005",
+    "endpoint": "/api/serp/live",
+    "method": "POST",
+    "input": {
+      "keyword": "mitsubishi binh phuoc",
+      "location": "vn",
+      "num_results": 10
+    },
+    "output": null,
+    "status_code": 500,
+    "duration_ms": 5.4,
+    "error": "invalid character '—' (U+2014) (google_serp_scraper.py, line 61)",
+    "success": false
+  },
+  {
+    "id": 134,
+    "timestamp": "2026-05-13T08:42:56.786766",
+    "endpoint": "/api/ga4-overview",
+    "method": "POST",
+    "input": {
+      "days": 30
+    },
+    "output": {
+      "fetched_at": "2026-05-13T08:42:56.707003",
+      "period_days": 30,
+      "data_source": "error",
+      "property_id": "",
+      "overview": {},
+      "traffic_sources": [],
+      "top_pages": [],
+      "daily_sessions": [],
+      "error": "GA4_PROPERTY_ID chưa được cấu hình. Vào Google Analytics → Admin → Property Details để lấy Property ID."
+    },
+    "status_code": 200,
+    "duration_ms": 68.5,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 135,
+    "timestamp": "2026-05-13T08:42:56.847926",
+    "endpoint": "/api/ai-keywords",
+    "method": "POST",
+    "input": {},
+    "output": {
+      "analyzed_at": "2026-05-13T08:42:56.706394",
+      "site_url": "",
+      "gsc_keywords": [],
+      "total_clicks": 0,
+      "total_impressions": 0,
+      "ai_analysis": "",
+      "recommended_keywords": [],
+      "keyword_clusters": [],
+      "content_strategy": [],
+      "top_performing": [],
+      "quick_wins": [],
+      "summary": "Cần kết nối Google Search Console để lấy dữ liệu từ khóa thật trước khi phân tích.",
+      "data_source": "no_data",
+      "ai_provider": "none",
+      "error": "Chưa có dữ liệu GSC. Cấu hình Google Search Console để phân tích từ khóa thật."
+    },
+    "status_code": 200,
+    "duration_ms": 129.5,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 136,
+    "timestamp": "2026-05-13T08:42:56.915187",
+    "endpoint": "/api/ga4-overview",
+    "method": "POST",
+    "input": {
+      "days": 30
+    },
+    "output": {
+      "fetched_at": "2026-05-13T08:42:56.707185",
+      "period_days": 30,
+      "data_source": "error",
+      "property_id": "",
+      "overview": {},
+      "traffic_sources": [],
+      "top_pages": [],
+      "daily_sessions": [],
+      "error": "GA4_PROPERTY_ID chưa được cấu hình. Vào Google Analytics → Admin → Property Details để lấy Property ID."
+    },
+    "status_code": 200,
+    "duration_ms": 193.3,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 137,
+    "timestamp": "2026-05-13T08:42:56.973809",
+    "endpoint": "/api/serp/live",
+    "method": "POST",
+    "input": {
+      "keyword": "mitsubishi binh phuoc",
+      "location": "vn",
+      "num_results": 10
+    },
+    "output": null,
+    "status_code": 500,
+    "duration_ms": 252.7,
+    "error": "invalid character '—' (U+2014) (google_serp_scraper.py, line 61)",
+    "success": false
+  },
+  {
+    "id": 138,
+    "timestamp": "2026-05-13T08:42:57.036336",
+    "endpoint": "/api/ai-keywords",
+    "method": "POST",
+    "input": {},
+    "output": {
+      "analyzed_at": "2026-05-13T08:42:56.707522",
+      "site_url": "",
+      "gsc_keywords": [],
+      "total_clicks": 0,
+      "total_impressions": 0,
+      "ai_analysis": "",
+      "recommended_keywords": [],
+      "keyword_clusters": [],
+      "content_strategy": [],
+      "top_performing": [],
+      "quick_wins": [],
+      "summary": "Cần kết nối Google Search Console để lấy dữ liệu từ khóa thật trước khi phân tích.",
+      "data_source": "no_data",
+      "ai_provider": "none",
+      "error": "Chưa có dữ liệu GSC. Cấu hình Google Search Console để phân tích từ khóa thật."
+    },
+    "status_code": 200,
+    "duration_ms": 311.6,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 139,
+    "timestamp": "2026-05-13T08:43:02.960434",
+    "endpoint": "/api/backlinks/analyze",
+    "method": "POST",
+    "input": {
+      "url": "https://fongfog.site"
+    },
+    "output": {
+      "url": "https://fongfog.site",
+      "overall_score": 59,
+      "grade": "B",
+      "internal_links": {
+        "total": 6,
+        "quality": {
+          "score": 62,
+          "total": 6,
+          "dofollow": 6,
+          "nofollow": 0,
+          "unique_domains": 0,
+          "branded_anchors": 6,
+          "generic_anchors": 0,
+          "quality": "good"
+        },
+        "sample": [
+          {
+            "url": "https://fongfog.site/",
+            "anchor": "FONG FOGChoose us to bring your beauty to light.",
+            "nofollow": false
+          },
+          {
+            "url": "https://fongfog.site/",
+            "anchor": "TRANG CHỦ",
+            "nofollow": false
+          },
+          {
+            "url": "https://fongfog.site/thu-vien-anh/",
+            "anchor": "ALBUM",
+            "nofollow": false
+          },
+          {
+            "url": "https://fongfog.site/quy-dinh/",
+            "anchor": "QUY ĐỊNH",
+            "nofollow": false
+          },
+          {
+            "url": "https://fongfog.site/quy-dinh",
+            "anchor": "XEM CHI TIẾT QUY ĐỊNH",
+            "nofollow": false
+          },
+          {
+            "url": "https://fongfog.site/quy-dinh",
+            "anchor": "XEM QUY ĐỊNH ĐẦY ĐỦ",
+            "nofollow": false
+          }
+        ]
+      },
+      "external_links": {
+        "total": 8,
+        "quality": {
+          "score": 57,
+          "total": 8,
+          "dofollow": 8,
+          "nofollow": 0,
+          "unique_domains": 2,
+          "branded_anchors": 2,
+          "generic_anchors": 0,
+          "quality": "fair"
+        },
+        "sample": [
+          {
+            "url": "https://www.facebook.com/fong.fog.2024",
+            "anchor": "INBOX NGAY",
+            "nofollow": false,
+            "domain": "www.facebook.com"
+          },
+          {
+            "url": "https://www.facebook.com/fong.fog.2024",
+            "anchor": "LIÊN HỆ TƯ VẤN",
+            "nofollow": false,
+            "domain": "www.facebook.com"
+          },
+          {
+            "url": "https://www.facebook.com/fong.fog.2024",
+            "anchor": "[no text]",
+            "nofollow": false,
+            "domain": "www.facebook.com"
+          },
+          {
+            "url": "https://www.instagram.com/fong.fog/",
+            "anchor": "[no text]",
+            "nofollow": false,
+            "domain": "www.instagram.com"
+          },
+          {
+            "url": "https://www.facebook.com/fong.fog.2024",
+            "anchor": "[no text]",
+            "nofollow": false,
+            "domain": "www.facebook.com"
+          },
+          {
+            "url": "https://www.instagram.com/fong.fog/",
+            "anchor": "[no text]",
+            "nofollow": false,
+            "domain": "www.instagram.com"
+          },
+          {
+            "url": "https://www.facebook.com/fong.fog.2024",
+            "anchor": "[no text]",
+            "nofollow": false,
+            "domain": "www.facebook.com"
+          },
+          {
+            "url": "https://www.instagram.com/fong.fog/",
+            "anchor": "[no text]",
+            "nofollow": false,
+            "domain": "www.instagram.com"
+          }
+        ]
+      },
+      "referring_domains": [
+        {
+          "domain": "www.facebook.com",
+          "links": 5,
+          "dofollow": 5,
+          "nofollow": 0,
+          "anchors": [
+            "INBOX NGAY",
+            "LIÊN HỆ TƯ VẤN"
+          ]
+        },
+        {
+          "domain": "www.instagram.com",
+          "links": 3,
+          "dofollow": 3,
+          "nofollow": 0,
+          "anchors": []
+        }
+      ],
+      "total_domains": 2,
+      "suggestions": [
+        "Đa dạng hóa nguồn backlink — nhận link từ nhiều domain khác nhau",
+        "Tăng số internal links — kết nối các trang liên quan với nhau",
+        "Thay 6 anchor text chung chung (click here, xem thêm) bằng keyword cụ thể",
+        "Submit website lên các thư mục doanh nghiệp địa phương (Google Business, Yelp VN)",
+        "Viết bài guest post trên các blog ngành ô tô, xe hơi"
+      ]
+    },
+    "status_code": 200,
+    "duration_ms": 1642.8,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 140,
+    "timestamp": "2026-05-13T08:43:30.655673",
+    "endpoint": "/api/serp/live",
+    "method": "POST",
+    "input": {
+      "keyword": "https://fongfog.site",
+      "location": "vn",
+      "num_results": 10
+    },
+    "output": null,
+    "status_code": 500,
+    "duration_ms": 4.0,
+    "error": "invalid character '—' (U+2014) (google_serp_scraper.py, line 61)",
+    "success": false
+  },
+  {
+    "id": 141,
+    "timestamp": "2026-05-13T08:43:41.736425",
+    "endpoint": "/api/serp/live",
+    "method": "POST",
+    "input": {
+      "keyword": "https://fongfog.site",
+      "location": "vn",
+      "num_results": 10
+    },
+    "output": null,
+    "status_code": 500,
+    "duration_ms": 3.0,
+    "error": "invalid character '—' (U+2014) (google_serp_scraper.py, line 61)",
+    "success": false
+  },
+  {
+    "id": 142,
+    "timestamp": "2026-05-13T08:43:46.037234",
+    "endpoint": "/api/rank-tracker/keywords",
+    "method": "GET",
+    "input": null,
+    "output": {
+      "keywords": []
+    },
+    "status_code": 200,
+    "duration_ms": 8.6,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 143,
+    "timestamp": "2026-05-13T08:43:46.109019",
+    "endpoint": "/api/rank-tracker/tags",
+    "method": "GET",
+    "input": null,
+    "output": {
+      "tags": []
+    },
+    "status_code": 200,
+    "duration_ms": 90.5,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 144,
+    "timestamp": "2026-05-13T08:43:46.165730",
+    "endpoint": "/api/rank-tracker/alerts",
+    "method": "GET",
+    "input": null,
+    "output": {
+      "alerts": []
+    },
+    "status_code": 200,
+    "duration_ms": 60.4,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 145,
+    "timestamp": "2026-05-13T08:43:46.222688",
+    "endpoint": "/api/rank-tracker/keywords",
+    "method": "GET",
+    "input": null,
+    "output": {
+      "keywords": []
+    },
+    "status_code": 200,
+    "duration_ms": 116.1,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 146,
+    "timestamp": "2026-05-13T08:43:46.279890",
+    "endpoint": "/api/rank-tracker/tags",
+    "method": "GET",
+    "input": null,
+    "output": {
+      "tags": []
+    },
+    "status_code": 200,
+    "duration_ms": 57.5,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 147,
+    "timestamp": "2026-05-13T08:43:46.337232",
+    "endpoint": "/api/rank-tracker/alerts",
+    "method": "GET",
+    "input": null,
+    "output": {
+      "alerts": []
+    },
+    "status_code": 200,
+    "duration_ms": 57.6,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 148,
+    "timestamp": "2026-05-13T08:43:48.756525",
+    "endpoint": "/api/rank-tracker/add",
+    "method": "POST",
+    "input": {
+      "keyword": "https://fongfog.site",
+      "tag": ""
+    },
+    "output": {
+      "status": "ok",
+      "keyword": "https://fongfog.site",
+      "tag": ""
+    },
+    "status_code": 200,
+    "duration_ms": 6.1,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 149,
+    "timestamp": "2026-05-13T08:43:48.828650",
+    "endpoint": "/api/rank-tracker/keywords",
+    "method": "GET",
+    "input": null,
+    "output": {
+      "keywords": [
+        {
+          "keyword": "https://fongfog.site",
+          "tag": "",
+          "position": null,
+          "previous_position": null,
+          "change": null,
+          "clicks": 0,
+          "impressions": 0,
+          "ctr": 0,
+          "source": "pending",
+          "last_checked": null,
+          "created_at": "2026-05-13 01:43:48"
+        }
+      ]
+    },
+    "status_code": 200,
+    "duration_ms": 1.4,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 150,
+    "timestamp": "2026-05-13T08:43:48.890951",
+    "endpoint": "/api/rank-tracker/tags",
+    "method": "GET",
+    "input": null,
+    "output": {
+      "tags": []
+    },
+    "status_code": 200,
+    "duration_ms": 0.5,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 151,
+    "timestamp": "2026-05-13T08:43:52.285707",
+    "endpoint": "/api/rank-tracker/sync",
+    "method": "POST",
+    "input": null,
+    "output": {
+      "error": "GSC chưa cấu hình OAuth2",
+      "synced": 0
+    },
+    "status_code": 200,
+    "duration_ms": 1.9,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 152,
+    "timestamp": "2026-05-13T08:43:52.358675",
+    "endpoint": "/api/rank-tracker/keywords",
+    "method": "GET",
+    "input": null,
+    "output": {
+      "keywords": [
+        {
+          "keyword": "https://fongfog.site",
+          "tag": "",
+          "position": null,
+          "previous_position": null,
+          "change": null,
+          "clicks": 0,
+          "impressions": 0,
+          "ctr": 0,
+          "source": "pending",
+          "last_checked": null,
+          "created_at": "2026-05-13 01:43:48"
+        }
+      ]
+    },
+    "status_code": 200,
+    "duration_ms": 0.7,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 153,
+    "timestamp": "2026-05-13T08:43:52.421159",
+    "endpoint": "/api/rank-tracker/alerts",
+    "method": "GET",
+    "input": null,
+    "output": {
+      "alerts": []
+    },
+    "status_code": 200,
+    "duration_ms": 0.6,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 154,
+    "timestamp": "2026-05-13T08:44:03.902053",
+    "endpoint": "/api/ai-keywords",
+    "method": "POST",
+    "input": {
+      "target_keyword": "https://fongfog.site"
+    },
+    "output": {
+      "analyzed_at": "2026-05-13T08:44:03.865152",
+      "site_url": "",
+      "gsc_keywords": [],
+      "total_clicks": 0,
+      "total_impressions": 0,
+      "ai_analysis": "",
+      "recommended_keywords": [],
+      "keyword_clusters": [],
+      "content_strategy": [],
+      "top_performing": [],
+      "quick_wins": [],
+      "summary": "Cần kết nối Google Search Console để lấy dữ liệu từ khóa thật trước khi phân tích.",
+      "data_source": "no_data",
+      "ai_provider": "none",
+      "error": "Chưa có dữ liệu GSC. Cấu hình Google Search Console để phân tích từ khóa thật."
+    },
+    "status_code": 200,
+    "duration_ms": 1.3,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 155,
+    "timestamp": "2026-05-13T08:44:21.521882",
+    "endpoint": "/api/calendar/items",
+    "method": "GET",
+    "input": null,
+    "output": {
+      "items": []
+    },
+    "status_code": 200,
+    "duration_ms": 6.6,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 156,
+    "timestamp": "2026-05-13T08:44:21.593859",
+    "endpoint": "/api/calendar/stats",
+    "method": "GET",
+    "input": null,
+    "output": {
+      "total": 0,
+      "draft": 0,
+      "review": 0,
+      "published": 0,
+      "upcoming": 0,
+      "overdue": 0
+    },
+    "status_code": 200,
+    "duration_ms": 91.0,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 157,
+    "timestamp": "2026-05-13T08:44:21.651751",
+    "endpoint": "/api/calendar/items",
+    "method": "GET",
+    "input": null,
+    "output": {
+      "items": []
+    },
+    "status_code": 200,
+    "duration_ms": 0.9,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 158,
+    "timestamp": "2026-05-13T08:44:21.709094",
+    "endpoint": "/api/calendar/stats",
+    "method": "GET",
+    "input": null,
+    "output": {
+      "total": 0,
+      "draft": 0,
+      "review": 0,
+      "published": 0,
+      "upcoming": 0,
+      "overdue": 0
+    },
+    "status_code": 200,
+    "duration_ms": 57.6,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 159,
+    "timestamp": "2026-05-13T08:44:22.416045",
+    "endpoint": "/api/ab-test/list",
+    "method": "GET",
+    "input": null,
+    "output": {
+      "tests": []
+    },
+    "status_code": 200,
+    "duration_ms": 3.4,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 160,
+    "timestamp": "2026-05-13T08:44:22.487854",
+    "endpoint": "/api/ab-test/list",
+    "method": "GET",
+    "input": null,
+    "output": {
+      "tests": []
+    },
+    "status_code": 200,
+    "duration_ms": 0.7,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 161,
+    "timestamp": "2026-05-13T08:44:41.151995",
+    "endpoint": "/api/sites/list",
+    "method": "GET",
+    "input": null,
+    "output": {
+      "sites": [
+        {
+          "id": 1,
+          "name": "Mitsubishi Bình Phước",
+          "url": "https://binhphuocmitsubishi.com",
+          "description": "Đại lý chính hãng Mitsubishi tại Bình Phước",
+          "niche": "ô tô",
+          "is_active": 1,
+          "last_scan_score": 0,
+          "last_scan_date": null,
+          "created_at": "2026-05-11 10:32:23"
+        }
+      ]
+    },
+    "status_code": 200,
+    "duration_ms": 6.2,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 162,
+    "timestamp": "2026-05-13T08:44:41.226105",
+    "endpoint": "/api/sites/list",
+    "method": "GET",
+    "input": null,
+    "output": {
+      "sites": [
+        {
+          "id": 1,
+          "name": "Mitsubishi Bình Phước",
+          "url": "https://binhphuocmitsubishi.com",
+          "description": "Đại lý chính hãng Mitsubishi tại Bình Phước",
+          "niche": "ô tô",
+          "is_active": 1,
+          "last_scan_score": 0,
+          "last_scan_date": null,
+          "created_at": "2026-05-11 10:32:23"
+        }
+      ]
+    },
+    "status_code": 200,
+    "duration_ms": 0.7,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 163,
+    "timestamp": "2026-05-13T09:58:41.086020",
+    "endpoint": "/api/ga4-overview",
+    "method": "POST",
+    "input": {
+      "days": 30
+    },
+    "output": {
+      "fetched_at": "2026-05-13T09:58:41.060539",
+      "period_days": 30,
+      "data_source": "error",
+      "property_id": "",
+      "overview": {},
+      "traffic_sources": [],
+      "top_pages": [],
+      "daily_sessions": [],
+      "error": "GA4_PROPERTY_ID chưa được cấu hình. Vào Google Analytics → Admin → Property Details để lấy Property ID."
+    },
+    "status_code": 200,
+    "duration_ms": 10.0,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 164,
+    "timestamp": "2026-05-13T09:58:41.154606",
+    "endpoint": "/api/serp/live",
+    "method": "POST",
+    "input": {
+      "keyword": "mitsubishi binh phuoc",
+      "location": "vn",
+      "num_results": 10
+    },
+    "output": null,
+    "status_code": 500,
+    "duration_ms": 80.8,
+    "error": "invalid character '—' (U+2014) (google_serp_scraper.py, line 61)",
+    "success": false
+  },
+  {
+    "id": 165,
+    "timestamp": "2026-05-13T09:58:41.217382",
+    "endpoint": "/api/ga4-overview",
+    "method": "POST",
+    "input": {
+      "days": 30
+    },
+    "output": {
+      "fetched_at": "2026-05-13T09:58:41.062238",
+      "period_days": 30,
+      "data_source": "error",
+      "property_id": "",
+      "overview": {},
+      "traffic_sources": [],
+      "top_pages": [],
+      "daily_sessions": [],
+      "error": "GA4_PROPERTY_ID chưa được cấu hình. Vào Google Analytics → Admin → Property Details để lấy Property ID."
+    },
+    "status_code": 200,
+    "duration_ms": 143.2,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 166,
+    "timestamp": "2026-05-13T09:58:41.292309",
+    "endpoint": "/api/ai-keywords",
+    "method": "POST",
+    "input": {},
+    "output": {
+      "analyzed_at": "2026-05-13T09:58:41.061844",
+      "site_url": "",
+      "gsc_keywords": [],
+      "total_clicks": 0,
+      "total_impressions": 0,
+      "ai_analysis": "",
+      "recommended_keywords": [],
+      "keyword_clusters": [],
+      "content_strategy": [],
+      "top_performing": [],
+      "quick_wins": [],
+      "summary": "Cần kết nối Google Search Console để lấy dữ liệu từ khóa thật trước khi phân tích.",
+      "data_source": "no_data",
+      "ai_provider": "none",
+      "error": "Chưa có dữ liệu GSC. Cấu hình Google Search Console để phân tích từ khóa thật."
+    },
+    "status_code": 200,
+    "duration_ms": 216.7,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 167,
+    "timestamp": "2026-05-13T09:58:41.356083",
+    "endpoint": "/api/serp/live",
+    "method": "POST",
+    "input": {
+      "keyword": "mitsubishi binh phuoc",
+      "location": "vn",
+      "num_results": 10
+    },
+    "output": null,
+    "status_code": 500,
+    "duration_ms": 279.9,
+    "error": "invalid character '—' (U+2014) (google_serp_scraper.py, line 61)",
+    "success": false
+  },
+  {
+    "id": 168,
+    "timestamp": "2026-05-13T09:58:41.420216",
+    "endpoint": "/api/ai-keywords",
+    "method": "POST",
+    "input": {},
+    "output": {
+      "analyzed_at": "2026-05-13T09:58:41.062341",
+      "site_url": "",
+      "gsc_keywords": [],
+      "total_clicks": 0,
+      "total_impressions": 0,
+      "ai_analysis": "",
+      "recommended_keywords": [],
+      "keyword_clusters": [],
+      "content_strategy": [],
+      "top_performing": [],
+      "quick_wins": [],
+      "summary": "Cần kết nối Google Search Console để lấy dữ liệu từ khóa thật trước khi phân tích.",
+      "data_source": "no_data",
+      "ai_provider": "none",
+      "error": "Chưa có dữ liệu GSC. Cấu hình Google Search Console để phân tích từ khóa thật."
+    },
+    "status_code": 200,
+    "duration_ms": 344.7,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 169,
+    "timestamp": "2026-05-13T09:59:34.862569",
+    "endpoint": "/api/rank-tracker/keywords",
+    "method": "GET",
+    "input": null,
+    "output": {
+      "keywords": [
+        {
+          "keyword": "https://fongfog.site",
+          "tag": "",
+          "position": null,
+          "previous_position": null,
+          "change": null,
+          "clicks": 0,
+          "impressions": 0,
+          "ctr": 0,
+          "source": "pending",
+          "last_checked": null,
+          "created_at": "2026-05-13 01:43:48"
+        }
+      ]
+    },
+    "status_code": 200,
+    "duration_ms": 12.0,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 170,
+    "timestamp": "2026-05-13T09:59:34.937797",
+    "endpoint": "/api/rank-tracker/tags",
+    "method": "GET",
+    "input": null,
+    "output": {
+      "tags": []
+    },
+    "status_code": 200,
+    "duration_ms": 91.0,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 171,
+    "timestamp": "2026-05-13T09:59:35.005845",
+    "endpoint": "/api/rank-tracker/alerts",
+    "method": "GET",
+    "input": null,
+    "output": {
+      "alerts": []
+    },
+    "status_code": 200,
+    "duration_ms": 159.7,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 172,
+    "timestamp": "2026-05-13T09:59:35.069866",
+    "endpoint": "/api/rank-tracker/keywords",
+    "method": "GET",
+    "input": null,
+    "output": {
+      "keywords": [
+        {
+          "keyword": "https://fongfog.site",
+          "tag": "",
+          "position": null,
+          "previous_position": null,
+          "change": null,
+          "clicks": 0,
+          "impressions": 0,
+          "ctr": 0,
+          "source": "pending",
+          "last_checked": null,
+          "created_at": "2026-05-13 01:43:48"
+        }
+      ]
+    },
+    "status_code": 200,
+    "duration_ms": 1.6,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 173,
+    "timestamp": "2026-05-13T09:59:35.132031",
+    "endpoint": "/api/rank-tracker/tags",
+    "method": "GET",
+    "input": null,
+    "output": {
+      "tags": []
+    },
+    "status_code": 200,
+    "duration_ms": 62.6,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 174,
+    "timestamp": "2026-05-13T09:59:35.196378",
+    "endpoint": "/api/rank-tracker/alerts",
+    "method": "GET",
+    "input": null,
+    "output": {
+      "alerts": []
+    },
+    "status_code": 200,
+    "duration_ms": 126.0,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 175,
+    "timestamp": "2026-05-13T09:59:36.844850",
+    "endpoint": "/api/ga4-overview",
+    "method": "POST",
+    "input": {
+      "days": 30
+    },
+    "output": {
+      "fetched_at": "2026-05-13T09:59:36.816068",
+      "period_days": 30,
+      "data_source": "error",
+      "property_id": "",
+      "overview": {},
+      "traffic_sources": [],
+      "top_pages": [],
+      "daily_sessions": [],
+      "error": "GA4_PROPERTY_ID chưa được cấu hình. Vào Google Analytics → Admin → Property Details để lấy Property ID."
+    },
+    "status_code": 200,
+    "duration_ms": 1.4,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 176,
+    "timestamp": "2026-05-13T09:59:36.921011",
+    "endpoint": "/api/ai-keywords",
+    "method": "POST",
+    "input": {},
+    "output": {
+      "analyzed_at": "2026-05-13T09:59:36.815979",
+      "site_url": "",
+      "gsc_keywords": [],
+      "total_clicks": 0,
+      "total_impressions": 0,
+      "ai_analysis": "",
+      "recommended_keywords": [],
+      "keyword_clusters": [],
+      "content_strategy": [],
+      "top_performing": [],
+      "quick_wins": [],
+      "summary": "Cần kết nối Google Search Console để lấy dữ liệu từ khóa thật trước khi phân tích.",
+      "data_source": "no_data",
+      "ai_provider": "none",
+      "error": "Chưa có dữ liệu GSC. Cấu hình Google Search Console để phân tích từ khóa thật."
+    },
+    "status_code": 200,
+    "duration_ms": 86.7,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 177,
+    "timestamp": "2026-05-13T09:59:36.991733",
+    "endpoint": "/api/serp/live",
+    "method": "POST",
+    "input": {
+      "keyword": "mitsubishi binh phuoc",
+      "location": "vn",
+      "num_results": 10
+    },
+    "output": null,
+    "status_code": 500,
+    "duration_ms": 156.0,
+    "error": "invalid character '—' (U+2014) (google_serp_scraper.py, line 61)",
+    "success": false
+  },
+  {
+    "id": 178,
+    "timestamp": "2026-05-13T09:59:37.058395",
+    "endpoint": "/api/ga4-overview",
+    "method": "POST",
+    "input": {
+      "days": 30
+    },
+    "output": {
+      "fetched_at": "2026-05-13T09:59:36.972127",
+      "period_days": 30,
+      "data_source": "error",
+      "property_id": "",
+      "overview": {},
+      "traffic_sources": [],
+      "top_pages": [],
+      "daily_sessions": [],
+      "error": "GA4_PROPERTY_ID chưa được cấu hình. Vào Google Analytics → Admin → Property Details để lấy Property ID."
+    },
+    "status_code": 200,
+    "duration_ms": 139.5,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 179,
+    "timestamp": "2026-05-13T09:59:37.130235",
+    "endpoint": "/api/ai-keywords",
+    "method": "POST",
+    "input": {},
+    "output": {
+      "analyzed_at": "2026-05-13T09:59:36.970386",
+      "site_url": "",
+      "gsc_keywords": [],
+      "total_clicks": 0,
+      "total_impressions": 0,
+      "ai_analysis": "",
+      "recommended_keywords": [],
+      "keyword_clusters": [],
+      "content_strategy": [],
+      "top_performing": [],
+      "quick_wins": [],
+      "summary": "Cần kết nối Google Search Console để lấy dữ liệu từ khóa thật trước khi phân tích.",
+      "data_source": "no_data",
+      "ai_provider": "none",
+      "error": "Chưa có dữ liệu GSC. Cấu hình Google Search Console để phân tích từ khóa thật."
+    },
+    "status_code": 200,
+    "duration_ms": 295.8,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 180,
+    "timestamp": "2026-05-13T09:59:37.192451",
+    "endpoint": "/api/serp/live",
+    "method": "POST",
+    "input": {
+      "keyword": "mitsubishi binh phuoc",
+      "location": "vn",
+      "num_results": 10
+    },
+    "output": null,
+    "status_code": 500,
+    "duration_ms": 274.7,
+    "error": "invalid character '—' (U+2014) (google_serp_scraper.py, line 61)",
+    "success": false
+  },
+  {
+    "id": 181,
+    "timestamp": "2026-05-13T10:05:54.141436",
+    "endpoint": "/api/calendar/items",
+    "method": "GET",
+    "input": null,
+    "output": {
+      "items": []
+    },
+    "status_code": 200,
+    "duration_ms": 2.5,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 182,
+    "timestamp": "2026-05-13T10:05:54.207609",
+    "endpoint": "/api/calendar/stats",
+    "method": "GET",
+    "input": null,
+    "output": {
+      "total": 0,
+      "draft": 0,
+      "review": 0,
+      "published": 0,
+      "upcoming": 0,
+      "overdue": 0
+    },
+    "status_code": 200,
+    "duration_ms": 76.6,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 183,
+    "timestamp": "2026-05-13T10:05:54.267796",
+    "endpoint": "/api/calendar/items",
+    "method": "GET",
+    "input": null,
+    "output": {
+      "items": []
+    },
+    "status_code": 200,
+    "duration_ms": 0.9,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 184,
+    "timestamp": "2026-05-13T10:05:54.328184",
+    "endpoint": "/api/calendar/stats",
+    "method": "GET",
+    "input": null,
+    "output": {
+      "total": 0,
+      "draft": 0,
+      "review": 0,
+      "published": 0,
+      "upcoming": 0,
+      "overdue": 0
+    },
+    "status_code": 200,
+    "duration_ms": 61.3,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 185,
+    "timestamp": "2026-05-13T10:05:56.886568",
+    "endpoint": "/api/sites/list",
+    "method": "GET",
+    "input": null,
+    "output": {
+      "sites": [
+        {
+          "id": 1,
+          "name": "Mitsubishi Bình Phước",
+          "url": "https://binhphuocmitsubishi.com",
+          "description": "Đại lý chính hãng Mitsubishi tại Bình Phước",
+          "niche": "ô tô",
+          "is_active": 1,
+          "last_scan_score": 0,
+          "last_scan_date": null,
+          "created_at": "2026-05-11 10:32:23"
+        }
+      ]
+    },
+    "status_code": 200,
+    "duration_ms": 1.8,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 186,
+    "timestamp": "2026-05-13T10:05:56.949044",
+    "endpoint": "/api/sites/list",
+    "method": "GET",
+    "input": null,
+    "output": {
+      "sites": [
+        {
+          "id": 1,
+          "name": "Mitsubishi Bình Phước",
+          "url": "https://binhphuocmitsubishi.com",
+          "description": "Đại lý chính hãng Mitsubishi tại Bình Phước",
+          "niche": "ô tô",
+          "is_active": 1,
+          "last_scan_score": 0,
+          "last_scan_date": null,
+          "created_at": "2026-05-11 10:32:23"
+        }
+      ]
+    },
+    "status_code": 200,
+    "duration_ms": 0.5,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 187,
+    "timestamp": "2026-05-13T10:08:06.212942",
+    "endpoint": "/api/serp/live",
+    "method": "POST",
+    "input": {
+      "keyword": "https://binhphuocmitsubishi.com",
+      "location": "vn",
+      "num_results": 10
+    },
+    "output": null,
+    "status_code": 500,
+    "duration_ms": 4.6,
+    "error": "invalid character '—' (U+2014) (google_serp_scraper.py, line 61)",
+    "success": false
+  },
+  {
+    "id": 188,
+    "timestamp": "2026-05-13T10:08:35.258084",
+    "endpoint": "/api/serp/live",
+    "method": "POST",
+    "input": {
+      "keyword": "https://binhphuocmitsubishi.com",
+      "location": "vn",
+      "num_results": 15
+    },
+    "output": null,
+    "status_code": 500,
+    "duration_ms": 4.2,
+    "error": "invalid character '—' (U+2014) (google_serp_scraper.py, line 61)",
+    "success": false
+  },
+  {
+    "id": 189,
+    "timestamp": "2026-05-13T10:08:35.978539",
+    "endpoint": "/api/serp/live",
+    "method": "POST",
+    "input": {
+      "keyword": "https://binhphuocmitsubishi.com",
+      "location": "vn",
+      "num_results": 15
+    },
+    "output": null,
+    "status_code": 500,
+    "duration_ms": 2.9,
+    "error": "invalid character '—' (U+2014) (google_serp_scraper.py, line 61)",
+    "success": false
+  },
+  {
+    "id": 190,
+    "timestamp": "2026-05-13T10:08:39.429932",
+    "endpoint": "/api/ga4-overview",
+    "method": "POST",
+    "input": {
+      "days": 30
+    },
+    "output": {
+      "fetched_at": "2026-05-13T10:08:39.398460",
+      "period_days": 30,
+      "data_source": "error",
+      "property_id": "",
+      "overview": {},
+      "traffic_sources": [],
+      "top_pages": [],
+      "daily_sessions": [],
+      "error": "GA4_PROPERTY_ID chưa được cấu hình. Vào Google Analytics → Admin → Property Details để lấy Property ID."
+    },
+    "status_code": 200,
+    "duration_ms": 4.4,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 191,
+    "timestamp": "2026-05-13T10:08:39.501520",
+    "endpoint": "/api/ai-keywords",
+    "method": "POST",
+    "input": {},
+    "output": {
+      "analyzed_at": "2026-05-13T10:08:39.397167",
+      "site_url": "",
+      "gsc_keywords": [],
+      "total_clicks": 0,
+      "total_impressions": 0,
+      "ai_analysis": "",
+      "recommended_keywords": [],
+      "keyword_clusters": [],
+      "content_strategy": [],
+      "top_performing": [],
+      "quick_wins": [],
+      "summary": "Cần kết nối Google Search Console để lấy dữ liệu từ khóa thật trước khi phân tích.",
+      "data_source": "no_data",
+      "ai_provider": "none",
+      "error": "Chưa có dữ liệu GSC. Cấu hình Google Search Console để phân tích từ khóa thật."
+    },
+    "status_code": 200,
+    "duration_ms": 92.8,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 192,
+    "timestamp": "2026-05-13T10:08:39.563713",
+    "endpoint": "/api/serp/live",
+    "method": "POST",
+    "input": {
+      "keyword": "mitsubishi binh phuoc",
+      "location": "vn",
+      "num_results": 10
+    },
+    "output": null,
+    "status_code": 500,
+    "duration_ms": 150.5,
+    "error": "invalid character '—' (U+2014) (google_serp_scraper.py, line 61)",
+    "success": false
+  },
+  {
+    "id": 193,
+    "timestamp": "2026-05-13T10:08:39.625059",
+    "endpoint": "/api/ga4-overview",
+    "method": "POST",
+    "input": {
+      "days": 30
+    },
+    "output": {
+      "fetched_at": "2026-05-13T10:08:39.484515",
+      "period_days": 30,
+      "data_source": "error",
+      "property_id": "",
+      "overview": {},
+      "traffic_sources": [],
+      "top_pages": [],
+      "daily_sessions": [],
+      "error": "GA4_PROPERTY_ID chưa được cấu hình. Vào Google Analytics → Admin → Property Details để lấy Property ID."
+    },
+    "status_code": 200,
+    "duration_ms": 211.4,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 194,
+    "timestamp": "2026-05-13T10:08:39.687313",
+    "endpoint": "/api/serp/live",
+    "method": "POST",
+    "input": {
+      "keyword": "mitsubishi binh phuoc",
+      "location": "vn",
+      "num_results": 10
+    },
+    "output": null,
+    "status_code": 500,
+    "duration_ms": 273.5,
+    "error": "invalid character '—' (U+2014) (google_serp_scraper.py, line 61)",
+    "success": false
+  },
+  {
+    "id": 195,
+    "timestamp": "2026-05-13T10:08:39.747487",
+    "endpoint": "/api/ai-keywords",
+    "method": "POST",
+    "input": {},
+    "output": {
+      "analyzed_at": "2026-05-13T10:08:39.399273",
+      "site_url": "",
+      "gsc_keywords": [],
+      "total_clicks": 0,
+      "total_impressions": 0,
+      "ai_analysis": "",
+      "recommended_keywords": [],
+      "keyword_clusters": [],
+      "content_strategy": [],
+      "top_performing": [],
+      "quick_wins": [],
+      "summary": "Cần kết nối Google Search Console để lấy dữ liệu từ khóa thật trước khi phân tích.",
+      "data_source": "no_data",
+      "ai_provider": "none",
+      "error": "Chưa có dữ liệu GSC. Cấu hình Google Search Console để phân tích từ khóa thật."
+    },
+    "status_code": 200,
+    "duration_ms": 336.1,
+    "error": null,
+    "success": true
   }
 ]

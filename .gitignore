@@ -8,16 +8,6 @@ build/
 *.egg
 .eggs/
 
-# Virtual environment
-venv/
-.venv/
-env/
-
-# Environment variables
-.env
-.env.local
-.env.production
-
 # Node
 node_modules/
 npm-debug.log*
