@@ -173,6 +173,107 @@ async def health():
     return {"status": "ok", "phase": 20, "version": "3.2.0"}
 
 
+@app.get("/api/server-config")
+async def server_config():
+    """Return server-side API key status (masked) for the config page."""
+    import os
+    from dotenv import load_dotenv
+    load_dotenv(os.path.join(os.path.dirname(__file__), ".env"), override=True)
+
+    def _mask(val: str) -> dict:
+        """Return {configured: bool, masked: str} for a key value."""
+        if not val:
+            return {"configured": False, "masked": ""}
+        if len(val) <= 8:
+            return {"configured": True, "masked": val[:2] + "***"}
+        return {"configured": True, "masked": val[:6] + "..." + val[-4:]}
+
+    groq = os.getenv("GROQ_API_KEY", "")
+    psi = os.getenv("PAGESPEED_API_KEY", "")
+    ga4_prop = os.getenv("GA4_PROPERTY_ID", "")
+    ga4_refresh = os.getenv("GA4_REFRESH_TOKEN", "") or os.getenv("GOOGLE_SEARCH_CONSOLE_REFRESH_TOKEN", "")
+    gsc_client = os.getenv("GOOGLE_SEARCH_CONSOLE_CLIENT_ID", "")
+    gsc_secret = os.getenv("GOOGLE_SEARCH_CONSOLE_CLIENT_SECRET", "")
+    gsc_refresh = os.getenv("GOOGLE_SEARCH_CONSOLE_REFRESH_TOKEN", "")
+    gsc_site = os.getenv("GSC_SITE_URL", "")
+    dfs_login = os.getenv("DATAFORSEO_LOGIN", "")
+    dfs_pass = os.getenv("DATAFORSEO_PASSWORD", "")
+    jwt_secret = os.getenv("JWT_SECRET_KEY", "")
+
+    return {
+        "groq_api_key": _mask(groq),
+        "pagespeed_api_key": _mask(psi),
+        "ga4_property_id": _mask(ga4_prop),
+        "ga4_refresh_token": _mask(ga4_refresh),
+        "gsc_client_id": _mask(gsc_client),
+        "gsc_client_secret": _mask(gsc_secret),
+        "gsc_refresh_token": _mask(gsc_refresh),
+        "gsc_site_url": {"configured": bool(gsc_site), "masked": gsc_site},
+        "dataforseo_login": _mask(dfs_login),
+        "dataforseo_password": _mask(dfs_pass),
+        "jwt_secret_key": _mask(jwt_secret),
+    }
+
+
+@app.post("/api/server-config")
+async def update_server_config(request: Request):
+    """Update API keys in the backend .env file."""
+    import os
+    from dotenv import load_dotenv
+
+    body = await request.json()
+    env_path = os.path.join(os.path.dirname(__file__), ".env")
+
+    # Map of allowed frontend keys → .env variable names
+    KEY_MAP = {
+        "groq_api_key": "GROQ_API_KEY",
+        "pagespeed_api_key": "PAGESPEED_API_KEY",
+        "ga4_property_id": "GA4_PROPERTY_ID",
+        "gsc_client_id": "GOOGLE_SEARCH_CONSOLE_CLIENT_ID",
+        "gsc_client_secret": "GOOGLE_SEARCH_CONSOLE_CLIENT_SECRET",
+        "gsc_refresh_token": "GOOGLE_SEARCH_CONSOLE_REFRESH_TOKEN",
+        "gsc_site_url": "GSC_SITE_URL",
+        "dataforseo_login": "DATAFORSEO_LOGIN",
+        "dataforseo_password": "DATAFORSEO_PASSWORD",
+        "jwt_secret_key": "JWT_SECRET_KEY",
+    }
+
+    updates = {}
+    for frontend_key, env_key in KEY_MAP.items():
+        if frontend_key in body and body[frontend_key]:
+            updates[env_key] = body[frontend_key]
+
+    if not updates:
+        return {"status": "error", "message": "Không có giá trị nào để cập nhật."}
+
+    # Read existing .env, update or append keys
+    lines: list[str] = []
+    seen: set[str] = set()
+    if os.path.exists(env_path):
+        with open(env_path, "r") as f:
+            for line in f:
+                stripped = line.strip()
+                if "=" in stripped and not stripped.startswith("#"):
+                    key = stripped.split("=", 1)[0]
+                    if key in updates:
+                        lines.append(f"{key}={updates[key]}\n")
+                        seen.add(key)
+                    else:
+                        lines.append(line if line.endswith("\n") else line + "\n")
+                else:
+                    lines.append(line if line.endswith("\n") else line + "\n")
+
+    for key, val in updates.items():
+        if key not in seen:
+            lines.append(f"{key}={val}\n")
+
+    with open(env_path, "w") as f:
+        f.writelines(lines)
+
+    load_dotenv(env_path, override=True)
+    return {"status": "ok", "message": f"Đã cập nhật {len(updates)} key(s).", "updated": list(updates.keys())}
+
+
 # ── Usage History API ────────────────────────────────────────────────────────
 
 @app.get("/api/usage-history")

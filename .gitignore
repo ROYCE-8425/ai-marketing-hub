@@ -32,6 +32,8 @@ Thumbs.db
 # Credentials
 *.json.key
 service-account*.json
+.env
+backend/.env
 
 # External tools (cloned repos)
 .superpowers/
