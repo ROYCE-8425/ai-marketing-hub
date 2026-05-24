@@ -105,14 +105,33 @@ async def check_core_web_vitals(
     # ── CWV pass/fail thresholds ───────────────────────────────────────
     cwv_status = _compute_cwv_status(cwv)
 
+    # Map overall_category from PageSpeed ("FAST", "AVERAGE", "SLOW", "NONE") to frontend
+    raw_status = loading.get("overall_category", "NONE")
+    status_map = {"FAST": "good", "AVERAGE": "needs_improvement", "SLOW": "poor", "NONE": "poor"}
+
     return {
         "url": url,
         "strategy": strategy,
-        "core_web_vitals": cwv,
-        "cwv_status": cwv_status,
-        "scores": scores,
+        "metrics": {
+            "lcp": {
+                "value": cwv["lcp"]["value"] if cwv["lcp"]["value"] is not None else 0,
+                "unit": "ms",
+                "rating": cwv_status.get("lcp", "poor")
+            },
+            "inp": {
+                "value": cwv["inp"]["value"] if cwv["inp"]["value"] is not None else 0,
+                "unit": "ms",
+                "rating": cwv_status.get("inp", "poor")
+            },
+            "cls": {
+                "value": cwv["cls"]["value"] if cwv["cls"]["value"] is not None else 0,
+                "unit": "",
+                "rating": cwv_status.get("cls", "poor")
+            }
+        },
+        "lighthouse_scores": scores,
         "opportunities": opportunities[:10],
-        "overall_status": loading.get("overall_category", "NONE"),
+        "overall_status": status_map.get(raw_status, "poor"),
     }
 
 
@@ -182,21 +201,21 @@ def _compute_cwv_status(cwv: Dict) -> Dict[str, str]:
     inp_val = cwv["inp"]["value"]
     cls_val = cwv["cls"]["value"]
 
-    if any(v is None for v in (lcp_val, inp_val, cls_val)):
-        return {}
-
     return {
         "lcp": (
+            "poor" if lcp_val is None else
             "good" if lcp_val <= 2500
             else "needs_improvement" if lcp_val <= 4000
             else "poor"
         ),
         "inp": (
+            "poor" if inp_val is None else
             "good" if inp_val <= 200
             else "needs_improvement" if inp_val <= 500
             else "poor"
         ),
         "cls": (
+            "poor" if cls_val is None else
             "good" if cls_val <= 0.1
             else "needs_improvement" if cls_val <= 0.25
             else "poor"

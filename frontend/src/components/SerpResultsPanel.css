@@ -396,3 +396,18 @@
   .serp-table th:nth-child(3) { display: none; }
   .serp-row td:nth-child(3) { display: none; }
 }
+
+/* AI Analyze Single Styles */
+.analyze-single-btn { background: linear-gradient(135deg, #8b5cf6, #06b6d4); color: white; border: none; padding: 0.4rem 0.8rem; border-radius: 0.4rem; font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
+.analyze-single-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+.analyze-single-panel { padding: 1rem; background: rgba(139, 92, 246, 0.05); border: 1px solid rgba(139, 92, 246, 0.2); border-radius: 0.5rem; margin: 0.5rem; }
+.analyze-loading { color: #8b5cf6; font-size: 0.9rem; text-align: center; padding: 1rem; }
+.ai-analysis-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(0,0,0,0.1); padding-bottom: 0.5rem; margin-bottom: 1rem; }
+.ai-analysis-header h4 { margin: 0; color: #1f2937; font-size: 1rem; }
+.word-count-badge { background: rgba(6, 182, 212, 0.15); color: #06b6d4; padding: 0.2rem 0.5rem; border-radius: 1rem; font-size: 0.75rem; font-weight: bold; }
+.ai-markdown { font-size: 0.9rem; line-height: 1.6; color: #4b5563; }
+.ai-markdown h3, .ai-markdown h4, .ai-markdown h5 { color: #111827; margin-top: 1rem; margin-bottom: 0.5rem; }
+.ai-markdown li { margin-bottom: 0.25rem; }
+.quick-links { display: flex; gap: 0.5rem; margin-top: 1.5rem; border-top: 1px solid rgba(0,0,0,0.1); padding-top: 1rem; }
+.quick-link-btn { background: rgba(0,0,0,0.05); color: #374151; padding: 0.4rem 0.8rem; border-radius: 0.4rem; font-size: 0.8rem; text-decoration: none; border: 1px solid rgba(0,0,0,0.1); transition: all 0.2s; }
+.quick-link-btn:hover { background: rgba(0,0,0,0.1); color: #111827; }

@@ -68,6 +68,15 @@ export interface DeepAnalyzeResponse {
   };
 }
 
+export interface AnalyzeSingleResponse {
+  url: string;
+  keyword: string;
+  title: string;
+  word_count: number;
+  ai_analysis: string;
+  analyzed_at: string;
+}
+
 // ─── Hook: SERP Live ───────────────────────────────────────────────────────────
 
 export function useSerpLive() {
@@ -144,4 +153,41 @@ export function useDeepAnalyze() {
   };
 
   return { data, loading, error, analyze };
+}
+
+// ─── Hook: Single AI Analyze ───────────────────────────────────────────────────
+
+export function useAnalyzeSingle() {
+  const [data, setData] = useState<AnalyzeSingleResponse | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const analyzeSingle = async (keyword: string, url: string) => {
+    setLoading(true);
+    setError(null);
+    setData(null);
+    try {
+      const res = await fetch(`${API_BASE}/serp/analyze-single`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ keyword, url }),
+      });
+      if (!res.ok) {
+        const errBody = await res.json().catch(() => ({}));
+        throw new Error(errBody.detail ?? `HTTP ${res.status}`);
+      }
+      setData(await res.json());
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Unknown error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const reset = () => {
+    setData(null);
+    setError(null);
+  };
+
+  return { data, loading, error, analyzeSingle, reset };
 }

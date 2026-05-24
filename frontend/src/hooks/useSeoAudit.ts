@@ -27,7 +27,11 @@ export function useSeoAudit(): UseSeoAuditReturn {
       });
       if (!res.ok) {
         const errBody = await res.json().catch(() => ({}));
-        throw new Error(errBody.detail ?? `HTTP ${res.status}`);
+        const detail = errBody.detail;
+        const msg = typeof detail === "string" ? detail
+          : Array.isArray(detail) ? detail.map((d: { msg?: string }) => d.msg || JSON.stringify(d)).join("; ")
+          : detail ? JSON.stringify(detail) : `HTTP ${res.status}`;
+        throw new Error(msg);
       }
       setData(await res.json());
     } catch (e) {

@@ -101,19 +101,19 @@ export function BacklinkAnalyzer() {
             </div>
             <div className="geo-score-info">
               <span className="geo-grade" style={{ color: gradeColor(result.grade) }}>{result.grade}</span>
-              <span className="geo-grade-label">Link Quality</span>
-              <p className="geo-url">Internal: {result.internal_links.total} | External: {result.external_links.total} | Domains: {result.total_domains}</p>
+              <span className="geo-grade-label">Chất lượng liên kết</span>
+              <p className="geo-url">Nội bộ: {result.internal_links.total} | Bên ngoài: {result.external_links.total} | Tên miền: {result.total_domains}</p>
             </div>
           </div>
 
           {/* Stats */}
           <div className="spin-stats">
             <div className="spin-stat">
-              <span className="spin-stat-label">Internal Links</span>
+              <span className="spin-stat-label">Liên kết nội bộ</span>
               <span className="spin-stat-value" style={{ color: "#3b82f6" }}>{result.internal_links.total}</span>
             </div>
             <div className="spin-stat">
-              <span className="spin-stat-label">External Links</span>
+              <span className="spin-stat-label">Liên kết ngoài</span>
               <span className="spin-stat-value" style={{ color: "#f59e0b" }}>{result.external_links.total}</span>
             </div>
             <div className="spin-stat">
@@ -133,13 +133,13 @@ export function BacklinkAnalyzer() {
           {/* Tabs */}
           <div className="spin-version-tabs" style={{ marginTop: 16 }}>
             <button className={`spin-version-tab ${tab === "internal" ? "active" : ""}`} onClick={() => setTab("internal")}>
-              🏠 Internal ({result.internal_links.total})
+              🏠 Nội bộ ({result.internal_links.total})
             </button>
             <button className={`spin-version-tab ${tab === "external" ? "active" : ""}`} onClick={() => setTab("external")}>
-              🌐 External ({result.external_links.total})
+              🌐 Bên ngoài ({result.external_links.total})
             </button>
             <button className={`spin-version-tab ${tab === "domains" ? "active" : ""}`} onClick={() => setTab("domains")}>
-              🏢 Domains ({result.total_domains})
+              🏢 Tên miền ({result.total_domains})
             </button>
           </div>
 
@@ -151,7 +151,7 @@ export function BacklinkAnalyzer() {
                   <tr>
                     <th>URL</th>
                     <th>Anchor Text</th>
-                    <th>Type</th>
+                    <th>Loại</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -180,7 +180,7 @@ export function BacklinkAnalyzer() {
             <div className="rt-table-wrap">
               <table className="rt-table">
                 <thead>
-                  <tr><th>Domain</th><th>Links</th><th>Dofollow</th><th>Nofollow</th><th>Anchors</th></tr>
+                  <tr><th>Tên miền</th><th>Liên kết</th><th>Dofollow</th><th>Nofollow</th><th>Anchor Text</th></tr>
                 </thead>
                 <tbody>
                   {result.referring_domains.map((d, i) => (

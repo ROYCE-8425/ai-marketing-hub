@@ -186,6 +186,16 @@ async def serp_live(body: SerpLiveRequest):
         dfs_result["analyzed_at"] = datetime.now().isoformat()
         return dfs_result
 
+    # Strategy 1.5: Try SerpAPI
+    from core.serpapi_search import search_serpapi
+    serpapi_result = await asyncio.to_thread(
+        search_serpapi, body.keyword, body.location, body.num_results
+    )
+    if serpapi_result:
+        if serpapi_result.get("source") == "api_error" or serpapi_result.get("organic_results"):
+            serpapi_result["analyzed_at"] = datetime.now().isoformat()
+            return serpapi_result
+
     # Strategy 2: GoogleSerpScraper (also DataForSEO-backed, handles error states)
     from core.google_serp_scraper import GoogleSerpScraper
     scraper = GoogleSerpScraper()
@@ -284,4 +294,118 @@ async def serp_deep_analyze(body: DeepAnalyzeRequest):
         "pages": page_results,
         "statistics": stats,
         "recommendation": recommendation,
+    }
+
+
+# ─── POST /api/serp/analyze-single ──────────────────────────────────────────────
+
+class AnalyzeSingleRequest(BaseModel):
+    keyword: str = Field(..., min_length=1)
+    url: str = Field(..., min_length=1)
+
+@router.post("/serp/analyze-single")
+async def serp_analyze_single(body: AnalyzeSingleRequest):
+    """
+    Scrape a single URL and use AI to provide an in-depth SEO analysis.
+    """
+    url = body.url
+    keyword = body.keyword
+    
+    # 1. Scrape content
+    try:
+        async with httpx.AsyncClient(timeout=15.0, follow_redirects=True, http2=True) as client:
+            resp = await client.get(url, headers={
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/125.0.0.0 Safari/537.36",
+            })
+            resp.raise_for_status()
+    except Exception as exc:
+        raise HTTPException(status_code=400, detail=f"Không thể cào dữ liệu từ URL này: {str(exc)}")
+
+    soup = BeautifulSoup(resp.text, "lxml")
+    
+    for tag in soup(["script", "style", "nav", "footer", "header", "aside", "noscript"]):
+        tag.decompose()
+        
+    title = soup.title.string.strip() if soup.title and soup.title.string else "Không có Title"
+    meta_desc = ""
+    desc_tag = soup.find("meta", attrs={"name": "description"})
+    if desc_tag and desc_tag.get("content"):
+        meta_desc = desc_tag["content"].strip()
+        
+    headings = []
+    for h in soup.find_all(["h1", "h2", "h3"]):
+        headings.append(f"{h.name.upper()}: {h.get_text(strip=True)}")
+    headings_str = "\n".join(headings[:20]) # Limit to 20 headings
+    
+    main = None
+    for sel in ["article", "main", '[role="main"]', ".content", "#content", ".post", ".entry-content"]:
+        main = soup.select_one(sel)
+        if main:
+            break
+    if not main:
+        main = soup.find("body")
+        
+    text_content = main.get_text(separator=" ", strip=True) if main else ""
+    words = re.findall(r"\b[a-zA-ZÀ-ỹ]{2,}\b", text_content)
+    word_count = len(words)
+    
+    # Truncate text content to avoid token limits (keep first ~1500 words)
+    truncated_text = " ".join(text_content.split()[:1500])
+    
+    # 2. Call Groq AI
+    groq_key = os.getenv("GROQ_API_KEY")
+    if not groq_key:
+        raise HTTPException(status_code=500, detail="Chưa cấu hình GROQ_API_KEY trong hệ thống.")
+        
+    prompt = f"""Bạn là một chuyên gia SEO hàng đầu bằng Tiếng Việt.
+Hãy phân tích trang web sau đây đang xếp hạng cao cho từ khóa: "{keyword}"
+
+[THÔNG TIN TRANG WEB]
+- URL: {url}
+- Title: {title}
+- Meta Description: {meta_desc}
+- Tổng số từ ước tính: {word_count} từ
+- Danh sách Headings (H1, H2, H3):
+{headings_str}
+
+- Trích đoạn Nội dung chính (đã rút gọn):
+{truncated_text}
+
+[YÊU CẦU PHÂN TÍCH]
+Hãy trả về một báo cáo phân tích theo định dạng Markdown, chia làm 3 phần rõ ràng:
+1. Đánh giá On-page SEO: Title, Meta, Headings có chứa từ khóa không? Cấu trúc có tốt không?
+2. Ưu điểm nội dung: Vì sao bài viết này đáp ứng được User Intent (ý định tìm kiếm) của người dùng cho từ khóa "{keyword}"? Điểm mạnh nhất của bài là gì?
+3. Chiến lược lật đổ (Actionable Advice): Tôi cần làm gì để viết một bài tốt hơn trang này? (Ví dụ: Thêm content gap nào, hình ảnh, cấu trúc lại như thế nào).
+
+Lưu ý: Format bằng Markdown sạch đẹp, ngắn gọn, súc tích, đi thẳng vào vấn đề.
+"""
+
+    try:
+        async with httpx.AsyncClient(timeout=60.0) as client:
+            ai_resp = await client.post(
+                "https://api.groq.com/openai/v1/chat/completions",
+                headers={"Authorization": f"Bearer {groq_key}"},
+                json={
+                    "model": "llama-3.3-70b-versatile",
+                    "messages": [
+                        {"role": "system", "content": "You are a top-tier Vietnamese SEO expert."},
+                        {"role": "user", "content": prompt}
+                    ],
+                    "temperature": 0.5,
+                    "max_tokens": 2048
+                }
+            )
+            ai_resp.raise_for_status()
+            ai_data = ai_resp.json()
+            analysis_result = ai_data["choices"][0]["message"]["content"]
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Lỗi khi gọi AI phân tích: {str(exc)}")
+
+    return {
+        "url": url,
+        "keyword": keyword,
+        "title": title,
+        "word_count": word_count,
+        "ai_analysis": analysis_result,
+        "analyzed_at": datetime.now().isoformat()
     }

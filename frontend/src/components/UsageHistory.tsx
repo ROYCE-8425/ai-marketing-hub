@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
+import { API_BASE } from "../lib/apiConfig";
 
-const API = import.meta.env.VITE_API_URL || "http://localhost:8000";
+const API = API_BASE.replace(/\/api\/?$/, "");
 
 interface HistoryEntry {
   id: number;

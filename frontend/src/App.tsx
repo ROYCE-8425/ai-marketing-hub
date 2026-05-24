@@ -104,40 +104,77 @@ interface NavItem { id: TabId; label: string; icon: string }
 interface NavGroup { group: string; icon: string; items: NavItem[] }
 type NavIndexItem = NavItem & { group: string; groupIcon: string; groupSize: number };
 
+// Monochrome SVG icon paths (Lucide-style, 24x24 viewBox)
+const NAV_ICONS: Record<string, string> = {
+  dashboard: "M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z M9 22V12h6v10",
+  seo: "M21 21l-6-6m2-5a7 7 0 1 1-14 0 7 7 0 0 1 14 0z",
+  techseo: "M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z",
+  cwv: "M13 2L3 14h9l-1 8 10-12h-9l1-8z",
+  cro: "M16 8v8 M12 11v5 M8 14v2 M4 2h16a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z",
+  serp: "M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z M2 12h20 M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z",
+  backlinks: "M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71 M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71",
+  brokenlinks: "M16.5 9.4l-9-5.19 M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z M3.27 6.96L12 12.01l8.73-5.05 M12 22.08V12",
+  schemavalidator: "M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z M14 2v6h6 M16 13H8 M16 17H8 M10 9H8",
+  ranktracker: "M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z M12 7a3 3 0 1 0 0 6 3 3 0 0 0 0-6z",
+  aikeys: "M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 0 1 7 7h1a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1.07A7 7 0 0 1 14 22h-4a7 7 0 0 1-6.93-6H2a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h1a7 7 0 0 1 7-7h1V5.73c-.6-.34-1-.99-1-1.73a2 2 0 0 1 2-2z M10 17a1 1 0 1 0 0-2 1 1 0 0 0 0 2z M14 17a1 1 0 1 0 0-2 1 1 0 0 0 0 2z",
+  competitor: "M17 20h5v-2a3 3 0 0 0-5.356-1.857 M7 20H2v-2a3 3 0 0 1 5.356-1.857 M12 14a4 4 0 1 0 0-8 4 4 0 0 0 0 8z M17 10a3 3 0 1 0 0-6 M7 10a3 3 0 1 1 0-6",
+  planner: "M12 20h9 M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z",
+  spineditor: "M21.5 2v6h-6 M2.5 22v-6h6 M2 11.5a10 10 0 0 1 18.8-4.3 M22 12.5a10 10 0 0 1-18.8 4.2",
+  geo: "M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z M12 8v4l3 3",
+  calendar: "M19 4H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z M16 2v4 M8 2v4 M3 10h18",
+  abtest: "M16 3h5v5 M4 20L21 3 M21 16v5h-5 M15 15l6 6 M4 4l5 5",
+  report: "M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z M14 2v6h6 M8 13h2 M8 17h2 M14 13h2 M14 17h2",
+  tracker: "M22 12h-4l-3 9L9 3l-3 9H2",
+  fileconvert: "M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z M14 2v6h6 M12 18v-6 M9 15l3 3 3-3",
+  sites: "M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z M12 22V15h0",
+  googlesetup: "M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z",
+};
+
+/** Render a monochrome SVG icon */
+function NavIcon({ name, size = 18 }: { name: string; size?: number }) {
+  const d = NAV_ICONS[name];
+  if (!d) return null;
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      {d.split(/ (?=M|C|L|A|Z)/g).map((pathD, i) => <path key={i} d={pathD.trim()} />)}
+    </svg>
+  );
+}
+
 const NAV_GROUPS: NavGroup[] = [
-  { group: "Tổng quan", icon: "📊", items: [
-    { id: "dashboard", label: "Dashboard", icon: "📈" },
+  { group: "Tổng quan", icon: "", items: [
+    { id: "dashboard", label: "Dashboard", icon: "dashboard" },
   ]},
-  { group: "Phân tích SEO", icon: "🔍", items: [
-    { id: "seo", label: "Kiểm tra SEO", icon: "🔎" },
-    { id: "techseo", label: "Technical SEO", icon: "🔧" },
-    { id: "cwv", label: "Core Web Vitals", icon: "⚡" },
-    { id: "cro", label: "CRO & Uy tín", icon: "📊" },
-    { id: "serp", label: "SERP trực tiếp", icon: "🌐" },
-    { id: "backlinks", label: "Backlinks", icon: "🔗" },
-    { id: "brokenlinks", label: "Kiểm tra link hỏng", icon: "🔗" },
-    { id: "schemavalidator", label: "Xác thực Schema", icon: "📋" },
+  { group: "Phân tích SEO", icon: "", items: [
+    { id: "seo", label: "Kiểm tra SEO", icon: "seo" },
+    { id: "techseo", label: "Technical SEO", icon: "techseo" },
+    { id: "cwv", label: "Core Web Vitals", icon: "cwv" },
+    { id: "cro", label: "CRO & Uy tín", icon: "cro" },
+    { id: "serp", label: "SERP trực tiếp", icon: "serp" },
+    { id: "backlinks", label: "Backlinks", icon: "backlinks" },
+    { id: "brokenlinks", label: "Kiểm tra link hỏng", icon: "brokenlinks" },
+    { id: "schemavalidator", label: "Xác thực Schema", icon: "schemavalidator" },
   ]},
-  { group: "Từ khóa", icon: "🎯", items: [
-    { id: "ranktracker", label: "Theo dõi Keyword", icon: "📍" },
-    { id: "aikeys", label: "AI Keyword Analysis", icon: "🤖" },
-    { id: "competitor", label: "Phân tích đối thủ", icon: "⭐" },
+  { group: "Từ khóa", icon: "", items: [
+    { id: "ranktracker", label: "Theo dõi Keyword", icon: "ranktracker" },
+    { id: "aikeys", label: "AI Keyword Analysis", icon: "aikeys" },
+    { id: "competitor", label: "Phân tích đối thủ", icon: "competitor" },
   ]},
-  { group: "Nội dung", icon: "✍️", items: [
-    { id: "planner", label: "Viết nội dung AI", icon: "📝" },
-    { id: "spineditor", label: "Spin Editor", icon: "🔄" },
-    { id: "geo", label: "Tối ưu GEO", icon: "🧠" },
-    { id: "calendar", label: "Lịch nội dung", icon: "📅" },
+  { group: "Nội dung", icon: "", items: [
+    { id: "planner", label: "Viết nội dung AI", icon: "planner" },
+    { id: "spineditor", label: "Spin Editor", icon: "spineditor" },
+    { id: "geo", label: "Tối ưu GEO", icon: "geo" },
+    { id: "calendar", label: "Lịch nội dung", icon: "calendar" },
   ]},
-  { group: "Công cụ", icon: "⚡", items: [
-    { id: "abtest", label: "A/B Testing", icon: "🧪" },
-    { id: "report", label: "Báo cáo AI", icon: "📋" },
-    { id: "tracker", label: "Chiến dịch", icon: "📈" },
-    { id: "fileconvert", label: "File Converter", icon: "📎" },
+  { group: "Công cụ", icon: "", items: [
+    { id: "abtest", label: "A/B Testing", icon: "abtest" },
+    { id: "report", label: "Báo cáo AI", icon: "report" },
+    { id: "tracker", label: "Chiến dịch", icon: "tracker" },
+    { id: "fileconvert", label: "File Converter", icon: "fileconvert" },
   ]},
-  { group: "Quản lý", icon: "⚙️", items: [
-    { id: "sites", label: "Multi-site", icon: "🏢" },
-    { id: "googlesetup", label: "Cấu hình Google", icon: "🔐" },
+  { group: "Quản lý", icon: "", items: [
+    { id: "sites", label: "Multi-site", icon: "sites" },
+    { id: "googlesetup", label: "Cấu hình Google", icon: "googlesetup" },
   ]},
 ];
 
@@ -190,7 +227,7 @@ function PageHeader({ icon, title, description, group }: {
         <span className="page-header-current">{title}</span>
       </div>
       <h2 className="page-header-title">
-        <span className="page-header-icon">{icon}</span>
+        <span className="page-header-icon"><NavIcon name={icon} size={22} /></span>
         {title}
       </h2>
       <p className="page-header-desc">{description}</p>
@@ -230,7 +267,7 @@ function Sidebar({ collapsed, onToggle, onMobileClose }: {
         <nav className="sidebar-nav">
           {NAV_GROUPS.map(group => (
             <div key={group.group} className="sidebar-group">
-              {!collapsed && <div className="sidebar-group-label">{group.icon} {group.group}</div>}
+              {!collapsed && <div className="sidebar-group-label">{group.group}</div>}
               {collapsed && <div className="sidebar-group-dot" />}
               {group.items.map(item => (
                 <NavLink key={item.id}
@@ -240,7 +277,7 @@ function Sidebar({ collapsed, onToggle, onMobileClose }: {
                   onClick={() => { if (window.innerWidth < 1024) onMobileClose(); }}
                   end={item.id === 'dashboard'}
                 >
-                  <span className="sidebar-item-icon">{item.icon}</span>
+                  <span className="sidebar-item-icon"><NavIcon name={item.icon} size={16} /></span>
                   {!collapsed && <span className="sidebar-item-label">{item.label}</span>}
                 </NavLink>
               ))}
@@ -581,7 +618,9 @@ export default function App() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!url.trim() || !keyword.trim()) return;
-    analyze({ url: url.trim(), primary_keyword: keyword.trim() }).then(() => {
+    let finalUrl = url.trim();
+    if (!/^https?:\/\//i.test(finalUrl)) finalUrl = `https://${finalUrl}`;
+    analyze({ url: finalUrl, primary_keyword: keyword.trim() }).then(() => {
       // Save to history after analysis completes (auditData will be set by then)
     });
     navigate(getPathFromTabId('seo'));
@@ -688,7 +727,7 @@ export default function App() {
             <span className="topbar-breadcrumb">
               <span className="topbar-breadcrumb-group">{currentGroup}</span>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" opacity="0.4"><path d="M9 18l6-6-6-6" /></svg>
-              <span className="topbar-breadcrumb-page">{currentIcon} {currentLabel}</span>
+              <span className="topbar-breadcrumb-page"><NavIcon name={currentIcon} size={14} /> {currentLabel}</span>
             </span>
           </div>
           <div className="topbar-actions">

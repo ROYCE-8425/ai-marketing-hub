@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { PlanContentResponse, SectionResult } from "../types/content";
 import { PolishPanel } from "./PolishPanel";
+import { API_BASE } from "../lib/apiConfig";
 import "./ContentPlanner.css";
 
 // ─── Section type → icon/label/color ────────────────────────────────────────────
@@ -230,7 +231,7 @@ export function ContentPlannerPanel({ plan, onPublish }: ContentPlannerPanelProp
     setWriting(true);
     setWriterDraft("⏳ AI đang viết bài... Vui lòng chờ 1-2 phút...");
     try {
-      const response = await fetch("http://localhost:8000/api/content/write-full", {
+      const response = await fetch(`${API_BASE}/content/write-full`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

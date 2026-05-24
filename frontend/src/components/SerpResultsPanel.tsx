@@ -1,4 +1,5 @@
-import { useDeepAnalyze } from "../hooks/useSerpLive";
+import { useState } from "react";
+import { useDeepAnalyze, useAnalyzeSingle } from "../hooks/useSerpLive";
 import type { SerpLiveResponse, SerpResult, DeepAnalyzeResponse } from "../hooks/useSerpLive";
 import { exportSerpToCsv } from "../lib/history";
 import "./SerpResultsPanel.css";
@@ -38,7 +39,106 @@ function SerpFeatureBadges({ features }: { features: string[] }) {
   );
 }
 
-function RankingTable({ results, onRowClick }: { results: SerpResult[]; onRowClick?: (url: string) => void }) {
+function SerpRowItem({ r, keyword, onRowClick }: { r: SerpResult; keyword: string; onRowClick?: (url: string) => void }) {
+  const [expanded, setExpanded] = useState(false);
+  const { data, loading, error, analyzeSingle } = useAnalyzeSingle();
+
+  const handleAnalyze = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!expanded && !data && !loading) {
+      analyzeSingle(keyword, r.url);
+    }
+    setExpanded(!expanded);
+  };
+
+  const handleLinkClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (onRowClick) onRowClick(r.url);
+    else window.open(r.url, "_blank");
+  };
+
+  const renderFormattedLine = (text: string) => {
+    const parts = text.split(/\*\*(.*?)\*\*/g);
+    return (
+      <>
+        {parts.map((part, index) => 
+          index % 2 === 1 ? <strong key={index} style={{ color: "#1f2937" }}>{part}</strong> : part
+        )}
+      </>
+    );
+  };
+
+  return (
+    <>
+      <tr className={`serp-row ${expanded ? "expanded" : ""}`} onClick={handleLinkClick}>
+        <td>
+          <PositionBadge pos={r.position} />
+        </td>
+        <td>
+          <div className="serp-title-cell">
+            <span className="serp-title">{r.title}</span>
+            <span className="serp-domain">{r.domain}</span>
+            {r.breadcrumb && <span className="serp-breadcrumb">{r.breadcrumb}</span>}
+          </div>
+        </td>
+        <td>
+          <span className="serp-snippet">{r.snippet}</span>
+        </td>
+        <td>
+          <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+            <button
+              onClick={handleAnalyze}
+              className="analyze-single-btn"
+              title="Phân tích AI cho trang này"
+            >
+              {loading ? <span className="btn-spinner" /> : "🔬 Mổ xẻ SEO"}
+            </button>
+            <svg className="serp-link-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+              <polyline points="15 3 21 3 21 9" />
+              <line x1="10" y1="14" x2="21" y2="3" />
+            </svg>
+          </div>
+        </td>
+      </tr>
+      {expanded && (
+        <tr className="serp-row-expanded">
+          <td colSpan={4}>
+            <div className="analyze-single-panel">
+              {loading && <div className="analyze-loading">Đang cào dữ liệu và phân tích bằng Groq AI... Vui lòng đợi khoảng 15-20s.</div>}
+              {error && <div className="error-msg">{error}</div>}
+              {data && (
+                <div className="ai-analysis-content">
+                  <div className="ai-analysis-header">
+                    <h4>Báo cáo Phân Tích On-page (Top 1)</h4>
+                    <span className="word-count-badge">{data.word_count.toLocaleString()} từ</span>
+                  </div>
+                  <div className="ai-markdown">
+                    {data.ai_analysis.split('\n').map((line, i) => {
+                      const tLine = line.trim();
+                      if (tLine.startsWith('###')) return <h5 key={i}>{renderFormattedLine(tLine.replace(/^###\s*/, ''))}</h5>;
+                      if (tLine.startsWith('##')) return <h4 key={i}>{renderFormattedLine(tLine.replace(/^##\s*/, ''))}</h4>;
+                      if (tLine.startsWith('#')) return <h3 key={i}>{renderFormattedLine(tLine.replace(/^#\s*/, ''))}</h3>;
+                      if (tLine.startsWith('-') || tLine.startsWith('*')) return <li key={i}>{renderFormattedLine(tLine.replace(/^[-*]\s*/, ''))}</li>;
+                      if (tLine === '') return <br key={i} />;
+                      return <p key={i}>{renderFormattedLine(tLine)}</p>;
+                    })}
+                  </div>
+                  <div className="quick-links">
+                    <a href={`/core-web-vitals?url=${encodeURIComponent(r.url)}`} target="_blank" rel="noreferrer" className="quick-link-btn">⚡ Tốc độ (PageSpeed)</a>
+                    <a href={`/technical-seo?url=${encodeURIComponent(r.url)}`} target="_blank" rel="noreferrer" className="quick-link-btn">⚙️ Technical SEO</a>
+                  </div>
+                </div>
+              )}
+            </div>
+          </td>
+        </tr>
+      )}
+    </>
+  );
+}
+
+function RankingTable({ results, keyword, onRowClick }: { results: SerpResult[]; keyword: string; onRowClick?: (url: string) => void }) {
   return (
     <table className="serp-table">
       <thead>
@@ -46,37 +146,12 @@ function RankingTable({ results, onRowClick }: { results: SerpResult[]; onRowCli
           <th>#</th>
           <th>Trang web</th>
           <th>Mô tả</th>
-          <th></th>
+          <th>Hành động</th>
         </tr>
       </thead>
       <tbody>
         {results.map((r) => (
-          <tr
-            key={r.position}
-            className="serp-row"
-            onClick={() => onRowClick ? onRowClick(r.url) : window.open(r.url, "_blank")}
-          >
-            <td>
-              <PositionBadge pos={r.position} />
-            </td>
-            <td>
-              <div className="serp-title-cell">
-                <span className="serp-title">{r.title}</span>
-                <span className="serp-domain">{r.domain}</span>
-                {r.breadcrumb && <span className="serp-breadcrumb">{r.breadcrumb}</span>}
-              </div>
-            </td>
-            <td>
-              <span className="serp-snippet">{r.snippet}</span>
-            </td>
-            <td>
-              <svg className="serp-link-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
-                <polyline points="15 3 21 3 21 9" />
-                <line x1="10" y1="14" x2="21" y2="3" />
-              </svg>
-            </td>
-          </tr>
+          <SerpRowItem key={r.position} r={r} keyword={keyword} onRowClick={onRowClick} />
         ))}
       </tbody>
     </table>
@@ -319,7 +394,7 @@ export function SerpResultsPanel({ data }: { data: SerpLiveResponse }) {
 
       {/* Ranking table */}
       {data.organic_results.length > 0 ? (
-        <RankingTable results={data.organic_results} />
+        <RankingTable results={data.organic_results} keyword={data.keyword} />
       ) : (
         <p style={{ color: "#9ca3af", textAlign: "center", padding: "2rem" }}>
           Không tìm thấy kết quả. Vui lòng thử lại.

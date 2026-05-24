@@ -5,46 +5,59 @@ import { API_BASE } from "../lib/apiConfig";
 
 interface LinkResult {
   url: string;
-  source_page: string;
-  status_code: number;
-  link_type: string;  // "internal" | "external"
-  status: string;     // "ok" | "broken" | "redirect"
+  source_tag: string;
+  anchor_text: string;
+  type: string;
+  status: number | string | null;
 }
 
 interface ScanResult {
   url: string;
-  total_links: number;
-  ok_links: number;
-  broken_links: number;
-  redirect_links: number;
-  broken_rate: number;
-  links: LinkResult[];
+  duration_seconds: number;
+  summary: {
+    total_links_found: number;
+    total_checked: number;
+    broken_count: number;
+    redirected_count: number;
+    ok_count: number;
+    internal_broken: number;
+    external_broken: number;
+  };
+  broken_links: LinkResult[];
+  redirected_links: LinkResult[];
+  health_score: { score: number; grade: string; label: string };
+  recommendations: string[];
 }
 
-type FilterTab = "all" | "broken" | "redirect" | "ok";
+type FilterTab = "broken" | "redirect";
 
 // ─── Helpers ───────────────────────────────────────────────────────────────────
 
-/** Status row background color */
-function statusRowBg(status: string): string {
-  if (status === "broken") return "rgba(239,68,68,0.06)";
-  if (status === "redirect") return "rgba(234,179,8,0.06)";
-  return "transparent";
-}
 
 /** Status badge color */
-function statusColor(status: string): string {
-  if (status === "broken") return "#ef4444";
-  if (status === "redirect") return "#eab308";
-  return "#15803d";
-}
+const statusColor = (code: number | string | null) => {
+  const c = typeof code === "number" ? code : parseInt(String(code), 10);
+  if (isNaN(c)) return "#ef4444";
+  if (c >= 400 || c === 0) return "#ef4444";
+  if (c >= 300) return "#f59e0b";
+  return "#10b981";
+};
 
-/** Status badge label in Vietnamese */
-function statusLabel(status: string): string {
-  if (status === "broken") return "Hỏng";
-  if (status === "redirect") return "Redirect";
-  return "Tốt";
-}
+const statusLabel = (code: number | string | null) => {
+  const c = typeof code === "number" ? code : parseInt(String(code), 10);
+  if (isNaN(c)) return "Lỗi";
+  if (c === 0) return "Lỗi mạng";
+  if (c >= 400) return `Lỗi ${c}`;
+  if (c >= 300) return `Chuyển hướng ${c}`;
+  return "OK";
+};
+
+const statusRowBg = (code: number | string | null) => {
+  const c = typeof code === "number" ? code : parseInt(String(code), 10);
+  if (isNaN(c) || c >= 400 || c === 0) return "rgba(239,68,68,0.05)";
+  if (c >= 300) return "rgba(245,158,11,0.05)";
+  return "transparent";
+};
 
 /** Link type label */
 function typeLabel(type: string): string {
@@ -53,9 +66,9 @@ function typeLabel(type: string): string {
 
 /** Export data as CSV */
 function exportCsv(links: LinkResult[], filename: string) {
-  const header = "URL,Trang nguồn,Status Code,Loại,Trạng thái\n";
+  const header = "URL,Thẻ nguồn,Mỏ neo,Loại,Mã HTTP\n";
   const rows = links.map(l =>
-    `"${l.url}","${l.source_page}",${l.status_code},"${typeLabel(l.link_type)}","${statusLabel(l.status)}"`
+    `"${l.url}","${l.source_tag || ""}","${(l.anchor_text || "").replace(/"/g, '""')}","${l.type || ""}","${l.status || ""}"`
   ).join("\n");
   const blob = new Blob([header + rows], { type: "text/csv;charset=utf-8;" });
   const a = document.createElement("a");
@@ -100,7 +113,7 @@ export function BrokenLinkChecker() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<ScanResult | null>(null);
   const [error, setError] = useState("");
-  const [filter, setFilter] = useState<FilterTab>("all");
+  const [filter, setFilter] = useState<FilterTab>("broken");
 
   const handleScan = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -130,15 +143,14 @@ export function BrokenLinkChecker() {
   // Filter links by tab
   const filteredLinks = useMemo(() => {
     if (!result) return [];
-    if (filter === "all") return result.links;
-    return result.links.filter(l => l.status === filter);
+    if (filter === "broken") return result.broken_links;
+    if (filter === "redirect") return result.redirected_links;
+    return result.broken_links;
   }, [result, filter]);
 
   const tabs: { key: FilterTab; label: string }[] = [
-    { key: "all", label: "Tất cả" },
     { key: "broken", label: "Links hỏng" },
     { key: "redirect", label: "Redirect" },
-    { key: "ok", label: "Tốt" },
   ];
 
   return (
@@ -193,24 +205,58 @@ export function BrokenLinkChecker() {
           <div style={{ display: "flex", flexWrap: "wrap", gap: 12 }}>
             <div style={cardStyle}>
               <span style={cardLabel}>Tổng links</span>
-              <span style={cardValue}>{result.total_links}</span>
+              <span style={cardValue}>{result.summary.total_checked}</span>
             </div>
             <div style={cardStyle}>
               <span style={cardLabel}>Links hoạt động</span>
-              <span style={{ ...cardValue, color: "#15803d" }}>{result.ok_links}</span>
+              <span style={{ ...cardValue, color: "#15803d" }}>{result.summary.ok_count}</span>
             </div>
             <div style={cardStyle}>
               <span style={cardLabel}>Links hỏng</span>
-              <span style={{ ...cardValue, color: "#ef4444" }}>{result.broken_links}</span>
+              <span style={{ ...cardValue, color: "#ef4444" }}>{result.summary.broken_count}</span>
             </div>
             <div style={cardStyle}>
               <span style={cardLabel}>Tỷ lệ hỏng</span>
               <span style={{
                 ...cardValue,
-                color: result.broken_rate > 5 ? "#ef4444" : result.broken_rate > 1 ? "#eab308" : "#15803d",
+                color: (result.summary.broken_count / (result.summary.total_checked || 1) * 100) > 5 ? "#ef4444" : "#15803d",
               }}>
-                {result.broken_rate.toFixed(1)}%
+                {((result.summary.broken_count / (result.summary.total_checked || 1)) * 100).toFixed(1)}%
               </span>
+            </div>
+            <div className="score-ring">
+              <div className="ring-bg"></div>
+              <div
+                className="ring-progress"
+                style={{
+                  background: `conic-gradient(var(--green) ${result.health_score.score}%, transparent 0)`,
+                }}
+              ></div>
+              <div className="ring-inner">
+                <span style={{ fontSize: 28, fontWeight: 800 }}>{result.health_score.score}</span>
+                <span style={{ fontSize: 11, color: "var(--text-dim)", textTransform: "uppercase", letterSpacing: "0.05em" }}>Điểm</span>
+              </div>
+            </div>
+            <div style={{ flex: 1, minWidth: 200 }}>
+              <h4 style={{ fontSize: 18, color: "var(--text-h)", marginBottom: 8, display: "flex", alignItems: "center", gap: 8 }}>
+                <span style={{ fontSize: 24 }}>{result.health_score.score >= 90 ? "🏆" : result.health_score.score >= 70 ? "✅" : "⚠️"}</span>
+                Đánh giá: {result.health_score.grade}
+              </h4>
+              <p style={{ color: "var(--text)", fontSize: 14, lineHeight: 1.5, marginBottom: 12 }}>
+                Trang web có <strong>{result.summary.broken_count}</strong> link hỏng trên tổng số <strong>{result.summary.total_checked}</strong> link được kiểm tra.
+              </p>
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                {result.recommendations?.map((rec, i) => (
+                  <div key={i} style={{
+                    display: "flex", alignItems: "flex-start", gap: 8,
+                    background: "rgba(0,0,0,0.15)", padding: "10px 14px", borderRadius: 6,
+                    fontSize: 13, borderLeft: "3px solid var(--primary)"
+                  }}>
+                    <span style={{ color: "var(--primary)" }}>💡</span>
+                    <span>{rec}</span>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
 
@@ -225,12 +271,20 @@ export function BrokenLinkChecker() {
                   type="button"
                 >
                   {t.label}
-                  {t.key === "broken" && result.broken_links > 0 && (
+                  {t.key === "broken" && result.summary.broken_count > 0 && (
                     <span style={{
                       background: "rgba(239,68,68,0.2)", color: "#ef4444",
-                      fontSize: 10, fontWeight: 700, padding: "2px 6px", borderRadius: 99,
+                      padding: "2px 6px", borderRadius: 99, fontSize: 11, fontWeight: 700
                     }}>
-                      {result.broken_links}
+                      {result.summary.broken_count}
+                    </span>
+                  )}
+                  {t.key === "redirect" && result.summary.redirected_count > 0 && (
+                    <span style={{
+                      background: "rgba(234,179,8,0.2)", color: "#eab308",
+                      padding: "2px 6px", borderRadius: 99, fontSize: 11, fontWeight: 700
+                    }}>
+                      {result.summary.redirected_count}
                     </span>
                   )}
                 </button>
@@ -260,7 +314,7 @@ export function BrokenLinkChecker() {
               }}>
                 <thead>
                   <tr>
-                    {["URL", "Trang nguồn", "Status Code", "Loại", "Trạng thái"].map(h => (
+                    {["URL", "Thẻ nguồn", "Mỏ neo", "Loại", "Mã HTTP"].map(h => (
                       <th key={h} style={{
                         textAlign: "left", padding: "12px 14px",
                         fontSize: 11, fontWeight: 600, color: "var(--text-dim)",
@@ -293,23 +347,21 @@ export function BrokenLinkChecker() {
                           href={link.url} target="_blank" rel="noopener noreferrer"
                           style={{ color: "#3b82f6", fontSize: 12, textDecoration: "none" }}
                         >
-                          {link.url.replace(/^https?:\/\//, "").slice(0, 60)}
+                          {(link.url || "").replace(/^https?:\/\//, "").slice(0, 60)}
                         </a>
                       </td>
                       <td style={{
                         padding: "10px 14px", fontSize: 12, color: "var(--text)",
-                        maxWidth: 200, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
                         borderBottom: "1px solid rgba(22,163,74,0.5)",
                       }}>
-                        {link.source_page.replace(/^https?:\/\//, "").slice(0, 40)}
+                        {link.source_tag || "-"}
                       </td>
                       <td style={{
-                        padding: "10px 14px",
-                        fontFamily: '"DM Mono", monospace', fontWeight: 600,
-                        color: statusColor(link.status),
+                        padding: "10px 14px", fontSize: 12, color: "var(--text)",
+                        maxWidth: 150, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
                         borderBottom: "1px solid rgba(22,163,74,0.5)",
                       }}>
-                        {link.status_code}
+                        {link.anchor_text || "-"}
                       </td>
                       <td style={{
                         padding: "10px 14px", fontSize: 12,
@@ -318,11 +370,11 @@ export function BrokenLinkChecker() {
                         <span style={{
                           display: "inline-block", fontSize: 11, fontWeight: 600,
                           padding: "2px 8px", borderRadius: 99,
-                          background: link.link_type === "internal"
+                          background: link.type === "internal"
                             ? "rgba(59,130,246,0.12)" : "rgba(245,158,11,0.12)",
-                          color: link.link_type === "internal" ? "#3b82f6" : "#f59e0b",
+                          color: link.type === "internal" ? "#3b82f6" : "#f59e0b",
                         }}>
-                          {typeLabel(link.link_type)}
+                          {typeLabel(link.type || "")}
                         </span>
                       </td>
                       <td style={{
@@ -353,7 +405,7 @@ export function BrokenLinkChecker() {
 
           {/* Count summary */}
           <p style={{ fontSize: 12, color: "var(--text-dim)", textAlign: "right" }}>
-            Hiển thị {filteredLinks.length} / {result.total_links} links
+            Hiển thị {filteredLinks.length} / {result.summary.total_checked} links
           </p>
         </div>
       )}
