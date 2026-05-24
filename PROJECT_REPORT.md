@@ -431,45 +431,541 @@ usage_log (
 
 ---
 
-## 9. Tính năng chi tiết
+## 9. Mô tả nghiệp vụ chi tiết từng chức năng
 
-### 9.1 AI Engine (Groq LLaMA 3.3 70B)
-- **Viết bài SEO tự động** — nhập keyword, AI tạo bài hoàn chỉnh với heading, meta description
-- **Spin nội dung** — viết lại bài giữ nguyên ý nghĩa, tránh duplicate content
-- **Humanize** — biến nội dung AI thành văn phong tự nhiên
-- **Phân tích từ khóa** — gợi ý long-tail keywords, search intent
-- **Phân tích đối thủ** — so sánh content gap với competitor
+### 9.1 Trang tổng quan — Dashboard (`/`)
 
-### 9.2 SEO Audit Engine
-- **On-page SEO**: Title, Meta, H1-H6, Images alt, Internal links
-- **Technical SEO**: 8 tiêu chí scan (robots.txt, sitemap, HTTPS, speed...)
-- **Core Web Vitals**: LCP, FID, CLS qua Google PageSpeed API
-- **Schema Validation**: Kiểm tra JSON-LD markup
-- **Broken Link Checker**: Tìm và báo cáo link hỏng
+**Mục đích:** Cung cấp cái nhìn tổng quan về hiệu suất SEO và marketing của website đang quản lý.
 
-### 9.3 Content Management
-- **Content Calendar**: Lập lịch xuất bản, theo dõi trạng thái
-- **Content Planner**: AI gợi ý topic dựa trên keyword cluster
-- **Spin Editor**: Nhiều phiên bản nội dung từ 1 bài gốc
-- **File Converter**: Chuyển đổi PDF, Word, Excel, PPT → Markdown
+**Luồng nghiệp vụ:**
+1. Khi người dùng truy cập, hệ thống tự động lấy dữ liệu từ Google Search Console (GSC) và Google Analytics 4 (GA4)
+2. Hiển thị các chỉ số chính: tổng clicks, impressions, CTR trung bình, vị trí trung bình
+3. Biểu đồ xu hướng 28 ngày gần nhất (recharts line chart)
+4. Top 10 keywords có hiệu suất cao nhất
+5. Top pages được truy cập nhiều nhất
+6. Quick actions: chuyển nhanh đến các công cụ SEO
 
-### 9.4 Rank Tracking
-- **Theo dõi keyword**: Thêm/xóa keywords, gắn tag
-- **Lịch sử thứ hạng**: Biểu đồ recharts theo thời gian
-- **Đồng bộ GSC**: Lấy data từ Google Search Console
-- **Export**: CSV và Excel
-- **Cảnh báo**: Alert khi thứ hạng thay đổi đáng kể
+**Dữ liệu đầu vào:** GSC API, GA4 API (real-time)  
+**Dữ liệu đầu ra:** Dashboard cards, biểu đồ, bảng rankings  
+**Giá trị nghiệp vụ:** Giúp chủ website nắm nhanh tình hình SEO mà không cần truy cập từng công cụ Google riêng lẻ
 
-### 9.5 CRO & Trust Analysis
-- **Conversion Rate Optimization**: Đánh giá yếu tố chuyển đổi
-- **Trust Signals**: SSL, testimonials, contact info, privacy policy
-- **Above-the-fold Analysis**: Đánh giá nội dung hiển thị đầu tiên
-- **CTA Analysis**: Phân tích call-to-action effectiveness
+---
 
-### 9.6 Multi-site Management
-- Quản lý nhiều website từ 1 dashboard
-- Chuyển đổi site nhanh
-- Scan SEO riêng cho từng site
+### 9.2 Kiểm tra SEO On-page — SEO Audit (`/seo-audit`)
+
+**Mục đích:** Phân tích toàn diện chất lượng SEO on-page của một URL cụ thể.
+
+**Luồng nghiệp vụ:**
+1. Người dùng nhập URL cần kiểm tra và từ khóa mục tiêu
+2. Backend crawl URL, parse HTML bằng BeautifulSoup
+3. AI (Groq LLaMA) phân tích nội dung và chấm điểm theo 10+ tiêu chí:
+   - **Title tag**: Độ dài (50-60 ký tự), có chứa keyword không
+   - **Meta description**: Độ dài (150-160 ký tự), tính hấp dẫn
+   - **Heading structure**: H1 duy nhất, hierarchy H2-H6
+   - **Keyword density**: Mật độ từ khóa trong content (1-3%)
+   - **Image optimization**: Alt text, kích thước file
+   - **Internal/External links**: Số lượng và chất lượng
+   - **Content length**: So sánh với top 10 SERP
+   - **Readability**: Đánh giá độ dễ đọc
+4. Trả về điểm tổng (0-100), danh sách lỗi critical/warning/suggestion
+5. Gợi ý cải thiện cụ thể bằng AI
+
+**Dữ liệu đầu vào:** URL + keyword  
+**Dữ liệu đầu ra:** SEO score (0-100), chi tiết từng tiêu chí, gợi ý cải thiện  
+**Giá trị nghiệp vụ:** Thay thế việc kiểm tra thủ công, tiết kiệm 2-3 giờ/trang so với làm tay
+
+---
+
+### 9.3 Technical SEO Scanner (`/technical-seo`)
+
+**Mục đích:** Scan toàn bộ các yếu tố kỹ thuật ảnh hưởng đến SEO của website.
+
+**Luồng nghiệp vụ:**
+1. Nhập domain cần scan
+2. Hệ thống kiểm tra 8 tiêu chí kỹ thuật:
+   - **robots.txt**: Tồn tại, cấu hình đúng, không block Googlebot
+   - **sitemap.xml**: Tồn tại, valid XML, số lượng URLs
+   - **HTTPS**: Certificate hợp lệ, redirect HTTP → HTTPS
+   - **Page Speed**: Thời gian tải trang
+   - **Mobile-friendly**: Viewport meta, responsive design
+   - **Canonical tags**: Tránh duplicate content
+   - **Structured Data**: JSON-LD markup
+   - **Hreflang**: Đa ngôn ngữ (nếu có)
+3. Mỗi tiêu chí có trạng thái: Pass ✅ / Fail ❌ / Warning ⚠️
+4. Tổng hợp điểm kỹ thuật và danh sách khuyến nghị sửa
+
+**Dữ liệu đầu vào:** Domain URL  
+**Dữ liệu đầu ra:** 8 tiêu chí với trạng thái, điểm tổng, khuyến nghị  
+**Giá trị nghiệp vụ:** Phát hiện lỗi kỹ thuật trước khi Google phạt, cải thiện crawlability
+
+---
+
+### 9.4 Core Web Vitals (`/core-web-vitals`)
+
+**Mục đích:** Đo lường trải nghiệm người dùng theo 3 chỉ số chính của Google.
+
+**Luồng nghiệp vụ:**
+1. Nhập URL cần đo
+2. Backend gọi Google PageSpeed Insights API
+3. Hiển thị 3 chỉ số Core Web Vitals:
+   - **LCP (Largest Contentful Paint)**: Thời gian load phần tử lớn nhất (tốt < 2.5s)
+   - **FID (First Input Delay)**: Thời gian phản hồi tương tác đầu tiên (tốt < 100ms)
+   - **CLS (Cumulative Layout Shift)**: Mức độ dịch chuyển layout (tốt < 0.1)
+4. Đánh giá mỗi chỉ số: Good 🟢 / Needs Improvement 🟡 / Poor 🔴
+5. Performance score tổng (0-100)
+6. Danh sách cơ hội tối ưu (opportunities) với estimated savings
+
+**Dữ liệu đầu vào:** URL  
+**Dữ liệu đầu ra:** LCP, FID, CLS scores + performance score + opportunities  
+**Giá trị nghiệp vụ:** CWV là ranking signal của Google từ 2021, ảnh hưởng trực tiếp đến thứ hạng
+
+---
+
+### 9.5 Broken Link Checker (`/broken-links`)
+
+**Mục đích:** Phát hiện link hỏng (404, 500) trên website để sửa kịp thời.
+
+**Luồng nghiệp vụ:**
+1. Nhập URL trang cần kiểm tra
+2. Backend crawl trang, trích xuất tất cả links (internal + external)
+3. Kiểm tra từng link bằng HTTP HEAD request
+4. Phân loại: Working ✅ / Broken ❌ / Redirect ↗️ / Timeout ⏱
+5. Hiển thị bảng kết quả: URL, HTTP status, anchor text, vị trí trên trang
+6. Tổng kết: số link OK, broken, redirect
+
+**Dữ liệu đầu vào:** URL cần scan  
+**Dữ liệu đầu ra:** Danh sách links với status code, phân loại  
+**Giá trị nghiệp vụ:** Broken links ảnh hưởng đến UX và SEO, Google giảm ranking nếu có nhiều 404
+
+---
+
+### 9.6 Schema Validator (`/schema-validator`)
+
+**Mục đích:** Kiểm tra và tạo JSON-LD structured data cho website.
+
+**Luồng nghiệp vụ:**
+1. Nhập URL hoặc paste JSON-LD code
+2. Hệ thống parse và validate theo schema.org specification
+3. Kiểm tra: cú pháp JSON, required fields, data types, nested objects
+4. Hiển thị lỗi cụ thể: missing field, invalid value, deprecated property
+5. Preview kết quả structured data như Google sẽ hiểu
+
+**Dữ liệu đầu vào:** URL hoặc JSON-LD code  
+**Dữ liệu đầu ra:** Validation results, lỗi chi tiết, preview  
+**Giá trị nghiệp vụ:** Structured data giúp xuất hiện rich snippets trên Google (FAQ, rating stars, price...)
+
+---
+
+### 9.7 SERP Analysis (`/serp`)
+
+**Mục đích:** Phân tích kết quả tìm kiếm Google real-time cho từ khóa.
+
+**Luồng nghiệp vụ:**
+1. Nhập từ khóa cần tra cứu, chọn quốc gia/ngôn ngữ
+2. Backend gọi DataForSEO API hoặc scrape Google SERP
+3. Hiển thị top 10-20 kết quả với:
+   - Thứ hạng, title, URL, meta description
+   - Domain authority (nếu có)
+   - Features: featured snippet, people also ask, images, videos
+4. AI phân tích:
+   - Search intent (thông tin / giao dịch / điều hướng)
+   - Content type pattern (blog / product / landing page)
+   - Khó khăn cạnh tranh (competition level)
+
+**Dữ liệu đầu vào:** Keyword + location  
+**Dữ liệu đầu ra:** SERP results, search intent, competition analysis  
+**Giá trị nghiệp vụ:** Hiểu đối thủ đang rank cho keyword, xác định content strategy phù hợp
+
+---
+
+### 9.8 Backlink Analyzer (`/backlinks`)
+
+**Mục đích:** Phân tích hồ sơ backlink của website hoặc đối thủ.
+
+**Luồng nghiệp vụ:**
+1. Nhập domain cần phân tích
+2. Backend truy vấn DataForSEO Backlinks API
+3. Hiển thị:
+   - Tổng số backlinks, referring domains
+   - Top referring domains theo authority
+   - Anchor text distribution
+   - Dofollow vs Nofollow ratio
+   - New vs Lost backlinks trend
+4. So sánh với đối thủ (nếu nhập thêm domain)
+
+**Dữ liệu đầu vào:** Domain URL  
+**Dữ liệu đầu ra:** Backlink profile, referring domains, anchor text analysis  
+**Giá trị nghiệp vụ:** Backlinks là top 3 ranking factors, cần theo dõi để xây dựng link building strategy
+
+---
+
+### 9.9 Rank Tracker (`/rank-tracker`)
+
+**Mục đích:** Theo dõi thứ hạng từ khóa trên Google theo thời gian.
+
+**Luồng nghiệp vụ:**
+1. **Thêm keyword**: Nhập keyword + URL + tag phân nhóm → lưu vào `rank_tracker.db`
+2. **Đồng bộ**: Sync dữ liệu từ Google Search Console API
+3. **Biểu đồ**: Recharts line chart hiển thị biến động thứ hạng theo ngày/tuần/tháng
+4. **Cảnh báo**: Tự động phát hiện keyword tụt > 5 vị trí → alert
+5. **Phân nhóm**: Gắn tag (brand, product, long-tail...) để quản lý
+6. **Export**: Xuất báo cáo CSV/Excel cho stakeholders
+
+**Dữ liệu đầu vào:** Keywords, site URL, GSC API data  
+**Dữ liệu đầu ra:** Biểu đồ ranking history, alerts, CSV/Excel reports  
+**Database:** `rank_tracker.db` (tracked_keywords + ranking_history)  
+**Giá trị nghiệp vụ:** Đo lường hiệu quả SEO campaign, phát hiện sớm vấn đề ranking
+
+---
+
+### 9.10 AI Keywords (`/keywords`)
+
+**Mục đích:** Phân tích và gợi ý từ khóa SEO bằng AI.
+
+**Luồng nghiệp vụ:**
+1. Nhập seed keyword (ví dụ: "Mitsubishi Xpander")
+2. AI (Groq LLaMA) phân tích và trả về:
+   - **Related keywords**: Từ khóa liên quan
+   - **Long-tail keywords**: Từ khóa đuôi dài (ít cạnh tranh)
+   - **Question keywords**: Câu hỏi người dùng hay tìm
+   - **Search intent**: Informational / Transactional / Navigational
+   - **Keyword difficulty**: Ước lượng độ khó (Easy / Medium / Hard)
+   - **Content suggestions**: Gợi ý loại nội dung phù hợp
+3. Cho phép copy keyword list để dùng trong content planning
+
+**Dữ liệu đầu vào:** Seed keyword  
+**Dữ liệu đầu ra:** Keyword clusters, search intent, difficulty, suggestions  
+**Giá trị nghiệp vụ:** Thay thế công cụ keyword research trả phí (Ahrefs, SEMrush), tiết kiệm $99-249/tháng
+
+---
+
+### 9.11 Competitor Radar (`/competitor`)
+
+**Mục đích:** Phân tích và so sánh SEO giữa website mình và đối thủ.
+
+**Luồng nghiệp vụ:**
+1. Nhập URL mình + URL đối thủ + keyword chung
+2. Hệ thống crawl cả 2 trang, AI so sánh:
+   - Content length & quality
+   - Keyword usage & density
+   - Heading structure
+   - Internal linking
+   - Page speed
+   - Backlink profile
+3. Hiển thị bảng so sánh side-by-side
+4. AI đưa ra action items: "Đối thủ hơn bạn ở X, cần cải thiện Y"
+
+**Dữ liệu đầu vào:** URL mình + URL đối thủ + keyword  
+**Dữ liệu đầu ra:** So sánh chi tiết, gap analysis, action items  
+**Giá trị nghiệp vụ:** Biết đối thủ mạnh/yếu ở đâu để tập trung nguồn lực cạnh tranh
+
+---
+
+### 9.12 CRO Dashboard (`/cro`)
+
+**Mục đích:** Đánh giá khả năng chuyển đổi (Conversion Rate Optimization) của trang web.
+
+**Luồng nghiệp vụ:**
+1. Nhập URL landing page cần đánh giá
+2. Hệ thống phân tích 4 nhóm yếu tố:
+   - **CTA (Call-to-Action)**: Số lượng, vị trí, màu sắc, text
+   - **Trust Signals**: SSL, reviews, testimonials, contact info, chính sách
+   - **Above-the-fold**: Headline, sub-headline, hero image, value proposition
+   - **Engagement**: Form fields, navigation, loading speed
+3. Chấm điểm từng nhóm (0-100)
+4. Checklist CRO: Pass/Fail cho ~20 tiêu chí
+5. Sales risk alerts: Cảnh báo yếu tố gây mất khách
+
+**Dữ liệu đầu vào:** URL landing page  
+**Dữ liệu đầu ra:** CRO score, checklist, trust signals, recommendations  
+**Giá trị nghiệp vụ:** Tăng tỷ lệ chuyển đổi từ visitor → lead/customer
+
+---
+
+### 9.13 Content Planner (`/content-planner`)
+
+**Mục đích:** AI lập kế hoạch nội dung SEO dựa trên keyword cluster.
+
+**Luồng nghiệp vụ:**
+1. Nhập chủ đề/keyword chính + niche
+2. AI tạo content plan gồm:
+   - **Pillar content**: Bài trụ cột (3,000+ từ)
+   - **Cluster content**: Bài hỗ trợ (1,000-2,000 từ)
+   - **Topic map**: Sơ đồ liên kết nội dung
+   - **Publishing schedule**: Lịch xuất bản gợi ý
+   - **Keyword mapping**: Mỗi bài target keyword nào
+3. Cho phép chỉnh sửa plan và thêm vào Content Calendar
+4. Tạo outline chi tiết cho từng bài (heading + bullet points)
+
+**Dữ liệu đầu vào:** Topic + niche  
+**Dữ liệu đầu ra:** Content plan, topic map, outlines, schedule  
+**Giá trị nghiệp vụ:** Xây dựng topical authority, strategy nội dung 3-6 tháng
+
+---
+
+### 9.14 AI Content Writer (tích hợp trong Content Planner)
+
+**Mục đích:** Viết bài SEO hoàn chỉnh bằng AI Groq LLaMA 3.3 70B.
+
+**Luồng nghiệp vụ:**
+1. Nhập keyword chính, từ khóa phụ, tone of voice, độ dài mong muốn
+2. AI generate bài viết với:
+   - Title tag tối ưu SEO
+   - Meta description hấp dẫn
+   - Heading structure (H1, H2, H3...)
+   - Nội dung body chia đoạn rõ ràng
+   - Internal link suggestions
+   - FAQ section
+3. Điểm SEO preview (0-100) trước khi publish
+4. Cho phép chỉnh sửa, regenerate từng section
+5. Export: Copy HTML, Markdown, hoặc đẩy thẳng lên WordPress
+
+**Dữ liệu đầu vào:** Keyword, LSI keywords, tone, length  
+**Dữ liệu đầu ra:** Full article (HTML/Markdown), SEO score, meta tags  
+**Giá trị nghiệp vụ:** Viết 1 bài 2,000 từ trong 30 giây thay vì 3-4 giờ viết tay
+
+---
+
+### 9.15 Spin Editor (`/spin-editor`)
+
+**Mục đích:** Viết lại nội dung giữ nguyên ý nghĩa, tránh duplicate content.
+
+**Luồng nghiệp vụ:**
+1. Paste nội dung gốc hoặc nhập URL nguồn
+2. Chọn chế độ spin:
+   - **Spin đơn**: 1 phiên bản mới
+   - **Spin đa phiên bản**: 3-5 phiên bản khác nhau
+   - **Spin từng đoạn**: Chọn đoạn cụ thể để viết lại
+3. AI viết lại với:
+   - Thay đổi cấu trúc câu
+   - Sử dụng từ đồng nghĩa
+   - Giữ nguyên thông tin và ý nghĩa chính
+   - Đảm bảo tính tự nhiên (không giống máy)
+4. So sánh bản gốc vs bản spin (diff view)
+5. Kiểm tra % uniqueness
+
+**Dữ liệu đầu vào:** Nội dung gốc hoặc URL  
+**Dữ liệu đầu ra:** Nội dung đã spin, uniqueness score  
+**Giá trị nghiệp vụ:** Tạo nội dung unique cho satellite sites, tránh Google penalty duplicate
+
+---
+
+### 9.16 Content Humanizer (Polish)
+
+**Mục đích:** Biến nội dung AI thành văn phong tự nhiên, bypass AI detection tools.
+
+**Luồng nghiệp vụ:**
+1. Paste nội dung do AI viết
+2. Hệ thống phân tích patterns AI: lặp cấu trúc, quá formal, thiếu variation
+3. AI viết lại với:
+   - Thêm conversational tone
+   - Đa dạng cấu trúc câu (ngắn/dài xen kẽ)
+   - Thêm ví dụ thực tế
+   - Giảm formal language
+4. So sánh before/after
+
+**Dữ liệu đầu vào:** AI-generated content  
+**Dữ liệu đầu ra:** Humanized content  
+**Giá trị nghiệp vụ:** Google ngày càng phát hiện AI content, humanize giúp tránh penalize
+
+---
+
+### 9.17 GEO Optimizer — Schema Generator (`/geo-optimizer`)
+
+**Mục đích:** Tạo structured data (JSON-LD) cho 12 loại schema.org phổ biến.
+
+**Luồng nghiệp vụ:**
+1. Chọn loại schema cần tạo (1 trong 12):
+   - LocalBusiness, Product, Article, FAQ
+   - Review, Event, HowTo, Video
+   - Breadcrumb, Organization, JobPosting, WebSite
+2. Điền form thông tin (tên, địa chỉ, giá, mô tả...)
+3. Hệ thống generate JSON-LD code hợp lệ
+4. Preview: Hiển thị như Google sẽ hiểu
+5. Copy code → Paste vào `<head>` của website
+6. Validate: Kiểm tra tự động trước khi copy
+
+**Dữ liệu đầu vào:** Form fields tùy loại schema  
+**Dữ liệu đầu ra:** JSON-LD code, preview, validation  
+**Giá trị nghiệp vụ:** Rich snippets tăng CTR lên 20-30% trên SERP
+
+---
+
+### 9.18 Content Calendar (`/content-calendar`)
+
+**Mục đích:** Quản lý lịch xuất bản nội dung cho team content.
+
+**Luồng nghiệp vụ:**
+1. **Tạo item**: Nhập tiêu đề, keyword, loại content, ngày dự kiến, tác giả
+2. **Quản lý trạng thái**: Draft → Scheduled → Published
+3. **Calendar view**: Hiển thị dạng lịch tháng
+4. **Thống kê**: Số bài draft/scheduled/published, phân bố theo tuần
+5. **AI suggest**: Gợi ý topic mới dựa trên keyword gaps
+6. **CRUD**: Thêm, sửa, xóa, lọc theo trạng thái/tác giả
+
+**Dữ liệu đầu vào:** Content item metadata  
+**Dữ liệu đầu ra:** Calendar view, statistics, AI suggestions  
+**Database:** `content_calendar.db`  
+**Giá trị nghiệp vụ:** Đảm bảo content team publish đều đặn, tránh gaps trong content strategy
+
+---
+
+### 9.19 A/B Testing SEO (`/ab-testing`)
+
+**Mục đích:** So sánh hiệu quả SEO giữa 2 phiên bản trang.
+
+**Luồng nghiệp vụ:**
+1. **Tạo test**: Nhập tên test, URL A, URL B, keyword target
+2. **Thu thập**: Hệ thống phân tích cả 2 URL — SEO score, content quality, speed
+3. **Đánh giá**: AI so sánh và chọn winner dựa trên:
+   - SEO score comparison
+   - Content relevance
+   - Technical performance
+   - User experience signals
+4. **AI Analysis**: Giải thích tại sao version này tốt hơn
+5. **Lịch sử**: Lưu kết quả tests đã chạy
+
+**Dữ liệu đầu vào:** 2 URLs + keyword  
+**Dữ liệu đầu ra:** Winner, comparison scores, AI analysis  
+**Database:** `ab_tests.db`  
+**Giá trị nghiệp vụ:** Data-driven SEO decisions thay vì đoán mò
+
+---
+
+### 9.20 Report Generator (`/report`)
+
+**Mục đích:** Tạo báo cáo SEO chuyên nghiệp dạng PDF.
+
+**Luồng nghiệp vụ:**
+1. Chọn website và khoảng thời gian
+2. Hệ thống tổng hợp dữ liệu từ:
+   - GSC: traffic, impressions, clicks
+   - Rank tracker: thay đổi thứ hạng
+   - SEO audit: điểm hiện tại
+   - Content calendar: bài đã publish
+3. Generate PDF với:
+   - Executive summary
+   - Traffic overview (biểu đồ)
+   - Keyword rankings (bảng)
+   - SEO improvements made
+   - Action items for next period
+4. Export PDF để gửi cho khách hàng/quản lý
+
+**Dữ liệu đầu vào:** Site + date range  
+**Dữ liệu đầu ra:** PDF report  
+**Giá trị nghiệp vụ:** Báo cáo chuyên nghiệp cho agency gửi khách hàng, tiết kiệm 2-3 giờ/report
+
+---
+
+### 9.21 Campaign Tracker (`/campaign`)
+
+**Mục đích:** Theo dõi hiệu quả chiến dịch marketing tổng hợp.
+
+**Luồng nghiệp vụ:**
+1. Tạo campaign: tên, mục tiêu, kênh (SEO, Ads, Social...)
+2. Liên kết với keywords đang theo dõi
+3. Dashboard campaign:
+   - Tiến độ so với mục tiêu
+   - ROI ước tính
+   - Keyword performance trong campaign
+   - Content đã xuất bản cho campaign
+4. So sánh hiệu quả giữa các campaign
+
+**Dữ liệu đầu vào:** Campaign metadata, linked keywords  
+**Dữ liệu đầu ra:** Campaign dashboard, ROI metrics  
+**Giá trị nghiệp vụ:** Đo lường ROI của SEO investment theo từng campaign
+
+---
+
+### 9.22 File Converter (`/file-converter`)
+
+**Mục đích:** Chuyển đổi file office sang Markdown cho content team.
+
+**Luồng nghiệp vụ:**
+1. Upload file: PDF, Word (.docx), Excel (.xlsx), PowerPoint (.pptx)
+2. Backend parse file bằng python-docx, openpyxl, python-pptx
+3. Convert sang Markdown với formatting giữ nguyên:
+   - Headings, bold, italic
+   - Tables (Excel → Markdown table)
+   - Lists, images (base64 embed)
+4. SEO mode: Convert + AI tối ưu SEO (thêm headings, meta...)
+5. URL mode: Nhập URL → scrape → convert to Markdown
+
+**Dữ liệu đầu vào:** File upload hoặc URL  
+**Dữ liệu đầu ra:** Markdown content  
+**Giá trị nghiệp vụ:** Content team viết trên Word/Google Docs, cần convert để publish lên CMS
+
+---
+
+### 9.23 Site Manager (`/sites`)
+
+**Mục đích:** Quản lý nhiều website trong 1 hệ thống.
+
+**Luồng nghiệp vụ:**
+1. **Thêm site**: Nhập URL, tên, mô tả, niche
+2. **Chọn site active**: Tất cả tools sẽ sử dụng site đang active
+3. **Dashboard site**: Last scan score, scan date
+4. **CRUD**: Thêm, sửa, xóa, bật/tắt site
+
+**Dữ liệu đầu vào:** Site metadata  
+**Dữ liệu đầu ra:** Sites list, active site  
+**Database:** `sites.db`  
+**Giá trị nghiệp vụ:** Agency quản lý nhiều khách hàng, mỗi khách 1 site
+
+---
+
+### 9.24 Google Setup (`/google-setup`)
+
+**Mục đích:** Cấu hình API keys và kết nối dịch vụ bên ngoài.
+
+**Luồng nghiệp vụ:**
+1. Hiển thị trạng thái từng API key: "Đã cấu hình" ✅ / "Chưa cấu hình" ⚠️
+2. 4 nhóm cấu hình:
+   - **AI Engine**: Groq API Key
+   - **Google APIs**: GSC Client ID/Secret, GA4 credentials, PageSpeed API Key
+   - **SERP & Backlinks**: DataForSEO Login/Password
+   - **Bảo mật**: JWT Secret Key
+3. Cho phép thêm/sửa key trực tiếp → Lưu vào `.env` trên backend
+4. Thanh tiến trình: "8/10 API keys đã cấu hình"
+5. Keys hiển thị dạng masked (gsk_dH...o3Qj)
+
+**Dữ liệu đầu vào:** API keys  
+**Dữ liệu đầu ra:** Config status, masked keys  
+**Giá trị nghiệp vụ:** Admin dễ dàng cấu hình mà không cần SSH vào server
+
+---
+
+### 9.25 Đăng nhập / Đăng ký (`/login`)
+
+**Mục đích:** Xác thực người dùng và phân quyền truy cập.
+
+**Luồng nghiệp vụ:**
+1. **Đăng ký**: Email + họ tên + mật khẩu → hash bcrypt → lưu `auth.db`
+2. **Đăng nhập**: Email + password → verify → JWT access token + refresh token
+3. **Token management**: Access token (15 phút) + Refresh token (7 ngày)
+4. **Auto refresh**: Frontend tự động refresh token khi gần hết hạn
+5. **Roles**: admin (full access), editor (CRUD content), viewer (read-only)
+
+**Dữ liệu đầu vào:** Email + password  
+**Dữ liệu đầu ra:** JWT tokens, user profile  
+**Database:** `auth.db`  
+**Giá trị nghiệp vụ:** Bảo vệ hệ thống, phân quyền team
+
+---
+
+### 9.26 Quản lý người dùng (`/admin/users`)
+
+**Mục đích:** Admin quản lý tài khoản người dùng trong hệ thống.
+
+**Luồng nghiệp vụ:**
+1. Danh sách tất cả users: email, tên, role, trạng thái, lần login cuối
+2. **Đổi role**: Nâng/hạ quyền (admin ↔ editor ↔ viewer)
+3. **Vô hiệu hóa**: Tạm khóa tài khoản (soft delete)
+4. Chỉ admin mới truy cập được trang này
+
+**Dữ liệu đầu vào:** User actions (role change, deactivate)  
+**Dữ liệu đầu ra:** User list, status updates  
+**Giá trị nghiệp vụ:** Quản lý team access, revoke quyền khi nhân sự nghỉ việc
 
 ---
 
