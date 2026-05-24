@@ -7,13 +7,15 @@ to Markdown for SEO content analysis.
 Uses Microsoft's MarkItDown library (119K+ stars).
 """
 
-from markitdown import MarkItDown
 from typing import Optional
 import tempfile
 import os
 
-
-_md = MarkItDown(enable_plugins=False)
+try:
+    from markitdown import MarkItDown
+    _md = MarkItDown(enable_plugins=False)
+except ImportError:
+    _md = None  # Package not installed — functions will return error dicts
 
 
 def convert_file_to_markdown(
@@ -32,6 +34,17 @@ def convert_file_to_markdown(
     Returns:
         dict with keys: markdown, filename, word_count, char_count
     """
+    if _md is None:
+        return {
+            "markdown": "",
+            "filename": filename,
+            "word_count": 0,
+            "char_count": 0,
+            "extension": os.path.splitext(filename)[1].lower(),
+            "success": False,
+            "error": "markitdown package not installed. Run: pip install markitdown[all]",
+        }
+
     ext = os.path.splitext(filename)[1].lower()
 
     # Write to temp file (MarkItDown needs a file path)
@@ -82,6 +95,16 @@ def convert_url_to_markdown(url: str) -> dict:
     Returns:
         dict with keys: markdown, url, word_count, char_count
     """
+    if _md is None:
+        return {
+            "markdown": "",
+            "url": url,
+            "word_count": 0,
+            "char_count": 0,
+            "success": False,
+            "error": "markitdown package not installed. Run: pip install markitdown[all]",
+        }
+
     try:
         result = _md.convert_url(url)
         text = result.text_content or ""

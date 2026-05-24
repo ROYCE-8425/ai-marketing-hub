@@ -8,7 +8,9 @@ export default function GoogleSetup() {
   const [gscSiteUrl, setGscSiteUrl] = useState(() => localStorage.getItem("gsc_site_url") || "");
   const [ga4PropertyId, setGa4PropertyId] = useState(() => localStorage.getItem("ga4_property_id") || "");
   const [serpApiKey, setSerpApiKey] = useState(() => localStorage.getItem("serp_api_key") || "");
+  const [pagespeedApiKey, setPagespeedApiKey] = useState(() => localStorage.getItem("pagespeed_api_key") || "");
   const [saved, setSaved] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- API response data
   const [healthStatus, setHealthStatus] = useState<any>(null);
 
   useEffect(() => {
@@ -21,6 +23,7 @@ export default function GoogleSetup() {
     localStorage.setItem("gsc_site_url", gscSiteUrl);
     localStorage.setItem("ga4_property_id", ga4PropertyId);
     localStorage.setItem("serp_api_key", serpApiKey);
+    localStorage.setItem("pagespeed_api_key", pagespeedApiKey);
     setSaved(true);
     setTimeout(() => setSaved(false), 3000);
   };
@@ -29,7 +32,7 @@ export default function GoogleSetup() {
     width: "100%",
     padding: "10px 14px",
     background: "rgba(255,255,255,0.03)",
-    border: "1px solid rgba(255,255,255,0.1)",
+    border: "1px solid rgba(0,0,0,0.08)",
     borderRadius: 8,
     color: "#fff",
     fontSize: 13,
@@ -49,7 +52,7 @@ export default function GoogleSetup() {
     borderRadius: 12,
     padding: 20,
     marginBottom: 16,
-    border: "1px solid rgba(255,255,255,0.06)",
+    border: "1px solid rgba(0,0,0,0.05)",
   };
 
   return (
@@ -57,7 +60,7 @@ export default function GoogleSetup() {
       <h2 style={{ fontSize: 18, fontWeight: 700, color: "var(--text-h)", marginBottom: 8 }}>
         ⚙️ Google API Setup
       </h2>
-      <p style={{ fontSize: 13, color: "rgba(255,255,255,0.5)", marginBottom: 20 }}>
+      <p style={{ fontSize: 13, color: "#6b7280", marginBottom: 20 }}>
         Cấu hình kết nối Google Search Console, GA4, và SerpAPI cho hệ thống.
       </p>
 
@@ -115,14 +118,25 @@ export default function GoogleSetup() {
         </div>
       </div>
 
+      {/* PageSpeed Section */}
+      <div style={sectionStyle}>
+        <h3 style={{ fontSize: 14, fontWeight: 600, color: "var(--text-h)", marginBottom: 12 }}>
+          ⚡ PageSpeed Insights (Core Web Vitals)
+        </h3>
+        <div>
+          <label style={labelStyle}>API Key</label>
+          <input style={inputStyle} type="password" value={pagespeedApiKey} onChange={e => setPagespeedApiKey(e.target.value)} placeholder="AIzaSy..." />
+        </div>
+      </div>
+
       {/* Save Button */}
       <button
         onClick={handleSave}
         style={{
           padding: "12px 28px",
-          background: saved ? "rgba(74,222,128,0.15)" : "rgba(139,92,246,0.15)",
-          border: `1px solid ${saved ? "rgba(74,222,128,0.3)" : "rgba(139,92,246,0.3)"}`,
-          color: saved ? "#4ade80" : "#a78bfa",
+          background: saved ? "rgba(74,222,128,0.15)" : "rgba(22,163,74,0.15)",
+          border: `1px solid ${saved ? "rgba(74,222,128,0.3)" : "rgba(22,163,74,0.3)"}`,
+          color: saved ? "#4ade80" : "#4ade80",
           fontSize: 14,
           fontWeight: 600,
           borderRadius: 10,
@@ -133,7 +147,7 @@ export default function GoogleSetup() {
       </button>
 
       <p style={{ fontSize: 11, color: "rgba(255,255,255,0.3)", marginTop: 12 }}>
-        💡 Cấu hình backend (.env): Đặt GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GSC_SITE_URL, GA4_PROPERTY_ID, SERPAPI_KEY
+        💡 Cấu hình backend (.env): Đặt GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GSC_SITE_URL, GA4_PROPERTY_ID, SERPAPI_KEY, PAGESPEED_API_KEY
       </p>
     </div>
   );

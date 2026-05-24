@@ -101,6 +101,7 @@ export function SpinEditor() {
         if (d.error) { setError(d.error); }
         else { setResult(d); }
       }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- API response data
     } catch (e: any) {
       setError(e.message || "Lỗi kết nối");
     }
@@ -114,7 +115,7 @@ export function SpinEditor() {
   };
 
   const uniquenessColor = (pct: number) => {
-    if (pct >= 70) return "#22c55e";
+    if (pct >= 70) return "#15803d";
     if (pct >= 40) return "#f59e0b";
     return "#ef4444";
   };
@@ -156,7 +157,8 @@ export function SpinEditor() {
               <button key={m.id} type="button"
                 className={`spin-level-btn ${spinMode === m.id ? "active" : ""}`}
                 onClick={() => setSpinMode(m.id)}
-                style={{ "--level-color": "#8b5cf6" } as any}>
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any -- API response data
+                style={{ "--level-color": "#16a34a" } as any}>
                 <span className="spin-level-name">{m.icon} {m.label}</span>
               </button>
             ))}
@@ -171,6 +173,7 @@ export function SpinEditor() {
               <button key={l} type="button"
                 className={`spin-level-btn ${level === l ? "active" : ""}`}
                 onClick={() => setLevel(l)}
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any -- API response data
                 style={{ "--level-color": levelLabels[l].color } as any}>
                 <span className="spin-level-name">{levelLabels[l].label}</span>
                 <span className="spin-level-desc">{levelLabels[l].desc}</span>
@@ -187,7 +190,8 @@ export function SpinEditor() {
               <button key={id} type="button"
                 className={`spin-level-btn ${tone === id ? "active" : ""}`}
                 onClick={() => setTone(id)}
-                style={{ "--level-color": "#22d3ee" } as any}>
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any -- API response data
+                style={{ "--level-color": "#10b981" } as any}>
                 <span className="spin-level-name">{t.icon} {t.label}</span>
               </button>
             ))}

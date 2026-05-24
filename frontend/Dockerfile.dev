@@ -1,0 +1,20 @@
+# ============================================================================
+# AI Marketing Hub — Frontend Dev Dockerfile
+# Used by docker-compose.dev.yml for hot-reload development
+# ============================================================================
+
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Install dependencies
+COPY package.json package-lock.json ./
+RUN npm ci
+
+# Copy source (will be overridden by volume mount)
+COPY . .
+
+EXPOSE 5173
+
+# Vite dev server — bind to 0.0.0.0 for Docker access
+CMD ["npx", "vite", "--host", "0.0.0.0", "--port", "5173"]

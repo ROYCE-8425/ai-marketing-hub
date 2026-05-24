@@ -16,7 +16,10 @@ from routers import api_phase2
 from routers import api_phase3
 from routers import api_convert
 from routers import api_auth
+from routers import api_user_auth
 from routers import api_satellite
+from routers import api_seo_tools
+from routers import api_content_writer
 
 app = FastAPI(
     title="AI Marketing Hub — Backend",
@@ -138,7 +141,10 @@ app.include_router(api_phase2.router)
 app.include_router(api_phase3.router)
 app.include_router(api_convert.router)
 app.include_router(api_auth.router)
+app.include_router(api_user_auth.router)
 app.include_router(api_satellite.router)
+app.include_router(api_seo_tools.router)
+app.include_router(api_content_writer.router)
 
 
 @app.on_event("startup")

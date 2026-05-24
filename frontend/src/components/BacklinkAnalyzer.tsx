@@ -56,11 +56,12 @@ export function BacklinkAnalyzer() {
       });
       const d = await r.json();
       if (d.error) setError(d.error); else setResult(d);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- API response data
     } catch (e: any) { setError(e.message); }
     setLoading(false);
   };
 
-  const gradeColor = (g: string) => ({ A: "#22c55e", B: "#3b82f6", C: "#f59e0b", D: "#ef4444" }[g] || "#888");
+  const gradeColor = (g: string) => ({ A: "#15803d", B: "#3b82f6", C: "#f59e0b", D: "#ef4444" }[g] || "#888");
 
   return (
     <div className="geo-optimizer">
@@ -87,7 +88,7 @@ export function BacklinkAnalyzer() {
           <div className="geo-score-hero">
             <div className="geo-score-ring">
               <svg viewBox="0 0 120 120" width="140" height="140">
-                <circle cx="60" cy="60" r="52" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="8" />
+                <circle cx="60" cy="60" r="52" fill="none" stroke="rgba(0,0,0,0.05)" strokeWidth="8" />
                 <circle cx="60" cy="60" r="52" fill="none" stroke={gradeColor(result.grade)}
                   strokeWidth="8" strokeLinecap="round"
                   strokeDasharray={`${(result.overall_score / 100) * 327} 327`}
@@ -117,7 +118,7 @@ export function BacklinkAnalyzer() {
             </div>
             <div className="spin-stat">
               <span className="spin-stat-label">Dofollow</span>
-              <span className="spin-stat-value" style={{ color: "#22c55e" }}>
+              <span className="spin-stat-value" style={{ color: "#15803d" }}>
                 {result.internal_links.quality.dofollow + result.external_links.quality.dofollow}
               </span>
             </div>
@@ -186,7 +187,7 @@ export function BacklinkAnalyzer() {
                     <tr key={i}>
                       <td style={{ fontSize: 13, fontWeight: 600 }}>{d.domain}</td>
                       <td>{d.links}</td>
-                      <td style={{ color: "#22c55e" }}>{d.dofollow}</td>
+                      <td style={{ color: "#15803d" }}>{d.dofollow}</td>
                       <td style={{ color: "#ef4444" }}>{d.nofollow}</td>
                       <td style={{ fontSize: 11, opacity: 0.7, maxWidth: 200, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{d.anchors.join(", ")}</td>
                     </tr>

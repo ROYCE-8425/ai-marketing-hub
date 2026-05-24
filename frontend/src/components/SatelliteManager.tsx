@@ -36,6 +36,21 @@ interface SpinVersion {
   word_count: number;
 }
 
+interface SpinResultItem {
+  success: boolean;
+  site: string;
+  uniqueness: number;
+  post_url: string;
+  error: string;
+}
+
+interface SpinResult {
+  error?: string;
+  success?: number;
+  total_sites?: number;
+  results?: SpinResultItem[];
+}
+
 type TabId = "sites" | "spinpost" | "history";
 
 export function SatelliteManager() {
@@ -60,7 +75,7 @@ export function SatelliteManager() {
   });
   const [selectedSites, setSelectedSites] = useState<string[]>([]);
   const [spinLoading, setSpinLoading] = useState(false);
-  const [spinResults, setSpinResults] = useState<any>(null);
+  const [spinResults, setSpinResults] = useState<SpinResult | null>(null);
 
   // Preview
   const [previewVersions, setPreviewVersions] = useState<SpinVersion[]>([]);
@@ -88,10 +103,12 @@ export function SatelliteManager() {
     } catch { /* silent */ }
   }, []);
 
+  /* eslint-disable react-hooks/set-state-in-effect -- fetch on mount */
   useEffect(() => {
-    fetchSites();
-    fetchPosts();
+    void fetchSites();
+    void fetchPosts();
   }, [fetchSites, fetchPosts]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   // ── Site CRUD ───────────────────────────────────────────────────────────
 
@@ -150,8 +167,9 @@ export function SatelliteManager() {
         await fetchPosts();
         await fetchSites();
       }
-    } catch (e: any) {
-      setSpinResults({ error: e.message });
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : String(e);
+      setSpinResults({ error: msg });
     }
     setSpinLoading(false);
   };
@@ -174,7 +192,7 @@ export function SatelliteManager() {
       if (r.ok) {
         const d = await r.json();
         if (d.versions) {
-          setPreviewVersions(d.versions.map((v: any, i: number) => ({
+          setPreviewVersions(d.versions.map((v: { rewritten: string; uniqueness_percent: number; rewritten_words: number }, i: number) => ({
             version: i + 1,
             content_text: v.rewritten,
             content_html: "",
@@ -400,8 +418,8 @@ export function SatelliteManager() {
                     <label key={site.id} style={{
                       display: "flex", alignItems: "center", gap: 4,
                       padding: "4px 10px", borderRadius: 8,
-                      background: selectedSites.includes(site.id) ? "rgba(139,92,246,0.15)" : "rgba(255,255,255,0.04)",
-                      border: `1px solid ${selectedSites.includes(site.id) ? "rgba(139,92,246,0.3)" : "rgba(255,255,255,0.08)"}`,
+                      background: selectedSites.includes(site.id) ? "rgba(22,163,74,0.15)" : "rgba(0,0,0,0.03)",
+                      border: `1px solid ${selectedSites.includes(site.id) ? "rgba(22,163,74,0.3)" : "rgba(0,0,0,0.06)"}`,
                       cursor: "pointer", fontSize: 12, color: "rgba(255,255,255,0.7)",
                     }}>
                       <input type="checkbox" checked={selectedSites.includes(site.id)}
@@ -434,7 +452,7 @@ export function SatelliteManager() {
                     <p key={i}>{p}</p>
                   ))}
                 </div>
-                <div style={{ fontSize: 12, color: "rgba(255,255,255,0.4)", marginTop: 4 }}>
+                <div style={{ fontSize: 12, color: "#9ca3af", marginTop: 4 }}>
                   {previewVersions[activePreview]?.word_count} từ
                 </div>
               </div>
@@ -470,7 +488,7 @@ export function SatelliteManager() {
                     <div style={{ fontSize: 13, color: "#4ade80", fontWeight: 600 }}>
                       ✅ Đã đăng: {spinResults.success}/{spinResults.total_sites} site
                     </div>
-                    {spinResults.results?.map((r: any, i: number) => (
+                    {spinResults.results?.map((r, i: number) => (
                       <div key={i} className={`sat-result-item ${r.success ? "success" : "failed"}`}>
                         <div className="sat-result-status">{r.success ? "✅" : "❌"}</div>
                         <div className="sat-result-info">

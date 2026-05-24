@@ -1,4 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { Routes, Route, NavLink, useLocation, useNavigate } from "react-router-dom";
+import SEOHead from "./components/SEO/SEOHead";
+import { SEO_CONFIG, getTabIdFromPath, getPathFromTabId } from "./components/SEO/seoConfig";
+import { buildOrganizationSchema, buildWebSiteSchema, buildSoftwareAppSchema } from "./components/SEO/JsonLd";
 import { useSeoAudit } from "./hooks/useSeoAudit";
 import { useOpportunities } from "./hooks/useOpportunities";
 import { useAutoFill } from "./hooks/useAutoFill";
@@ -17,11 +21,18 @@ import { GeoOptimizer } from "./components/GeoOptimizer";
 import { TechnicalSeo } from "./components/TechnicalSeo";
 import { ReportGenerator } from "./components/ReportGenerator";
 import { BacklinkAnalyzer } from "./components/BacklinkAnalyzer";
+import { CoreWebVitals } from "./components/CoreWebVitals";
+import { BrokenLinkChecker } from "./components/BrokenLinkChecker";
+import { SchemaValidator } from "./components/SchemaValidator";
 import { ContentCalendar } from "./components/ContentCalendarPanel";
 import { SiteManager } from "./components/SiteManager";
 import { AbTesting } from "./components/AbTesting";
 import FileConverter from "./components/FileConverter";
 import GoogleSetup from "./components/GoogleSetup";
+import AuthPage from "./components/AuthPage";
+import UserMenu from "./components/UserMenu";
+import UserManagement from "./components/UserManagement";
+import { isAuthenticated } from "./lib/auth";
 import { addToHistory } from "./lib/history";
 import type { AuditResponse } from "./types/seo";
 import type { CompetitorGapResponse, PlanContentResponse } from "./types/content";
@@ -72,12 +83,26 @@ class ErrorBoundary extends React.Component<
   }
 }
 
+// ─── Protected Route wrapper ──────────────────────────────────────────────────
+
+function ProtectedRoute({ children }: { children: React.ReactNode }) {
+  const navigate = useNavigate();
+  useEffect(() => {
+    if (!isAuthenticated()) {
+      navigate("/login", { replace: true });
+    }
+  }, [navigate]);
+  if (!isAuthenticated()) return null;
+  return <>{children}</>;
+}
+
 // ─── Tab types ─────────────────────────────────────────────────────────────────
 
-type TabId = "dashboard" | "seo" | "cro" | "competitor" | "planner" | "tracker" | "serp" | "aikeys" | "ranktracker" | "spineditor" | "geo" | "techseo" | "report" | "backlinks" | "calendar" | "sites" | "abtest" | "fileconvert" | "googlesetup";
+export type TabId = "dashboard" | "seo" | "cro" | "competitor" | "planner" | "tracker" | "serp" | "aikeys" | "ranktracker" | "spineditor" | "geo" | "techseo" | "report" | "backlinks" | "calendar" | "sites" | "abtest" | "fileconvert" | "googlesetup" | "cwv" | "brokenlinks" | "schemavalidator";
 
 interface NavItem { id: TabId; label: string; icon: string }
 interface NavGroup { group: string; icon: string; items: NavItem[] }
+type NavIndexItem = NavItem & { group: string; groupIcon: string; groupSize: number };
 
 const NAV_GROUPS: NavGroup[] = [
   { group: "Tổng quan", icon: "📊", items: [
@@ -86,9 +111,12 @@ const NAV_GROUPS: NavGroup[] = [
   { group: "Phân tích SEO", icon: "🔍", items: [
     { id: "seo", label: "Kiểm tra SEO", icon: "🔎" },
     { id: "techseo", label: "Technical SEO", icon: "🔧" },
+    { id: "cwv", label: "Core Web Vitals", icon: "⚡" },
     { id: "cro", label: "CRO & Uy tín", icon: "📊" },
     { id: "serp", label: "SERP trực tiếp", icon: "🌐" },
     { id: "backlinks", label: "Backlinks", icon: "🔗" },
+    { id: "brokenlinks", label: "Kiểm tra link hỏng", icon: "🔗" },
+    { id: "schemavalidator", label: "Xác thực Schema", icon: "📋" },
   ]},
   { group: "Từ khóa", icon: "🎯", items: [
     { id: "ranktracker", label: "Theo dõi Keyword", icon: "📍" },
@@ -113,8 +141,67 @@ const NAV_GROUPS: NavGroup[] = [
   ]},
 ];
 
-function Sidebar({ active, onChange, collapsed, onToggle }: {
-  active: TabId; onChange: (t: TabId) => void; collapsed: boolean; onToggle: () => void
+const NAV_INDEX: NavIndexItem[] = NAV_GROUPS.flatMap((group) =>
+  group.items.map((item) => ({
+    ...item,
+    group: group.group,
+    groupIcon: group.icon,
+    groupSize: group.items.length,
+  })),
+);
+
+// ─── Page descriptions for header ────────────────────────────────────────────
+
+const PAGE_DESCRIPTIONS: Record<string, string> = {
+  dashboard: "Tổng quan hiệu suất SEO, lượt truy cập và các chỉ số quan trọng.",
+  seo: "Phân tích on-page SEO chi tiết cho bất kỳ URL nào.",
+  techseo: "Kiểm tra 8 tiêu chí kỹ thuật: tốc độ, mobile, indexing, bảo mật...",
+  cwv: "Đo Core Web Vitals (LCP, FID, CLS) qua PageSpeed Insights API.",
+  cro: "Phân tích Conversion Rate Optimization và tín hiệu uy tín.",
+  serp: "Xem kết quả tìm kiếm Google trực tiếp cho từ khóa bất kỳ.",
+  backlinks: "Phân tích hồ sơ backlink và đánh giá chất lượng liên kết.",
+  brokenlinks: "Quét toàn bộ website để tìm liên kết hỏng (404, 500...).",
+  schemavalidator: "Kiểm tra và xác thực markup JSON-LD / Schema.org.",
+  ranktracker: "Theo dõi thứ hạng từ khóa theo thời gian với biểu đồ chi tiết.",
+  aikeys: "Phân tích từ khóa bằng AI — gợi ý LSI, cơ hội và chiến lược.",
+  competitor: "So sánh nội dung với đối thủ, tìm content gap và cơ hội.",
+  planner: "Tạo nội dung chất lượng cao bằng AI (Groq LLaMA 3.3 70B).",
+  spineditor: "Viết lại nội dung bằng AI — loại bỏ dấu vết AI, giữ ý nghĩa.",
+  geo: "Tạo Schema.org markup (12 loại) cho Local SEO và Rich Snippets.",
+  calendar: "Lên lịch xuất bản nội dung, theo dõi trạng thái bài viết.",
+  abtest: "Chạy A/B Testing SEO — so sánh hiệu quả 2 phiên bản trang.",
+  report: "Tạo báo cáo SEO tổng hợp bằng AI, xuất PDF chuyên nghiệp.",
+  tracker: "Theo dõi chiến dịch marketing, đo lường ROI và hiệu quả.",
+  fileconvert: "Chuyển đổi file PDF, Word, Excel, PPT sang Markdown.",
+  sites: "Quản lý nhiều website — chuyển đổi nhanh giữa các dự án.",
+  googlesetup: "Cấu hình Google Search Console và Google Analytics API.",
+};
+
+// ─── Page header component ──────────────────────────────────────────────────
+
+function PageHeader({ icon, title, description, group }: {
+  icon: string; title: string; description: string; group: string;
+}) {
+  return (
+    <div className="page-header">
+      <div className="page-header-breadcrumb">
+        <span className="page-header-group">{group}</span>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 18l6-6-6-6" /></svg>
+        <span className="page-header-current">{title}</span>
+      </div>
+      <h2 className="page-header-title">
+        <span className="page-header-icon">{icon}</span>
+        {title}
+      </h2>
+      <p className="page-header-desc">{description}</p>
+    </div>
+  );
+}
+
+function Sidebar({ collapsed, onToggle, onMobileClose }: {
+  collapsed: boolean;
+  onToggle: () => void;
+  onMobileClose: () => void;
 }) {
   return (
     <>
@@ -123,7 +210,7 @@ function Sidebar({ active, onChange, collapsed, onToggle }: {
           <div className="sidebar-brand">
             <div className="sidebar-logo">
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="url(#lg)" strokeWidth="2.5">
-                <defs><linearGradient id="lg" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#8b5cf6" /><stop offset="100%" stopColor="#06b6d4" /></linearGradient></defs>
+                <defs><linearGradient id="lg" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#16a34a" /><stop offset="100%" stopColor="#059669" /></linearGradient></defs>
                 <circle cx="12" cy="12" r="10" />
                 <path d="M8 12l3 3 5-6" />
               </svg>
@@ -146,14 +233,16 @@ function Sidebar({ active, onChange, collapsed, onToggle }: {
               {!collapsed && <div className="sidebar-group-label">{group.icon} {group.group}</div>}
               {collapsed && <div className="sidebar-group-dot" />}
               {group.items.map(item => (
-                <button key={item.id}
-                  className={`sidebar-item ${active === item.id ? "sidebar-item-active" : ""}`}
-                  onClick={() => onChange(item.id)}
+                <NavLink key={item.id}
+                  to={getPathFromTabId(item.id)}
+                  className={({ isActive }) => `sidebar-item ${isActive ? "sidebar-item-active" : ""}`}
                   title={collapsed ? item.label : undefined}
+                  onClick={() => { if (window.innerWidth < 1024) onMobileClose(); }}
+                  end={item.id === 'dashboard'}
                 >
                   <span className="sidebar-item-icon">{item.icon}</span>
                   {!collapsed && <span className="sidebar-item-label">{item.label}</span>}
-                </button>
+                </NavLink>
               ))}
             </div>
           ))}
@@ -161,7 +250,7 @@ function Sidebar({ active, onChange, collapsed, onToggle }: {
 
         {!collapsed && (
           <div className="sidebar-footer">
-            <div className="sidebar-version">v3.1 · Phase 20</div>
+            <div className="sidebar-version">v3.2 · Phase 20</div>
           </div>
         )}
       </aside>
@@ -376,9 +465,12 @@ function LoadingBtn({ type = "submit", loading, onClick, children, disabled }: {
 // ─── App root ─────────────────────────────────────────────────────────────────
 
 export default function App() {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const activeTab = getTabIdFromPath(location.pathname) as TabId;
+  const currentSeo = SEO_CONFIG[activeTab] || SEO_CONFIG.dashboard;
   const [url, setUrl] = useState("");
   const [keyword, setKeyword] = useState("");
-  const [activeTab, setActiveTab] = useState<TabId>("dashboard");
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const { data: auditData, loading: auditLoading, error: auditError, analyze, reset: resetAudit } = useSeoAudit();
 
@@ -418,6 +510,7 @@ export default function App() {
 
   // AI Keywords state
   const [aiKeysTarget, setAiKeysTarget] = useState("");
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- API response data
   const [aiKeysData, setAiKeysData] = useState<any>(null);
   const [aiKeysLoading, setAiKeysLoading] = useState(false);
   const [aiKeysError, setAiKeysError] = useState<string | null>(null);
@@ -491,7 +584,7 @@ export default function App() {
     analyze({ url: url.trim(), primary_keyword: keyword.trim() }).then(() => {
       // Save to history after analysis completes (auditData will be set by then)
     });
-    setActiveTab("seo");
+    navigate(getPathFromTabId('seo'));
   };
 
   const handleCompetitorSubmit = (e: React.FormEvent) => {
@@ -505,7 +598,7 @@ export default function App() {
     e.preventDefault();
     if (!planKeyword.trim() || !planAudience.trim()) return;
     generatePlan(planKeyword.trim(), planAudience.trim(), compData?.blueprint.must_fill_gaps.map((g) => g.opportunity));
-    setActiveTab("planner");
+    navigate(getPathFromTabId('planner'));
   };
 
   const handleTrackerSubmit = (e: React.FormEvent) => {
@@ -544,16 +637,46 @@ export default function App() {
     if (bulk.difficulty != null)           setTrackDifficulty(String(bulk.difficulty));
   };
 
+  // ── Derive current nav item info for breadcrumb ──
+  const currentNavItem = NAV_INDEX.find(i => i.id === activeTab);
+  const currentGroup = currentNavItem?.group || "Tổng quan";
+  const currentIcon = currentNavItem?.icon || "📊";
+  const currentLabel = currentNavItem?.label || "Dashboard";
+  const currentDesc = PAGE_DESCRIPTIONS[activeTab] || "";
+
+  // ── Login page — render independently, no shell ──
+  if (location.pathname === "/login") {
+    return (
+      <ErrorBoundary>
+        <SEOHead title="Đăng nhập — AI Marketing Hub" description="Đăng nhập vào AI Marketing Hub" path="/login" />
+        <AuthPage />
+      </ErrorBoundary>
+    );
+  }
+
   return (
     <ErrorBoundary>
     <div className="app-shell" translate="no">
       <div className="blob blob-1" />
       <div className="blob blob-2" />
+      <div className="blob blob-3" />
 
-      <Sidebar active={activeTab} onChange={(t) => { setActiveTab(t); if (window.innerWidth < 1024) setSidebarCollapsed(true); }}
-        collapsed={sidebarCollapsed} onToggle={() => setSidebarCollapsed(!sidebarCollapsed)} />
+      <Sidebar collapsed={sidebarCollapsed} onToggle={() => setSidebarCollapsed(!sidebarCollapsed)}
+        onMobileClose={() => setSidebarCollapsed(true)} />
 
       <div className={`app-main ${sidebarCollapsed ? "app-main-expanded" : ""}`}>
+        {/* SEO Head — dynamic per-route meta tags */}
+        <SEOHead
+          title={currentSeo.title}
+          description={currentSeo.description}
+          path={currentSeo.path}
+          jsonLd={activeTab === 'dashboard' ? {
+            ...buildOrganizationSchema(),
+            ...buildWebSiteSchema(),
+            ...buildSoftwareAppSchema(),
+          } : undefined}
+        />
+
         {/* Top bar */}
         <header className="topbar">
           <button className="topbar-menu" onClick={() => setSidebarCollapsed(!sidebarCollapsed)}>
@@ -561,24 +684,40 @@ export default function App() {
               <line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" />
             </svg>
           </button>
-          <h1 className="topbar-title">
-            {NAV_GROUPS.flatMap(g => g.items).find(i => i.id === activeTab)?.icon}{" "}
-            {NAV_GROUPS.flatMap(g => g.items).find(i => i.id === activeTab)?.label || "Dashboard"}
-          </h1>
+          <div className="topbar-nav">
+            <span className="topbar-breadcrumb">
+              <span className="topbar-breadcrumb-group">{currentGroup}</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" opacity="0.4"><path d="M9 18l6-6-6-6" /></svg>
+              <span className="topbar-breadcrumb-page">{currentIcon} {currentLabel}</span>
+            </span>
+          </div>
           <div className="topbar-actions">
             <span className="topbar-badge">Pro</span>
+            <UserMenu />
           </div>
         </header>
 
         <main className="main-content">
+        {/* Page header — only show for non-dashboard routes */}
+        {activeTab !== 'dashboard' && currentDesc && (
+          <PageHeader icon={currentIcon} title={currentLabel} description={currentDesc} group={currentGroup} />
+        )}
+        <Routes>
+
+        {/* ── Admin: User Management ── */}
+        <Route path="/admin/users" element={
+          <ProtectedRoute><UserManagement /></ProtectedRoute>
+        } />
 
         {/* ── Dashboard Tab ── */}
-        {activeTab === "dashboard" && (
-          <DashboardOverview onNavigate={(tab) => setActiveTab(tab as TabId)} />
-        )}
+        <Route path="/" element={
+          <ProtectedRoute>
+            <DashboardOverview onNavigate={(tab) => navigate(getPathFromTabId(tab))} />
+          </ProtectedRoute>
+        } />
 
         {/* ── SEO Audit Tab ── */}
-        {activeTab === "seo" && (
+        <Route path="/seo-audit" element={
           <>
             <form className="audit-form" onSubmit={handleSubmit} noValidate>
               <div className="hint-box">
@@ -640,10 +779,10 @@ export default function App() {
               </div>
             )}
           </>
-        )}
+        } />
 
         {/* ── CRO & Trust Tab ── */}
-        {activeTab === "cro" && (
+        <Route path="/cro" element={
           <>
             {!auditData && (
               <div className="phase3-prompt">
@@ -663,10 +802,10 @@ export default function App() {
               </div>
             )}
           </>
-        )}
+        } />
 
         {/* ── Competitor Radar Tab ── */}
-        {activeTab === "competitor" && (
+        <Route path="/competitor" element={
           <>
             <form className="audit-form" onSubmit={handleCompetitorSubmit} noValidate>
               <div className="hint-box">
@@ -728,10 +867,10 @@ export default function App() {
               </div>
             )}
           </>
-        )}
+        } />
 
         {/* ── AI Content Writer Tab ── */}
-        {activeTab === "planner" && (
+        <Route path="/content-planner" element={
           <>
             <form className="audit-form" onSubmit={handlePlanSubmit} noValidate>
               <div className="input-row">
@@ -827,10 +966,10 @@ export default function App() {
               </div>
             )}
           </>
-        )}
+        } />
 
         {/* ── Campaign Tracker Tab ── */}
-        {activeTab === "tracker" && (
+        <Route path="/campaign" element={
           <>
             {/* ── Data Connections ── */}
             <div className="data-connections-bar">
@@ -1045,10 +1184,10 @@ export default function App() {
               </div>
             )}
           </>
-        )}
+        } />
 
         {/* ── SERP Live Tab ── */}
-        {activeTab === "serp" && (
+        <Route path="/serp" element={
           <>
             <form className="audit-form" onSubmit={(e) => {
               e.preventDefault();
@@ -1128,10 +1267,10 @@ export default function App() {
               </div>
             )}
           </>
-        )}
+        } />
 
         {/* AI Keywords Tab */}
-        {activeTab === "aikeys" && (
+        <Route path="/keywords" element={
           <>
             <form className="audit-form" onSubmit={handleAiKeysAnalyze} noValidate>
               <div className="hint-box">
@@ -1195,6 +1334,7 @@ export default function App() {
                       <table className="serp-table">
                         <thead><tr><th>#</th><th>Từ khóa</th><th>Vị trí</th><th>Clicks</th><th>Hiển thị</th><th>CTR</th></tr></thead>
                         <tbody>
+                          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any -- API response */}
                           {aiKeysData.gsc_keywords.slice(0, 30).map((kw: any, i: number) => (
                             <tr key={i}>
                               <td>{i + 1}</td>
@@ -1215,6 +1355,7 @@ export default function App() {
                   <ResultPanel>
                     <h3 className="section-title">⚡ Quick Wins</h3>
                     <div style={{display:"flex",flexDirection:"column",gap:"8px"}}>
+                      {/* eslint-disable-next-line @typescript-eslint/no-explicit-any -- API response */}
                       {aiKeysData.quick_wins.map((qw: any, i: number) => (
                         <div key={i} className="rec-badge priority-important">
                           <span className="rec-tag" style={{background:"rgba(245,158,11,0.3)",color:"var(--amber)"}}>pos {qw.current_position}</span>
@@ -1232,6 +1373,7 @@ export default function App() {
                   <ResultPanel>
                     <h3 className="section-title">🗂️ Nhóm từ khóa (Clusters)</h3>
                     <div className="cro-grid">
+                      {/* eslint-disable-next-line @typescript-eslint/no-explicit-any -- API response */}
                       {aiKeysData.keyword_clusters.map((c: any, i: number) => (
                         <div key={i} className="glass-card">
                           <h4 className="glass-card-title">{c.cluster_name}</h4>
@@ -1251,6 +1393,7 @@ export default function App() {
                   <ResultPanel>
                     <h3 className="section-title">🎯 Từ khóa đề xuất mới</h3>
                     <div style={{display:"flex",flexDirection:"column",gap:"8px"}}>
+                      {/* eslint-disable-next-line @typescript-eslint/no-explicit-any -- API response */}
                       {aiKeysData.recommended_keywords.map((r: any, i: number) => (
                         <div key={i} className="rec-badge priority-nice_to_have">
                           <span className="rec-tag">{r.priority}</span>
@@ -1268,6 +1411,7 @@ export default function App() {
                   <ResultPanel>
                     <h3 className="section-title">📝 Chiến lược nội dung</h3>
                     <div style={{display:"flex",flexDirection:"column",gap:"8px"}}>
+                      {/* eslint-disable-next-line @typescript-eslint/no-explicit-any -- API response */}
                       {aiKeysData.content_strategy.map((s: any, i: number) => (
                         <div key={i} className="rec-badge priority-nice_to_have">
                           <span className="rec-tag">{s.content_type || "blog"}</span>
@@ -1290,46 +1434,59 @@ export default function App() {
               </div>
             )}
           </>
-        )}
+        } />
 
         {/* Rank Tracker Tab */}
-        {activeTab === "ranktracker" && <RankTracker />}
+        <Route path="/rank-tracker" element={<RankTracker />} />
 
         {/* Spin Editor Tab */}
-        {activeTab === "spineditor" && <SpinEditor />}
+        <Route path="/spin-editor" element={<SpinEditor />} />
 
         {/* GEO Optimizer Tab */}
-        {activeTab === "geo" && <GeoOptimizer />}
+        <Route path="/geo-optimizer" element={<GeoOptimizer />} />
 
         {/* Technical SEO Tab */}
-        {activeTab === "techseo" && <TechnicalSeo />}
+        <Route path="/technical-seo" element={<TechnicalSeo />} />
 
         {/* Backlink Analyzer Tab */}
-        {activeTab === "backlinks" && <BacklinkAnalyzer />}
+        <Route path="/backlinks" element={<BacklinkAnalyzer />} />
+
+        {/* Core Web Vitals Tab */}
+        <Route path="/core-web-vitals" element={<CoreWebVitals />} />
+
+        {/* Broken Link Checker Tab */}
+        <Route path="/broken-links" element={<BrokenLinkChecker />} />
+
+        {/* Schema Validator Tab */}
+        <Route path="/schema-validator" element={<SchemaValidator />} />
 
         {/* AI Report Generator Tab */}
-        {activeTab === "report" && <ReportGenerator />}
+        <Route path="/report" element={<ReportGenerator />} />
 
         {/* Content Calendar Tab */}
-        {activeTab === "calendar" && <ContentCalendar />}
+        <Route path="/content-calendar" element={<ContentCalendar />} />
 
         {/* Multi-site Manager Tab */}
-        {activeTab === "sites" && <SiteManager />}
+        <Route path="/sites" element={<SiteManager />} />
 
         {/* SEO A/B Testing Tab */}
-        {activeTab === "abtest" && <AbTesting />}
+        <Route path="/ab-testing" element={<AbTesting />} />
 
         {/* File Converter Tab */}
-        {activeTab === "fileconvert" && <FileConverter />}
+        <Route path="/file-converter" element={<FileConverter />} />
 
         {/* Google Setup Tab */}
-        {activeTab === "googlesetup" && <GoogleSetup />}
+        <Route path="/google-setup" element={<GoogleSetup />} />
 
+        {/* Catch-all: redirect unknown routes to dashboard */}
+        <Route path="*" element={<DashboardOverview onNavigate={(tab) => navigate(getPathFromTabId(tab))} />} />
+
+        </Routes>
       </main>
       </div>
 
       <footer className="page-footer">
-        AI Marketing Hub — Phiên bản 20 &nbsp;&middot;&nbsp; Xây dựng với FastAPI + React
+        AI Marketing Hub v3.2 &nbsp;&middot;&nbsp; FastAPI + React &nbsp;&middot;&nbsp; Phase 20
       </footer>
 
       {publishModal && (

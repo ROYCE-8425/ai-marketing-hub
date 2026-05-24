@@ -1,0 +1,39 @@
+# Virtual environment
+venv/
+.venv/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*.pyo
+*.egg-info/
+
+# Environment files (secrets)
+.env
+.env.*
+
+# Local SQLite databases (mounted as volumes in production)
+*.db
+
+# Test files
+test_*.py
+run_tests.sh
+test_quick.sh
+
+# IDE / Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Docker
+Dockerfile
+.dockerignore
+
+# Cache
+.cache/
+.pytest_cache/
+
+# Git
+.git/
+.gitignore

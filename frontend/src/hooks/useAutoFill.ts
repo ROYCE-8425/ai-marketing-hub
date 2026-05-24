@@ -80,6 +80,7 @@ export function useAutoFill(): UseAutoFillReturn {
 
       // Check for errors from backend (missing credentials, API failures)
       const gscError = gscData?.gsc?.error;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- ga4 sub-object may have error field
       const ga4Error = (gscData?.ga4 as any)?.error;
       const serpError = serpData?.error;
 

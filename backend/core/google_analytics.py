@@ -7,16 +7,21 @@ Fetches traffic, engagement, and conversion data from GA4 properties.
 import os
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Any
-from google.analytics.data_v1beta import BetaAnalyticsDataClient
-from google.analytics.data_v1beta.types import (
-    DateRange,
-    Dimension,
-    Metric,
-    RunReportRequest,
-    FilterExpression,
-    Filter,
-)
-from google.oauth2 import service_account
+
+try:
+    from google.analytics.data_v1beta import BetaAnalyticsDataClient
+    from google.analytics.data_v1beta.types import (
+        DateRange,
+        Dimension,
+        Metric,
+        RunReportRequest,
+        FilterExpression,
+        Filter,
+    )
+    from google.oauth2 import service_account
+    _HAS_GOOGLE_SDK = True
+except ImportError:
+    _HAS_GOOGLE_SDK = False
 
 
 class GoogleAnalytics:
@@ -34,6 +39,12 @@ class GoogleAnalytics:
         """
         self.property_id = property_id or os.getenv("GA4_PROPERTY_ID")
         credentials_path = credentials_path or os.getenv("GA4_CREDENTIALS_PATH")
+
+        if not _HAS_GOOGLE_SDK:
+            raise ImportError(
+                "google-analytics-data package not installed. "
+                "Run: pip install google-analytics-data google-auth"
+            )
 
         if not self.property_id:
             raise ValueError("GA4_PROPERTY_ID must be provided or set in environment")

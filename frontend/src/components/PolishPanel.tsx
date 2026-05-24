@@ -18,7 +18,7 @@ export function PolishPanel({ onAccept, onPublish, initialContent }: PolishPanel
 
   // Sync with initialContent when it changes
   useEffect(() => {
-    if (initialContent) setDraft(initialContent);
+    if (initialContent) setDraft(initialContent); // eslint-disable-line react-hooks/set-state-in-effect -- sync from prop
   }, [initialContent]);
 
   const hasResult = result !== null && result.success;

@@ -12,15 +12,15 @@ import "./DashboardOverview.css";
 // ─── Colors ─────────────────────────────────────────────────────────────────
 
 const COLORS = {
-  purple: "#8b5cf6",
+  purple: "#16a34a",
   blue: "#3b82f6",
   green: "#10b981",
   amber: "#f59e0b",
   red: "#ef4444",
-  cyan: "#06b6d4",
+  cyan: "#059669",
   pink: "#ec4899",
 };
-const PIE_COLORS = ["#8b5cf6", "#3b82f6", "#10b981", "#f59e0b", "#06b6d4", "#ec4899"];
+const PIE_COLORS = ["#16a34a", "#3b82f6", "#10b981", "#f59e0b", "#059669", "#ec4899"];
 
 // ─── Stat Card ──────────────────────────────────────────────────────────────
 
@@ -46,11 +46,13 @@ function StatCard({
 
 // ─── Mini chart tooltip ─────────────────────────────────────────────────────
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- API response data
 function ChartTooltip({ active, payload, label }: any) {
   if (!active || !payload?.length) return null;
   return (
     <div className="chart-tooltip">
       <p className="chart-tooltip-label">{label}</p>
+      {/* eslint-disable-next-line @typescript-eslint/no-explicit-any -- recharts payload */}
       {payload.map((p: any, i: number) => (
         <p key={i} style={{ color: p.color }}>
           {p.name}: <strong>{typeof p.value === "number" ? p.value.toLocaleString() : p.value}</strong>
@@ -100,9 +102,11 @@ export function DashboardOverview({ onNavigate }: { onNavigate: (tab: string) =>
     data_source: string;
   } | null>(null);
   const [gscLoading, setGscLoading] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- API response data
   const [ga4Data, setGa4Data] = useState<any>(null);
   const [ga4Loading, setGa4Loading] = useState(false);
   const [oauthLoading, setOauthLoading] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- API response data
   const [serpOverview, setSerpOverview] = useState<any>(null);
   const [serpLoading, setSerpLoading] = useState(false);
 
@@ -196,7 +200,7 @@ export function DashboardOverview({ onNavigate }: { onNavigate: (tab: string) =>
       } else if (data.error) {
         alert(data.error);
       }
-    } catch (err) {
+    } catch {
       alert("Không thể kết nối đến backend. Kiểm tra server đang chạy.");
     } finally {
       setOauthLoading(false);
@@ -262,7 +266,7 @@ export function DashboardOverview({ onNavigate }: { onNavigate: (tab: string) =>
         {gscData && gscData.data_source !== "live_gsc" && (
           <div className="gsc-live-banner" style={{ borderColor: 'rgba(245,158,11,0.2)', background: 'rgba(245,158,11,0.05)' }}>
             <div className="gsc-live-dot" style={{ background: '#f59e0b' }} />
-            <span style={{ color: '#fcd34d' }}>GSC: 🟡 Chưa kết nối — Cấu hình OAuth2 credentials để xem dữ liệu thật</span>
+            <span style={{ color: '#d97706' }}>GSC: 🟡 Chưa kết nối — Cấu hình OAuth2 credentials để xem dữ liệu thật</span>
             <button
               className="dash-connect-btn"
               onClick={handleConnectGoogle}
@@ -276,10 +280,10 @@ export function DashboardOverview({ onNavigate }: { onNavigate: (tab: string) =>
           const isLive = ga4Data.data_source === 'live_ga4';
           const isPartial = ga4Data.data_source === 'partial_live_ga4';
           const hasError = !isLive && !isPartial;
-          const borderColor = isLive ? 'rgba(99,102,241,0.3)' : isPartial ? 'rgba(245,158,11,0.25)' : 'rgba(239,68,68,0.2)';
-          const bg = isLive ? 'rgba(99,102,241,0.06)' : hasError ? 'rgba(239,68,68,0.05)' : 'rgba(245,158,11,0.05)';
-          const dotColor = isLive ? '#6366f1' : hasError ? '#ef4444' : '#f59e0b';
-          const textColor = isLive ? '#a5b4fc' : hasError ? '#fca5a5' : '#fcd34d';
+          const borderColor = isLive ? 'rgba(22,163,74,0.3)' : isPartial ? 'rgba(245,158,11,0.25)' : 'rgba(239,68,68,0.2)';
+          const bg = isLive ? 'rgba(22,163,74,0.06)' : hasError ? 'rgba(239,68,68,0.05)' : 'rgba(245,158,11,0.05)';
+          const dotColor = isLive ? '#059669' : hasError ? '#ef4444' : '#f59e0b';
+          const textColor = isLive ? '#059669' : hasError ? '#dc2626' : '#d97706';
           const label = isLive
             ? `✅ Dữ liệu thật · ${ga4Data.overview?.sessions || 0} phiên · ${ga4Data.overview?.pageviews || 0} lượt xem`
             : isPartial
@@ -312,9 +316,10 @@ export function DashboardOverview({ onNavigate }: { onNavigate: (tab: string) =>
           <h3 className="chart-title">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" /></svg>
             🌐 SERP Overview — "{serpOverview.keyword}" ({serpOverview.results_count} kết quả)
-            {serpOverview._cached && <span style={{ fontSize: 10, color: '#6ee7b7', marginLeft: 8 }}>⚡ cached</span>}
+            {serpOverview._cached && <span style={{ fontSize: 10, color: '#059669', marginLeft: 8 }}>⚡ cached</span>}
           </h3>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '8px' }}>
+            {/* eslint-disable-next-line @typescript-eslint/no-explicit-any -- API response */}
             {serpOverview.organic_results.slice(0, 5).map((r: any, i: number) => (
               <a
                 key={i}
@@ -331,7 +336,7 @@ export function DashboardOverview({ onNavigate }: { onNavigate: (tab: string) =>
               >
                 <span style={{ fontSize: 18, fontWeight: 800, color: i === 0 ? '#10b981' : i < 3 ? '#3b82f6' : '#8892b0', fontFamily: 'DM Mono, monospace', flexShrink: 0, width: 28 }}>#{r.position}</span>
                 <div style={{ minWidth: 0, flex: 1 }}>
-                  <div style={{ fontSize: 12, color: '#e2e8f0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{r.title}</div>
+                  <div style={{ fontSize: 12, color: '#1f2937', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{r.title}</div>
                   <div style={{ fontSize: 10, color: '#4a5578' }}>{r.domain}</div>
                 </div>
               </a>
@@ -340,7 +345,7 @@ export function DashboardOverview({ onNavigate }: { onNavigate: (tab: string) =>
           {serpOverview.serp_features?.length > 0 && (
             <div style={{ display: 'flex', gap: '6px', marginTop: '8px', flexWrap: 'wrap' }}>
               {serpOverview.serp_features.map((f: string, i: number) => (
-                <span key={i} style={{ fontSize: 10, background: 'rgba(139,92,246,0.15)', color: '#c4b5fd', padding: '2px 8px', borderRadius: '99px', border: '1px solid rgba(139,92,246,0.2)' }}>{f.replace(/_/g, ' ')}</span>
+                <span key={i} style={{ fontSize: 10, background: 'rgba(22,163,74,0.15)', color: '#15803d', padding: '2px 8px', borderRadius: '99px', border: '1px solid rgba(22,163,74,0.2)' }}>{f.replace(/_/g, ' ')}</span>
               ))}
             </div>
           )}
@@ -360,7 +365,7 @@ export function DashboardOverview({ onNavigate }: { onNavigate: (tab: string) =>
         <StatCard
           icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17" /><polyline points="16 7 22 7 22 13" /></svg>}
           value={ga4Data?.overview?.sessions || 0} label="Phiên truy cập"
-          accent="linear-gradient(90deg, #6366f1, #8b5cf6)"
+          accent="linear-gradient(90deg, #059669, #16a34a)"
           subValue={ga4Data?.overview?.new_users ? `${ga4Data.overview.new_users} mới` : undefined}
           subColor={COLORS.cyan}
         />
@@ -372,7 +377,7 @@ export function DashboardOverview({ onNavigate }: { onNavigate: (tab: string) =>
         <StatCard
           icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" /></svg>}
           value={ga4Data?.overview?.pageviews || 0} label="Lượt xem"
-          accent="linear-gradient(90deg, #a855f7, #7c3aed)"
+          accent="linear-gradient(90deg, #15803d, #16a34a)"
         />
         <StatCard
           icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" /></svg>}
@@ -389,7 +394,7 @@ export function DashboardOverview({ onNavigate }: { onNavigate: (tab: string) =>
         <StatCard
           icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 20V10" /><path d="M18 20V4" /><path d="M6 20v-4" /></svg>}
           value={`${ga4Data?.overview?.engagement_rate?.toFixed(1) || 0}%`} label="Tương tác"
-          accent="linear-gradient(90deg, #06b6d4, #0891b2)"
+          accent="linear-gradient(90deg, #059669, #0891b2)"
         />
       </div>
 
@@ -404,9 +409,9 @@ export function DashboardOverview({ onNavigate }: { onNavigate: (tab: string) =>
           {topByImpressions.length > 0 ? (
             <ResponsiveContainer width="100%" height={220}>
               <BarChart data={topByImpressions} margin={{ top: 5, right: 10, left: -15, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
-                <XAxis dataKey="keyword" tick={{ fontSize: 10, fill: "rgba(255,255,255,0.4)" }} interval={0} angle={-25} textAnchor="end" height={60} />
-                <YAxis tick={{ fontSize: 10, fill: "rgba(255,255,255,0.4)" }} />
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.06)" />
+                <XAxis dataKey="keyword" tick={{ fontSize: 10, fill: "#9ca3af" }} interval={0} angle={-25} textAnchor="end" height={60} />
+                <YAxis tick={{ fontSize: 10, fill: "#9ca3af" }} />
                 <Tooltip content={<ChartTooltip />} />
                 <Bar dataKey="impressions" name="Hiển thị" fill={COLORS.purple} radius={[4, 4, 0, 0]} />
                 <Bar dataKey="clicks" name="Clicks" fill={COLORS.cyan} radius={[4, 4, 0, 0]} />
@@ -451,9 +456,9 @@ export function DashboardOverview({ onNavigate }: { onNavigate: (tab: string) =>
           {(ga4Data?.daily_sessions?.length || 0) > 0 ? (
             <ResponsiveContainer width="100%" height={200}>
               <AreaChart data={ga4Data.daily_sessions} margin={{ top: 5, right: 10, left: -15, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
-                <XAxis dataKey="date" tick={{ fontSize: 9, fill: "rgba(255,255,255,0.35)" }} interval={Math.max(0, Math.floor((ga4Data.daily_sessions.length - 1) / 8))} />
-                <YAxis tick={{ fontSize: 10, fill: "rgba(255,255,255,0.4)" }} />
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.06)" />
+                <XAxis dataKey="date" tick={{ fontSize: 9, fill: "#9ca3af" }} interval={Math.max(0, Math.floor((ga4Data.daily_sessions.length - 1) / 8))} />
+                <YAxis tick={{ fontSize: 10, fill: "#9ca3af" }} />
                 <Tooltip content={<ChartTooltip />} />
                 <defs>
                   <linearGradient id="sessGrad" x1="0" y1="0" x2="0" y2="1">
@@ -483,7 +488,9 @@ export function DashboardOverview({ onNavigate }: { onNavigate: (tab: string) =>
           {(ga4Data?.traffic_sources?.length || 0) > 0 ? (
             <ResponsiveContainer width="100%" height={200}>
               <PieChart>
+                {/* eslint-disable-next-line @typescript-eslint/no-explicit-any -- recharts callback */}
                 <Pie data={ga4Data.traffic_sources.map((s: any) => ({ name: s.source, value: s.sessions }))} cx="50%" cy="50%" innerRadius={45} outerRadius={75} dataKey="value" label={({ name, value }: any) => `${name} (${value})`} labelLine={false}>
+                  {/* eslint-disable-next-line @typescript-eslint/no-explicit-any -- recharts loop */}
                   {ga4Data.traffic_sources.map((_: any, i: number) => (
                     <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />
                   ))}
@@ -518,13 +525,14 @@ export function DashboardOverview({ onNavigate }: { onNavigate: (tab: string) =>
                   </tr>
                 </thead>
                 <tbody>
+                  {/* eslint-disable-next-line @typescript-eslint/no-explicit-any -- GA4 API response */}
                   {ga4Data.top_pages.slice(0, 8).map((p: any, i: number) => (
                     <tr key={i}>
                       <td className="rank">{i + 1}</td>
                       <td className="page-path" title={p.title || p.path}>{p.title || p.path}</td>
                       <td>{p.pageviews}</td>
                       <td>{p.sessions}</td>
-                      <td style={{ color: p.bounce_rate > 60 ? '#fca5a5' : p.bounce_rate > 40 ? '#fcd34d' : '#6ee7b7' }}>{p.bounce_rate}%</td>
+                      <td style={{ color: p.bounce_rate > 60 ? '#dc2626' : p.bounce_rate > 40 ? '#d97706' : '#059669' }}>{p.bounce_rate}%</td>
                     </tr>
                   ))}
                 </tbody>
@@ -543,8 +551,8 @@ export function DashboardOverview({ onNavigate }: { onNavigate: (tab: string) =>
           </h3>
           <ResponsiveContainer width="100%" height={220}>
             <RadarChart data={radarData}>
-              <PolarGrid stroke="rgba(255,255,255,0.1)" />
-              <PolarAngleAxis dataKey="subject" tick={{ fontSize: 10, fill: "rgba(255,255,255,0.5)" }} />
+              <PolarGrid stroke="rgba(0,0,0,0.08)" />
+              <PolarAngleAxis dataKey="subject" tick={{ fontSize: 10, fill: "#6b7280" }} />
               <Radar name="Score" dataKey="value" stroke={COLORS.cyan} fill={COLORS.cyan} fillOpacity={0.2} strokeWidth={2} />
             </RadarChart>
           </ResponsiveContainer>
@@ -606,7 +614,7 @@ export function DashboardOverview({ onNavigate }: { onNavigate: (tab: string) =>
                   <span className="history-time">{timeAgo(entry.timestamp)}</span>
                   {entry.score != null && (
                     <span className="history-score" style={{
-                      color: entry.score >= 80 ? "#6ee7b7" : entry.score >= 50 ? "#fcd34d" : "#fca5a5",
+                      color: entry.score >= 80 ? "#059669" : entry.score >= 50 ? "#d97706" : "#dc2626",
                     }}>{entry.score}</span>
                   )}
                   <button className="export-btn" onClick={(e) => { e.stopPropagation(); handleDelete(entry.id); }} title="Xóa" style={{ padding: "0.2rem 0.4rem" }}>✕</button>

@@ -654,6 +654,375 @@ async def validate_schema_on_page(url: str) -> Dict[str, Any]:
     }
 
 
+def _wrap_schema(schema: Dict[str, Any]) -> Dict[str, Any]:
+    """Return dict with 'schema' (JSON-LD dict) and 'html' (script tag string)."""
+    html = '<script type="application/ld+json">\n' + json.dumps(schema, ensure_ascii=False, indent=2) + '\n</script>'
+    return {"schema": schema, "html": html}
+
+
+def generate_organization_schema(
+    name: str,
+    url: str = "",
+    logo_url: str = "",
+    description: str = "",
+    founder_name: str = "",
+    email: str = "",
+    phone: str = "",
+    street: str = "",
+    city: str = "",
+    region: str = "",
+    country: str = "VN",
+    postal_code: str = "",
+    social_profiles: Optional[List[str]] = None,
+) -> Dict[str, Any]:
+    """
+    Generate Organization Schema JSON-LD.
+
+    Returns:
+        Dict with 'schema' (JSON-LD dict) and 'html' (script tag string)
+    """
+    schema: Dict[str, Any] = {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": name,
+    }
+    if url:
+        schema["url"] = url
+    if logo_url:
+        schema["logo"] = logo_url
+    if description:
+        schema["description"] = description
+    if founder_name:
+        schema["founder"] = {"@type": "Person", "name": founder_name}
+    if email or phone:
+        contact: Dict[str, Any] = {"@type": "ContactPoint"}
+        if phone:
+            contact["telephone"] = phone
+            contact["contactType"] = "customer service"
+        if email:
+            contact["email"] = email
+        schema["contactPoint"] = contact
+    if street or city:
+        address: Dict[str, Any] = {"@type": "PostalAddress"}
+        if street:
+            address["streetAddress"] = street
+        if city:
+            address["addressLocality"] = city
+        if region:
+            address["addressRegion"] = region
+        if country:
+            address["addressCountry"] = country
+        if postal_code:
+            address["postalCode"] = postal_code
+        schema["address"] = address
+    if social_profiles:
+        schema["sameAs"] = social_profiles
+
+    return _wrap_schema(schema)
+
+
+def generate_website_schema(
+    name: str,
+    url: str = "",
+    description: str = "",
+    search_url_template: str = "",
+) -> Dict[str, Any]:
+    """
+    Generate WebSite Schema JSON-LD with optional SearchAction.
+
+    Returns:
+        Dict with 'schema' (JSON-LD dict) and 'html' (script tag string)
+    """
+    schema: Dict[str, Any] = {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": name,
+    }
+    if url:
+        schema["url"] = url
+    if description:
+        schema["description"] = description
+    if search_url_template:
+        schema["potentialAction"] = {
+            "@type": "SearchAction",
+            "target": search_url_template,
+            "query-input": "required name=search_term_string",
+        }
+
+    return _wrap_schema(schema)
+
+
+def generate_jobposting_schema(
+    title: str,
+    description: str = "",
+    company_name: str = "",
+    company_url: str = "",
+    city: str = "",
+    region: str = "",
+    country: str = "VN",
+    salary_min: float = 0,
+    salary_max: float = 0,
+    salary_currency: str = "VND",
+    employment_type: str = "FULL_TIME",
+    date_posted: str = "",
+    valid_through: str = "",
+    remote: bool = False,
+) -> Dict[str, Any]:
+    """
+    Generate JobPosting Schema JSON-LD.
+
+    Returns:
+        Dict with 'schema' (JSON-LD dict) and 'html' (script tag string)
+    """
+    schema: Dict[str, Any] = {
+        "@context": "https://schema.org",
+        "@type": "JobPosting",
+        "title": title,
+    }
+    if description:
+        schema["description"] = description
+    if employment_type:
+        schema["employmentType"] = employment_type
+    if date_posted:
+        schema["datePosted"] = date_posted
+    if valid_through:
+        schema["validThrough"] = valid_through
+
+    if company_name:
+        hiring_org: Dict[str, Any] = {"@type": "Organization", "name": company_name}
+        if company_url:
+            hiring_org["sameAs"] = company_url
+        schema["hiringOrganization"] = hiring_org
+
+    if remote:
+        schema["jobLocationType"] = "TELECOMMUTE"
+    if city or region or country:
+        loc_address: Dict[str, Any] = {"@type": "PostalAddress"}
+        if city:
+            loc_address["addressLocality"] = city
+        if region:
+            loc_address["addressRegion"] = region
+        if country:
+            loc_address["addressCountry"] = country
+        schema["jobLocation"] = {"@type": "Place", "address": loc_address}
+
+    if salary_min > 0 or salary_max > 0:
+        salary: Dict[str, Any] = {
+            "@type": "MonetaryAmount",
+            "currency": salary_currency,
+            "value": {
+                "@type": "QuantitativeValue",
+                "unitText": "MONTH",
+            },
+        }
+        if salary_min > 0 and salary_max > 0:
+            salary["value"]["minValue"] = salary_min
+            salary["value"]["maxValue"] = salary_max
+        elif salary_min > 0:
+            salary["value"]["value"] = salary_min
+        else:
+            salary["value"]["value"] = salary_max
+        schema["baseSalary"] = salary
+
+    return _wrap_schema(schema)
+
+
+def generate_event_schema(
+    name: str,
+    description: str = "",
+    start_date: str = "",
+    end_date: str = "",
+    location_name: str = "",
+    location_address: str = "",
+    url: str = "",
+    image_url: str = "",
+    performer_name: str = "",
+    offers_price: float = 0,
+    offers_currency: str = "VND",
+    offers_url: str = "",
+) -> Dict[str, Any]:
+    """
+    Generate Event Schema JSON-LD.
+
+    Returns:
+        Dict with 'schema' (JSON-LD dict) and 'html' (script tag string)
+    """
+    schema: Dict[str, Any] = {
+        "@context": "https://schema.org",
+        "@type": "Event",
+        "name": name,
+    }
+    if description:
+        schema["description"] = description
+    if start_date:
+        schema["startDate"] = start_date
+    if end_date:
+        schema["endDate"] = end_date
+    if url:
+        schema["url"] = url
+    if image_url:
+        schema["image"] = image_url
+
+    if location_name or location_address:
+        location: Dict[str, Any] = {"@type": "Place"}
+        if location_name:
+            location["name"] = location_name
+        if location_address:
+            location["address"] = {
+                "@type": "PostalAddress",
+                "streetAddress": location_address,
+            }
+        schema["location"] = location
+
+    if performer_name:
+        schema["performer"] = {"@type": "Person", "name": performer_name}
+
+    if offers_price > 0 or offers_url:
+        offers: Dict[str, Any] = {"@type": "Offer"}
+        if offers_price > 0:
+            offers["price"] = offers_price
+            offers["priceCurrency"] = offers_currency
+        if offers_url:
+            offers["url"] = offers_url
+        offers["availability"] = "https://schema.org/InStock"
+        schema["offers"] = offers
+
+    return _wrap_schema(schema)
+
+
+def generate_howto_schema(
+    name: str,
+    description: str = "",
+    total_time: str = "",
+    steps: Optional[List[Dict[str, str]]] = None,
+    tools: Optional[List[str]] = None,
+    supplies: Optional[List[str]] = None,
+) -> Dict[str, Any]:
+    """
+    Generate HowTo Schema JSON-LD.
+
+    Args:
+        steps: List of {"name": "...", "text": "...", "image_url": "..."(optional)}
+        tools: List of tool name strings
+        supplies: List of supply name strings
+        total_time: ISO 8601 duration (e.g. "PT30M")
+
+    Returns:
+        Dict with 'schema' (JSON-LD dict) and 'html' (script tag string)
+    """
+    schema: Dict[str, Any] = {
+        "@context": "https://schema.org",
+        "@type": "HowTo",
+        "name": name,
+    }
+    if description:
+        schema["description"] = description
+    if total_time:
+        schema["totalTime"] = total_time
+
+    if tools:
+        schema["tool"] = [{"@type": "HowToTool", "name": t} for t in tools]
+    if supplies:
+        schema["supply"] = [{"@type": "HowToSupply", "name": s} for s in supplies]
+
+    if steps:
+        step_list = []
+        for i, step in enumerate(steps, 1):
+            s: Dict[str, Any] = {
+                "@type": "HowToStep",
+                "position": i,
+                "name": step.get("name", f"Bước {i}"),
+                "text": step.get("text", ""),
+            }
+            if step.get("image_url"):
+                s["image"] = step["image_url"]
+            step_list.append(s)
+        schema["step"] = step_list
+
+    return _wrap_schema(schema)
+
+
+def generate_video_schema(
+    name: str,
+    description: str = "",
+    thumbnail_url: str = "",
+    upload_date: str = "",
+    duration: str = "",
+    content_url: str = "",
+    embed_url: str = "",
+) -> Dict[str, Any]:
+    """
+    Generate VideoObject Schema JSON-LD.
+
+    Args:
+        duration: ISO 8601 duration (e.g. "PT5M30S")
+
+    Returns:
+        Dict with 'schema' (JSON-LD dict) and 'html' (script tag string)
+    """
+    schema: Dict[str, Any] = {
+        "@context": "https://schema.org",
+        "@type": "VideoObject",
+        "name": name,
+    }
+    if description:
+        schema["description"] = description
+    if thumbnail_url:
+        schema["thumbnailUrl"] = thumbnail_url
+    if upload_date:
+        schema["uploadDate"] = upload_date
+    if duration:
+        schema["duration"] = duration
+    if content_url:
+        schema["contentUrl"] = content_url
+    if embed_url:
+        schema["embedUrl"] = embed_url
+
+    return _wrap_schema(schema)
+
+
+def generate_review_schema(
+    item_name: str,
+    item_type: str = "Product",
+    author_name: str = "",
+    rating_value: float = 0,
+    best_rating: float = 5,
+    review_body: str = "",
+    date_published: str = "",
+) -> Dict[str, Any]:
+    """
+    Generate Review Schema JSON-LD.
+
+    Args:
+        item_type: 'Product', 'LocalBusiness', or 'Organization'
+
+    Returns:
+        Dict with 'schema' (JSON-LD dict) and 'html' (script tag string)
+    """
+    schema: Dict[str, Any] = {
+        "@context": "https://schema.org",
+        "@type": "Review",
+        "itemReviewed": {
+            "@type": item_type,
+            "name": item_name,
+        },
+    }
+    if author_name:
+        schema["author"] = {"@type": "Person", "name": author_name}
+    if review_body:
+        schema["reviewBody"] = review_body
+    if date_published:
+        schema["datePublished"] = date_published
+    if rating_value > 0:
+        schema["reviewRating"] = {
+            "@type": "Rating",
+            "ratingValue": rating_value,
+            "bestRating": best_rating,
+        }
+
+    return _wrap_schema(schema)
+
+
 _SCHEMA_REQUIRED_FIELDS: Dict[str, List[str]] = {
     "Product": ["name", "offers"],
     "Article": ["headline", "author", "datePublished"],
@@ -666,5 +1035,9 @@ _SCHEMA_REQUIRED_FIELDS: Dict[str, List[str]] = {
     "BreadcrumbList": ["itemListElement"],
     "WebSite": ["name", "url"],
     "HowTo": ["name", "step"],
+    "JobPosting": ["title", "hiringOrganization", "datePosted"],
+    "Event": ["name", "startDate", "location"],
+    "VideoObject": ["name", "description", "thumbnailUrl", "uploadDate"],
+    "Review": ["itemReviewed", "author"],
 }
 

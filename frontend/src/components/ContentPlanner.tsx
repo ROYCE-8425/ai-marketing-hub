@@ -6,12 +6,12 @@ import "./ContentPlanner.css";
 // ─── Section type → icon/label/color ────────────────────────────────────────────
 
 const TYPE_CONFIG: Record<string, { label: string; color: string; icon: string }> = {
-  intro:          { label: "Introduction", color: "#8b5cf6", icon: "→" },
+  intro:          { label: "Introduction", color: "#16a34a", icon: "→" },
   body_how_to:    { label: "How-To",       color: "#10b981", icon: "⚙" },
-  body_comparison:{ label: "Comparison",    color: "#22d3ee", icon: "⟷" },
+  body_comparison:{ label: "Comparison",    color: "#10b981", icon: "⟷" },
   body_explanation:{ label: "Explanation", color: "#f59e0b", icon: "◈" },
   body_list:      { label: "List",         color: "#f59e0b", icon: "≡" },
-  faq:            { label: "FAQ",          color: "#22d3ee", icon: "?" },
+  faq:            { label: "FAQ",          color: "#10b981", icon: "?" },
   conclusion:     { label: "Conclusion",  color: "#ef4444", icon: "✓" },
 };
 
@@ -195,6 +195,7 @@ export function ContentPlannerPanel({ plan, onPublish }: ContentPlannerPanelProp
   // AI Writer draft state — populated only via AI polish flow
   const [writerDraft, setWriterDraft] = useState("");
   const [generating, setGenerating] = useState(false);
+  const [writing, setWriting] = useState(false);
 
   const handlePolishAccept = (humanized: string) => {
     setWriterDraft(humanized);
@@ -207,7 +208,6 @@ export function ContentPlannerPanel({ plan, onPublish }: ContentPlannerPanelProp
     );
   };
 
-  // Auto-generate draft from outline
   const handleGenerateDraft = () => {
     setGenerating(true);
     const draft = plan.sections.map((s) => {
@@ -224,6 +224,32 @@ export function ContentPlannerPanel({ plan, onPublish }: ContentPlannerPanelProp
     const fullDraft = `# ${plan.meta.title_options[0] || plan.topic}\n\n${draft}`;
     setWriterDraft(fullDraft);
     setTimeout(() => setGenerating(false), 500);
+  };
+
+  const handleWriteFull = async () => {
+    setWriting(true);
+    setWriterDraft("⏳ AI đang viết bài... Vui lòng chờ 1-2 phút...");
+    try {
+      const response = await fetch("http://localhost:8000/api/content/write-full", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          topic: plan.topic,
+          sections: plan.sections
+        })
+      });
+      const data = await response.json();
+      if (data.error) {
+        setWriterDraft(`❌ Lỗi: ${data.error}`);
+      } else {
+        const fullContent = `# ${plan.meta.title_options[0] || plan.topic}\n\n${data.content}`;
+        setWriterDraft(fullContent);
+      }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- API response data
+    } catch (e: any) {
+      setWriterDraft(`❌ Lỗi mạng: ${e.message}`);
+    }
+    setWriting(false);
   };
 
   // Warn if user tries to publish the outline skeleton directly
@@ -327,19 +353,36 @@ export function ContentPlannerPanel({ plan, onPublish }: ContentPlannerPanelProp
             <button
               type="button"
               onClick={handleGenerateDraft}
-              disabled={generating}
+              disabled={generating || writing}
               style={{
                 fontSize: "12px",
                 padding: "5px 12px",
-                background: "linear-gradient(135deg, #7c3aed, #6d28d9)",
+                background: "rgba(0,0,0,0.08)",
+                border: "1px solid rgba(255,255,255,0.2)",
+                borderRadius: "99px",
+                color: "#fff",
+                cursor: (generating || writing) ? "not-allowed" : "pointer",
+              }}
+            >
+              {generating ? "⏳ Đang tạo..." : "📄 Tạo dàn ý trống"}
+            </button>
+            <button
+              type="button"
+              onClick={handleWriteFull}
+              disabled={generating || writing}
+              style={{
+                fontSize: "12px",
+                padding: "5px 12px",
+                background: "linear-gradient(135deg, #16a34a, #059669)",
                 border: "none",
                 borderRadius: "99px",
                 color: "#fff",
-                cursor: generating ? "wait" : "pointer",
-                opacity: generating ? 0.6 : 1,
+                cursor: (generating || writing) ? "wait" : "pointer",
+                opacity: (generating || writing) ? 0.6 : 1,
+                fontWeight: "bold"
               }}
             >
-              {generating ? "⏳ Đang tạo..." : "✨ Tạo bản nháp từ outline"}
+              {writing ? "⏳ Đang viết (1-2 phút)..." : "🤖 Groq: Viết tự động 100%"}
             </button>
             {writerDraft && (
               <button
@@ -348,8 +391,8 @@ export function ContentPlannerPanel({ plan, onPublish }: ContentPlannerPanelProp
                 style={{
                   fontSize: "12px",
                   padding: "5px 12px",
-                  background: "rgba(139,92,246,0.1)",
-                  border: "1px solid rgba(139,92,246,0.25)",
+                  background: "rgba(22,163,74,0.1)",
+                  border: "1px solid rgba(22,163,74,0.25)",
                   borderRadius: "99px",
                   color: "var(--primary)",
                   cursor: "pointer",

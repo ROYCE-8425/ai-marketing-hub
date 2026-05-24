@@ -46,3 +46,8 @@ python-multipart>=0.0.9       # Required for FastAPI file uploads
 
 # ── Phase 21 — Excel Export ─────────────────────────────────────────────────────
 openpyxl>=3.1.0              # XLSX writer for rank tracker / reports export
+
+# ── Phase 22 — JWT Authentication ───────────────────────────────────────────────
+python-jose[cryptography]>=3.3.0   # JWT encode/decode
+passlib[bcrypt]>=1.7.4             # Password hashing with bcrypt
+python-multipart>=0.0.9            # Form data parsing for auth endpoints

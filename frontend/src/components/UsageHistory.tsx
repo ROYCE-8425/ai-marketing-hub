@@ -7,8 +7,8 @@ interface HistoryEntry {
   timestamp: string;
   endpoint: string;
   method: string;
-  input: any;
-  output: any;
+  input: unknown;
+  output: unknown;
   status_code: number;
   duration_ms: number;
   error: string | null;
@@ -47,7 +47,7 @@ export default function UsageHistory() {
     }
   };
 
-  useEffect(() => { fetchData(); }, [filter]);
+  useEffect(() => { void fetchData(); }, [filter]); // eslint-disable-line react-hooks/exhaustive-deps -- fetchData changes with filter
 
   const handleClear = async () => {
     if (!confirm("Xóa toàn bộ lịch sử?")) return;
@@ -66,7 +66,7 @@ export default function UsageHistory() {
       case "GET": return "rgba(34,197,94,0.15)";
       case "POST": return "rgba(59,130,246,0.15)";
       case "DELETE": return "rgba(239,68,68,0.15)";
-      default: return "rgba(255,255,255,0.05)";
+      default: return "rgba(0,0,0,0.06)";
     }
   };
 
@@ -79,21 +79,21 @@ export default function UsageHistory() {
       {/* Stats Cards */}
       {stats && (
         <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12, marginBottom: 16 }}>
-          <div style={{ background: "rgba(255,255,255,0.03)", borderRadius: 12, padding: 16, border: "1px solid rgba(255,255,255,0.06)" }}>
+          <div style={{ background: "rgba(255,255,255,0.03)", borderRadius: 12, padding: 16, border: "1px solid rgba(0,0,0,0.05)" }}>
             <div style={{ fontSize: 24, fontWeight: 700, color: "var(--text-h)" }}>{stats.total_calls}</div>
-            <div style={{ fontSize: 11, color: "rgba(255,255,255,0.5)", marginTop: 4 }}>Tổng API calls</div>
+            <div style={{ fontSize: 11, color: "#6b7280", marginTop: 4 }}>Tổng API calls</div>
           </div>
-          <div style={{ background: "rgba(255,255,255,0.03)", borderRadius: 12, padding: 16, border: "1px solid rgba(255,255,255,0.06)" }}>
+          <div style={{ background: "rgba(255,255,255,0.03)", borderRadius: 12, padding: 16, border: "1px solid rgba(0,0,0,0.05)" }}>
             <div style={{ fontSize: 24, fontWeight: 700, color: "#4ade80" }}>{stats.success}</div>
-            <div style={{ fontSize: 11, color: "rgba(255,255,255,0.5)", marginTop: 4 }}>Thành công</div>
+            <div style={{ fontSize: 11, color: "#6b7280", marginTop: 4 }}>Thành công</div>
           </div>
-          <div style={{ background: "rgba(255,255,255,0.03)", borderRadius: 12, padding: 16, border: "1px solid rgba(255,255,255,0.06)" }}>
+          <div style={{ background: "rgba(255,255,255,0.03)", borderRadius: 12, padding: 16, border: "1px solid rgba(0,0,0,0.05)" }}>
             <div style={{ fontSize: 24, fontWeight: 700, color: "#f87171" }}>{stats.errors}</div>
-            <div style={{ fontSize: 11, color: "rgba(255,255,255,0.5)", marginTop: 4 }}>Lỗi</div>
+            <div style={{ fontSize: 11, color: "#6b7280", marginTop: 4 }}>Lỗi</div>
           </div>
-          <div style={{ background: "rgba(255,255,255,0.03)", borderRadius: 12, padding: 16, border: "1px solid rgba(255,255,255,0.06)" }}>
+          <div style={{ background: "rgba(255,255,255,0.03)", borderRadius: 12, padding: 16, border: "1px solid rgba(0,0,0,0.05)" }}>
             <div style={{ fontSize: 24, fontWeight: 700, color: stats.success_rate > 80 ? "#4ade80" : "#fbbf24" }}>{stats.success_rate}%</div>
-            <div style={{ fontSize: 11, color: "rgba(255,255,255,0.5)", marginTop: 4 }}>Tỷ lệ thành công</div>
+            <div style={{ fontSize: 11, color: "#6b7280", marginTop: 4 }}>Tỷ lệ thành công</div>
           </div>
         </div>
       )}
@@ -105,9 +105,9 @@ export default function UsageHistory() {
           placeholder="Lọc theo endpoint..."
           value={filter}
           onChange={(e) => setFilter(e.target.value)}
-          style={{ flex: 1, padding: "8px 12px", background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 8, color: "#fff", fontSize: 12 }}
+          style={{ flex: 1, padding: "8px 12px", background: "rgba(255,255,255,0.03)", border: "1px solid rgba(0,0,0,0.08)", borderRadius: 8, color: "#fff", fontSize: 12 }}
         />
-        <button onClick={fetchData} style={{ padding: "8px 16px", background: "rgba(139,92,246,0.1)", border: "1px solid rgba(139,92,246,0.2)", color: "#a78bfa", borderRadius: 8, cursor: "pointer", fontSize: 12, fontWeight: 600 }}>
+        <button onClick={fetchData} style={{ padding: "8px 16px", background: "rgba(22,163,74,0.1)", border: "1px solid rgba(22,163,74,0.2)", color: "#4ade80", borderRadius: 8, cursor: "pointer", fontSize: 12, fontWeight: 600 }}>
           🔄 Refresh
         </button>
         <button onClick={handleClear} style={{ padding: "8px 16px", background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.15)", color: "#f87171", borderRadius: 8, cursor: "pointer", fontSize: 12 }}>
@@ -117,9 +117,9 @@ export default function UsageHistory() {
 
       {/* History Table */}
       {loading ? (
-        <div style={{ textAlign: "center", padding: 40, color: "rgba(255,255,255,0.4)" }}>⏳ Đang tải...</div>
+        <div style={{ textAlign: "center", padding: 40, color: "#9ca3af" }}>⏳ Đang tải...</div>
       ) : history.length === 0 ? (
-        <div style={{ textAlign: "center", padding: 40, color: "rgba(255,255,255,0.4)" }}>
+        <div style={{ textAlign: "center", padding: 40, color: "#9ca3af" }}>
           Chưa có lịch sử. Sử dụng các tính năng để bắt đầu ghi log.
         </div>
       ) : (
@@ -160,10 +160,10 @@ export default function UsageHistory() {
                   <td style={{ color: h.duration_ms > 5000 ? "#f87171" : h.duration_ms > 2000 ? "#fbbf24" : "var(--text)" }}>
                     {h.duration_ms.toLocaleString()}ms
                   </td>
-                  <td style={{ maxWidth: 150, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", fontSize: 11, color: "rgba(255,255,255,0.5)" }}>
+                  <td style={{ maxWidth: 150, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", fontSize: 11, color: "#6b7280" }}>
                     {h.input ? JSON.stringify(h.input).slice(0, 50) : "—"}
                   </td>
-                  <td style={{ maxWidth: 150, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", fontSize: 11, color: h.error ? "#f87171" : "rgba(255,255,255,0.5)" }}>
+                  <td style={{ maxWidth: 150, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", fontSize: 11, color: h.error ? "#f87171" : "#6b7280" }}>
                     {h.error || (h.output ? JSON.stringify(h.output).slice(0, 50) : "—")}
                   </td>
                 </tr>
@@ -176,12 +176,12 @@ export default function UsageHistory() {
       {/* Detail Modal */}
       {selected && (
         <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 9999 }} onClick={() => setSelected(null)}>
-          <div onClick={(e) => e.stopPropagation()} style={{ background: "var(--card-bg, #1a1a2e)", borderRadius: 16, padding: 24, maxWidth: 700, width: "90%", maxHeight: "80vh", overflow: "auto", border: "1px solid rgba(255,255,255,0.1)" }}>
+          <div onClick={(e) => e.stopPropagation()} style={{ background: "var(--card-bg, #111827)", borderRadius: 16, padding: 24, maxWidth: 700, width: "90%", maxHeight: "80vh", overflow: "auto", border: "1px solid rgba(0,0,0,0.08)" }}>
             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 16 }}>
               <h3 style={{ color: "var(--text-h)", margin: 0 }}>
                 #{selected.id} — {selected.endpoint}
               </h3>
-              <button onClick={() => setSelected(null)} style={{ background: "none", border: "none", color: "rgba(255,255,255,0.5)", fontSize: 18, cursor: "pointer" }}>✕</button>
+              <button onClick={() => setSelected(null)} style={{ background: "none", border: "none", color: "#6b7280", fontSize: 18, cursor: "pointer" }}>✕</button>
             </div>
 
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 16 }}>

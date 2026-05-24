@@ -69885,5 +69885,4100 @@
     "duration_ms": 336.1,
     "error": null,
     "success": true
+  },
+  {
+    "id": 196,
+    "timestamp": "2026-05-23T09:46:38.607579",
+    "endpoint": "/api/sites",
+    "method": "GET",
+    "input": null,
+    "output": {
+      "detail": "Not Found"
+    },
+    "status_code": 404,
+    "duration_ms": 0.7,
+    "error": null,
+    "success": false
+  },
+  {
+    "id": 197,
+    "timestamp": "2026-05-23T09:46:43.425918",
+    "endpoint": "/api/active-site",
+    "method": "GET",
+    "input": null,
+    "output": {
+      "detail": "Not Found"
+    },
+    "status_code": 404,
+    "duration_ms": 0.6,
+    "error": null,
+    "success": false
+  },
+  {
+    "id": 198,
+    "timestamp": "2026-05-23T09:49:18.286798",
+    "endpoint": "/api/auth/login",
+    "method": "POST",
+    "input": {
+      "email": "farmer01",
+      "password": "123456"
+    },
+    "output": {
+      "detail": "Email hoặc mật khẩu không đúng"
+    },
+    "status_code": 401,
+    "duration_ms": 3.5,
+    "error": null,
+    "success": false
+  },
+  {
+    "id": 199,
+    "timestamp": "2026-05-23T09:56:55.592204",
+    "endpoint": "/api/auth/login",
+    "method": "POST",
+    "input": {
+      "email": "admin@aimarketing.vn",
+      "password": "admin123"
+    },
+    "output": null,
+    "status_code": 500,
+    "duration_ms": 33.8,
+    "error": "password cannot be longer than 72 bytes, truncate manually if necessary (e.g. my_password[:72])",
+    "success": false
+  },
+  {
+    "id": 200,
+    "timestamp": "2026-05-23T09:56:57.926964",
+    "endpoint": "/api/auth/login",
+    "method": "POST",
+    "input": {
+      "email": "admin@aimarketing.vn",
+      "password": "admin123"
+    },
+    "output": null,
+    "status_code": 500,
+    "duration_ms": 10.9,
+    "error": "password cannot be longer than 72 bytes, truncate manually if necessary (e.g. my_password[:72])",
+    "success": false
+  },
+  {
+    "id": 201,
+    "timestamp": "2026-05-24T13:38:00.814009",
+    "endpoint": "/api/auth/login",
+    "method": "POST",
+    "input": {
+      "email": "admin@aimarketing.vn",
+      "password": "admin123"
+    },
+    "output": null,
+    "status_code": 500,
+    "duration_ms": 25.2,
+    "error": "password cannot be longer than 72 bytes, truncate manually if necessary (e.g. my_password[:72])",
+    "success": false
+  },
+  {
+    "id": 202,
+    "timestamp": "2026-05-24T13:38:03.316421",
+    "endpoint": "/api/sites/list",
+    "method": "GET",
+    "input": null,
+    "output": {
+      "sites": [
+        {
+          "id": 1,
+          "name": "Mitsubishi Bình Phước",
+          "url": "https://binhphuocmitsubishi.com",
+          "description": "Đại lý chính hãng Mitsubishi tại Bình Phước",
+          "niche": "ô tô",
+          "is_active": 1,
+          "last_scan_score": 0,
+          "last_scan_date": null,
+          "created_at": "2026-05-11 10:32:23"
+        }
+      ]
+    },
+    "status_code": 200,
+    "duration_ms": 1.1,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 203,
+    "timestamp": "2026-05-24T13:38:05.721323",
+    "endpoint": "/api/rank-tracker/keywords",
+    "method": "GET",
+    "input": null,
+    "output": {
+      "keywords": [
+        {
+          "keyword": "https://fongfog.site",
+          "tag": "",
+          "position": null,
+          "previous_position": null,
+          "change": null,
+          "clicks": 0,
+          "impressions": 0,
+          "ctr": 0,
+          "source": "pending",
+          "last_checked": null,
+          "created_at": "2026-05-13 01:43:48"
+        }
+      ]
+    },
+    "status_code": 200,
+    "duration_ms": 10.3,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 204,
+    "timestamp": "2026-05-24T13:38:15.722219",
+    "endpoint": "/api/auth/login",
+    "method": "POST",
+    "input": {
+      "email": "admin@aimarketing.vn",
+      "password": "admin123"
+    },
+    "output": null,
+    "status_code": 500,
+    "duration_ms": 8.7,
+    "error": "password cannot be longer than 72 bytes, truncate manually if necessary (e.g. my_password[:72])",
+    "success": false
+  },
+  {
+    "id": 205,
+    "timestamp": "2026-05-24T14:56:07.077787",
+    "endpoint": "/api/auth/login",
+    "method": "POST",
+    "input": {
+      "email": "admin@aimarketing.vn",
+      "password": "admin123"
+    },
+    "output": {
+      "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwiZW1haWwiOiJhZG1pbkBhaW1hcmtldGluZy52biIsInJvbGUiOiJhZG1pbiIsImV4cCI6MTc3OTYxMTE2NiwidHlwZSI6ImFjY2VzcyJ9.bBti291bPw4aAl7Q-60kSSpb1X0aqvSVImExkOE4LwI",
+      "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwiZW1haWwiOiJhZG1pbkBhaW1hcmtldGluZy52biIsInJvbGUiOiJhZG1pbiIsImV4cCI6MTc4MDIxNDE2NiwidHlwZSI6InJlZnJlc2gifQ.J4GZA52_AXVpNRkLJ_KHvspsv9weUH2miWAJR_x1-Qw",
+      "token_type": "bearer",
+      "user": {
+        "id": 1,
+        "email": "admin@aimarketing.vn",
+        "full_name": "Admin",
+        "role": "admin",
+        "is_active": true,
+        "created_at": "2026-05-23 02:05:28",
+        "last_login": null
+      }
+    },
+    "status_code": 200,
+    "duration_ms": 558.1,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 206,
+    "timestamp": "2026-05-24T14:56:17.769881",
+    "endpoint": "/api/auth/login",
+    "method": "POST",
+    "input": {
+      "email": "admin@aimarketing.vn",
+      "password": "admin123"
+    },
+    "output": {
+      "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwiZW1haWwiOiJhZG1pbkBhaW1hcmtldGluZy52biIsInJvbGUiOiJhZG1pbiIsImV4cCI6MTc3OTYxMTE3NywidHlwZSI6ImFjY2VzcyJ9.CsqQ1H54OuSCR9sGI_Os24UPb-kn4jHQ9O5r-S9eTMs",
+      "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwiZW1haWwiOiJhZG1pbkBhaW1hcmtldGluZy52biIsInJvbGUiOiJhZG1pbiIsImV4cCI6MTc4MDIxNDE3NywidHlwZSI6InJlZnJlc2gifQ.n5P1v-DB_iERZXvA_Zlq-zaJKPWdaWoc0mMXrjKaJoI",
+      "token_type": "bearer",
+      "user": {
+        "id": 1,
+        "email": "admin@aimarketing.vn",
+        "full_name": "Admin",
+        "role": "admin",
+        "is_active": true,
+        "created_at": "2026-05-23 02:05:28",
+        "last_login": "2026-05-24T07:56:06.880635+00:00"
+      }
+    },
+    "status_code": 200,
+    "duration_ms": 355.3,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 207,
+    "timestamp": "2026-05-24T14:56:18.039980",
+    "endpoint": "/api/auth/me",
+    "method": "GET",
+    "input": null,
+    "output": {
+      "id": 1,
+      "email": "admin@aimarketing.vn",
+      "full_name": "Admin",
+      "role": "admin",
+      "is_active": true,
+      "created_at": "2026-05-23 02:05:28",
+      "last_login": "2026-05-24T07:56:17.688162+00:00"
+    },
+    "status_code": 200,
+    "duration_ms": 4.7,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 208,
+    "timestamp": "2026-05-24T14:56:18.289509",
+    "endpoint": "/api/sites/list",
+    "method": "GET",
+    "input": null,
+    "output": {
+      "sites": [
+        {
+          "id": 1,
+          "name": "Mitsubishi Bình Phước",
+          "url": "https://binhphuocmitsubishi.com",
+          "description": "Đại lý chính hãng Mitsubishi tại Bình Phước",
+          "niche": "ô tô",
+          "is_active": 1,
+          "last_scan_score": 0,
+          "last_scan_date": null,
+          "created_at": "2026-05-11 10:32:23"
+        }
+      ]
+    },
+    "status_code": 200,
+    "duration_ms": 1.2,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 209,
+    "timestamp": "2026-05-24T14:56:18.580589",
+    "endpoint": "/api/calendar/items",
+    "method": "GET",
+    "input": null,
+    "output": {
+      "items": []
+    },
+    "status_code": 200,
+    "duration_ms": 11.9,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 210,
+    "timestamp": "2026-05-24T14:56:18.873702",
+    "endpoint": "/api/ab-test/list",
+    "method": "GET",
+    "input": null,
+    "output": {
+      "tests": []
+    },
+    "status_code": 200,
+    "duration_ms": 16.0,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 211,
+    "timestamp": "2026-05-24T14:56:29.193943",
+    "endpoint": "/api/rank-tracker/keywords",
+    "method": "GET",
+    "input": null,
+    "output": {
+      "keywords": [
+        {
+          "keyword": "https://fongfog.site",
+          "tag": "",
+          "position": null,
+          "previous_position": null,
+          "change": null,
+          "clicks": 0,
+          "impressions": 0,
+          "ctr": 0,
+          "source": "pending",
+          "last_checked": null,
+          "created_at": "2026-05-13 01:43:48"
+        }
+      ]
+    },
+    "status_code": 200,
+    "duration_ms": 5.7,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 212,
+    "timestamp": "2026-05-24T14:56:29.506008",
+    "endpoint": "/api/rank-tracker/tags",
+    "method": "GET",
+    "input": null,
+    "output": {
+      "tags": []
+    },
+    "status_code": 200,
+    "duration_ms": 1.2,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 213,
+    "timestamp": "2026-05-24T14:56:29.839870",
+    "endpoint": "/api/usage-stats",
+    "method": "GET",
+    "input": null,
+    "output": {
+      "total_calls": 212,
+      "success": 186,
+      "errors": 26,
+      "success_rate": 87.7,
+      "endpoints": {
+        "/api/ab-test/list": {
+          "calls": 7,
+          "success": 7,
+          "errors": 0,
+          "avg_ms": 4.4
+        },
+        "/api/serp/live": {
+          "calls": 36,
+          "success": 17,
+          "errors": 19,
+          "avg_ms": 640.4
+        },
+        "/api/ai-keywords": {
+          "calls": 29,
+          "success": 29,
+          "errors": 0,
+          "avg_ms": 1241.0
+        },
+        "/api/ga4-overview": {
+          "calls": 28,
+          "success": 28,
+          "errors": 0,
+          "avg_ms": 2071.5
+        },
+        "/api/audit-url": {
+          "calls": 5,
+          "success": 5,
+          "errors": 0,
+          "avg_ms": 1486.6
+        },
+        "/api/spineditor/scrape": {
+          "calls": 2,
+          "success": 2,
+          "errors": 0,
+          "avg_ms": 547.8
+        },
+        "/api/rank-tracker/keywords": {
+          "calls": 17,
+          "success": 17,
+          "errors": 0,
+          "avg_ms": 10.6
+        },
+        "/api/rank-tracker/tags": {
+          "calls": 14,
+          "success": 14,
+          "errors": 0,
+          "avg_ms": 33.9
+        },
+        "/api/rank-tracker/alerts": {
+          "calls": 14,
+          "success": 14,
+          "errors": 0,
+          "avg_ms": 62.6
+        },
+        "/api/rank-tracker/sync": {
+          "calls": 2,
+          "success": 2,
+          "errors": 0,
+          "avg_ms": 2144.8
+        },
+        "/api/usage-history": {
+          "calls": 10,
+          "success": 10,
+          "errors": 0,
+          "avg_ms": 37.7
+        },
+        "/api/usage-stats": {
+          "calls": 10,
+          "success": 10,
+          "errors": 0,
+          "avg_ms": 47.5
+        },
+        "/api/calendar/items": {
+          "calls": 7,
+          "success": 7,
+          "errors": 0,
+          "avg_ms": 4.4
+        },
+        "/api/calendar/stats": {
+          "calls": 6,
+          "success": 6,
+          "errors": 0,
+          "avg_ms": 58.7
+        },
+        "/api/satellite/sites": {
+          "calls": 2,
+          "success": 2,
+          "errors": 0,
+          "avg_ms": 1.4
+        },
+        "/api/satellite/posts": {
+          "calls": 2,
+          "success": 2,
+          "errors": 0,
+          "avg_ms": 32.4
+        },
+        "/api/serp/deep-analyze": {
+          "calls": 1,
+          "success": 1,
+          "errors": 0,
+          "avg_ms": 1252.9
+        },
+        "/api/sites/list": {
+          "calls": 8,
+          "success": 8,
+          "errors": 0,
+          "avg_ms": 1.6
+        },
+        "/api/backlinks/analyze": {
+          "calls": 1,
+          "success": 1,
+          "errors": 0,
+          "avg_ms": 1642.8
+        },
+        "/api/rank-tracker/add": {
+          "calls": 1,
+          "success": 1,
+          "errors": 0,
+          "avg_ms": 6.1
+        }
+      },
+      "last_call": "2026-05-24T14:56:29.506008"
+    },
+    "status_code": 200,
+    "duration_ms": 83.1,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 214,
+    "timestamp": "2026-05-24T14:57:33.381206",
+    "endpoint": "/api/rank-tracker/history",
+    "method": "GET",
+    "input": null,
+    "output": {
+      "keyword": "mitsubishi xpander",
+      "history": []
+    },
+    "status_code": 200,
+    "duration_ms": 1.6,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 215,
+    "timestamp": "2026-05-24T14:57:33.660415",
+    "endpoint": "/api/rank-tracker/alerts",
+    "method": "GET",
+    "input": null,
+    "output": {
+      "alerts": []
+    },
+    "status_code": 200,
+    "duration_ms": 1.5,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 216,
+    "timestamp": "2026-05-24T14:57:33.918533",
+    "endpoint": "/api/sites/active",
+    "method": "GET",
+    "input": null,
+    "output": {
+      "id": 1,
+      "name": "Mitsubishi Bình Phước",
+      "url": "https://binhphuocmitsubishi.com",
+      "description": "Đại lý chính hãng Mitsubishi tại Bình Phước",
+      "niche": "ô tô",
+      "is_active": 1,
+      "last_scan_score": 0,
+      "last_scan_date": null,
+      "created_at": "2026-05-11 10:32:23"
+    },
+    "status_code": 200,
+    "duration_ms": 0.9,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 217,
+    "timestamp": "2026-05-24T14:58:34.957188",
+    "endpoint": "/api/auth/login",
+    "method": "POST",
+    "input": {
+      "email": "admin@aimarketing.vn",
+      "password": "admin123"
+    },
+    "output": {
+      "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwiZW1haWwiOiJhZG1pbkBhaW1hcmtldGluZy52biIsInJvbGUiOiJhZG1pbiIsImV4cCI6MTc3OTYxMTMxNCwidHlwZSI6ImFjY2VzcyJ9.PZnxF4_bQISHuquup7Tw503M5iYFAR-GzNFPiNI6iUA",
+      "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwiZW1haWwiOiJhZG1pbkBhaW1hcmtldGluZy52biIsInJvbGUiOiJhZG1pbiIsImV4cCI6MTc4MDIxNDMxNCwidHlwZSI6InJlZnJlc2gifQ.hcR0_N8klfszMeo2Nl9R9_LInAF5po6pxuBoQx5Bidg",
+      "token_type": "bearer",
+      "user": {
+        "id": 1,
+        "email": "admin@aimarketing.vn",
+        "full_name": "Admin",
+        "role": "admin",
+        "is_active": true,
+        "created_at": "2026-05-23 02:05:28",
+        "last_login": "2026-05-24T07:56:17.688162+00:00"
+      }
+    },
+    "status_code": 200,
+    "duration_ms": 565.5,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 218,
+    "timestamp": "2026-05-24T14:58:35.282469",
+    "endpoint": "/api/auth/me",
+    "method": "GET",
+    "input": null,
+    "output": {
+      "id": 1,
+      "email": "admin@aimarketing.vn",
+      "full_name": "Admin",
+      "role": "admin",
+      "is_active": true,
+      "created_at": "2026-05-23 02:05:28",
+      "last_login": "2026-05-24T07:58:34.842714+00:00"
+    },
+    "status_code": 200,
+    "duration_ms": 3.6,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 219,
+    "timestamp": "2026-05-24T14:58:35.599869",
+    "endpoint": "/api/auth/users",
+    "method": "GET",
+    "input": null,
+    "output": [
+      {
+        "id": 1,
+        "email": "admin@aimarketing.vn",
+        "full_name": "Admin",
+        "role": "admin",
+        "is_active": true,
+        "created_at": "2026-05-23 02:05:28",
+        "last_login": "2026-05-24T07:58:34.842714+00:00"
+      }
+    ],
+    "status_code": 200,
+    "duration_ms": 5.3,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 220,
+    "timestamp": "2026-05-24T14:58:36.430921",
+    "endpoint": "/api/auth/register",
+    "method": "POST",
+    "input": {
+      "email": "test@demo.vn",
+      "full_name": "Test User",
+      "password": "test123456"
+    },
+    "output": {
+      "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyIiwiZW1haWwiOiJ0ZXN0QGRlbW8udm4iLCJyb2xlIjoidmlld2VyIiwiZXhwIjoxNzc5NjExMzE2LCJ0eXBlIjoiYWNjZXNzIn0.-TArtR6IzX48RWfmuC3YSTBH4VnDtx27mjbW0Mk3oEg",
+      "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyIiwiZW1haWwiOiJ0ZXN0QGRlbW8udm4iLCJyb2xlIjoidmlld2VyIiwiZXhwIjoxNzgwMjE0MzE2LCJ0eXBlIjoicmVmcmVzaCJ9.Wu0TjNrxC_yWwF_ppa2c0qX7mVNQar95jDR-oyHZTM8",
+      "token_type": "bearer",
+      "user": {
+        "id": 2,
+        "email": "test@demo.vn",
+        "full_name": "Test User",
+        "role": "viewer",
+        "is_active": true,
+        "created_at": "2026-05-24T07:58:35.819548+00:00",
+        "last_login": null
+      }
+    },
+    "status_code": 201,
+    "duration_ms": 522.0,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 221,
+    "timestamp": "2026-05-24T15:27:47.486012",
+    "endpoint": "/api/auth/login",
+    "method": "POST",
+    "input": {
+      "email": "admin",
+      "password": "trannhuy"
+    },
+    "output": {
+      "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwiZW1haWwiOiJhZG1pbiIsInJvbGUiOiJhZG1pbiIsImV4cCI6MTc3OTYxMzA2NywidHlwZSI6ImFjY2VzcyJ9.HjLRSRvtxhm5koYOmNw1jB6FjVK_v6XyVXQyOEn2DnI",
+      "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwiZW1haWwiOiJhZG1pbiIsInJvbGUiOiJhZG1pbiIsImV4cCI6MTc4MDIxNjA2NywidHlwZSI6InJlZnJlc2gifQ.2nGUUJLMpTP3dfSEqWNZ3oOL9ehppA5JwY39xY3XmcM",
+      "token_type": "bearer",
+      "user": {
+        "id": 1,
+        "email": "admin",
+        "full_name": "Admin",
+        "role": "admin",
+        "is_active": true,
+        "created_at": "2026-05-23 02:05:28",
+        "last_login": "2026-05-24T07:58:34.842714+00:00"
+      }
+    },
+    "status_code": 200,
+    "duration_ms": 506.3,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 222,
+    "timestamp": "2026-05-24T15:27:47.845317",
+    "endpoint": "/api/ai-keywords",
+    "method": "POST",
+    "input": {},
+    "output": {
+      "analyzed_at": "2026-05-24T15:27:47.807276",
+      "site_url": "",
+      "gsc_keywords": [],
+      "total_clicks": 0,
+      "total_impressions": 0,
+      "ai_analysis": "",
+      "recommended_keywords": [],
+      "keyword_clusters": [],
+      "content_strategy": [],
+      "top_performing": [],
+      "quick_wins": [],
+      "summary": "Cần kết nối Google Search Console để lấy dữ liệu từ khóa thật trước khi phân tích.",
+      "data_source": "no_data",
+      "ai_provider": "none",
+      "error": "Chưa có dữ liệu GSC. Cấu hình Google Search Console để phân tích từ khóa thật."
+    },
+    "status_code": 200,
+    "duration_ms": 15.0,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 223,
+    "timestamp": "2026-05-24T15:27:48.121586",
+    "endpoint": "/api/ga4-overview",
+    "method": "POST",
+    "input": {
+      "days": 30
+    },
+    "output": {
+      "fetched_at": "2026-05-24T15:27:48.044977",
+      "period_days": 30,
+      "data_source": "error",
+      "property_id": "",
+      "overview": {},
+      "traffic_sources": [],
+      "top_pages": [],
+      "daily_sessions": [],
+      "error": "GA4_PROPERTY_ID chưa được cấu hình. Vào Google Analytics → Admin → Property Details để lấy Property ID."
+    },
+    "status_code": 200,
+    "duration_ms": 261.2,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 224,
+    "timestamp": "2026-05-24T15:27:48.386040",
+    "endpoint": "/api/serp/live",
+    "method": "POST",
+    "input": {
+      "keyword": "mitsubishi binh phuoc",
+      "location": "vn",
+      "num_results": 10
+    },
+    "output": {
+      "keyword": "mitsubishi binh phuoc",
+      "location": "Viet Nam",
+      "organic_results": [],
+      "serp_features": [],
+      "total_results": 0,
+      "results_count": 0,
+      "source": "missing_credentials",
+      "error": "Can cau hinh DataForSEO API de lay Google SERP. Set DATAFORSEO_LOGIN va DATAFORSEO_PASSWORD trong backend/.env. Dang ky tai https://dataforseo.com",
+      "analyzed_at": "2026-05-24T15:27:48.320218"
+    },
+    "status_code": 200,
+    "duration_ms": 528.4,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 225,
+    "timestamp": "2026-05-24T15:27:48.646523",
+    "endpoint": "/api/ai-keywords",
+    "method": "POST",
+    "input": {},
+    "output": {
+      "analyzed_at": "2026-05-24T15:27:48.321808",
+      "site_url": "",
+      "gsc_keywords": [],
+      "total_clicks": 0,
+      "total_impressions": 0,
+      "ai_analysis": "",
+      "recommended_keywords": [],
+      "keyword_clusters": [],
+      "content_strategy": [],
+      "top_performing": [],
+      "quick_wins": [],
+      "summary": "Cần kết nối Google Search Console để lấy dữ liệu từ khóa thật trước khi phân tích.",
+      "data_source": "no_data",
+      "ai_provider": "none",
+      "error": "Chưa có dữ liệu GSC. Cấu hình Google Search Console để phân tích từ khóa thật."
+    },
+    "status_code": 200,
+    "duration_ms": 525.0,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 226,
+    "timestamp": "2026-05-24T15:27:48.923549",
+    "endpoint": "/api/ga4-overview",
+    "method": "POST",
+    "input": {
+      "days": 30
+    },
+    "output": {
+      "fetched_at": "2026-05-24T15:27:48.850101",
+      "period_days": 30,
+      "data_source": "error",
+      "property_id": "",
+      "overview": {},
+      "traffic_sources": [],
+      "top_pages": [],
+      "daily_sessions": [],
+      "error": "GA4_PROPERTY_ID chưa được cấu hình. Vào Google Analytics → Admin → Property Details để lấy Property ID."
+    },
+    "status_code": 200,
+    "duration_ms": 273.5,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 227,
+    "timestamp": "2026-05-24T15:27:49.200053",
+    "endpoint": "/api/serp/live",
+    "method": "POST",
+    "input": {
+      "keyword": "mitsubishi binh phuoc",
+      "location": "vn",
+      "num_results": 10
+    },
+    "output": {
+      "keyword": "mitsubishi binh phuoc",
+      "location": "Viet Nam",
+      "organic_results": [],
+      "serp_features": [],
+      "total_results": 0,
+      "results_count": 0,
+      "source": "missing_credentials",
+      "error": "Can cau hinh DataForSEO API de lay Google SERP. Set DATAFORSEO_LOGIN va DATAFORSEO_PASSWORD trong backend/.env. Dang ky tai https://dataforseo.com",
+      "analyzed_at": "2026-05-24T15:27:49.130899"
+    },
+    "status_code": 200,
+    "duration_ms": 553.5,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 228,
+    "timestamp": "2026-05-24T15:28:10.340945",
+    "endpoint": "/api/ab-test/list",
+    "method": "GET",
+    "input": null,
+    "output": {
+      "tests": []
+    },
+    "status_code": 200,
+    "duration_ms": 1.7,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 229,
+    "timestamp": "2026-05-24T15:28:10.611062",
+    "endpoint": "/api/ab-test/list",
+    "method": "GET",
+    "input": null,
+    "output": {
+      "tests": []
+    },
+    "status_code": 200,
+    "duration_ms": 3.1,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 230,
+    "timestamp": "2026-05-24T15:44:21.471538",
+    "endpoint": "/api/calendar/items",
+    "method": "GET",
+    "input": null,
+    "output": {
+      "items": []
+    },
+    "status_code": 200,
+    "duration_ms": 9.8,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 231,
+    "timestamp": "2026-05-24T15:44:21.764729",
+    "endpoint": "/api/calendar/stats",
+    "method": "GET",
+    "input": null,
+    "output": {
+      "total": 0,
+      "draft": 0,
+      "review": 0,
+      "published": 0,
+      "upcoming": 0,
+      "overdue": 0
+    },
+    "status_code": 200,
+    "duration_ms": 267.8,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 232,
+    "timestamp": "2026-05-24T15:44:22.022985",
+    "endpoint": "/api/calendar/items",
+    "method": "GET",
+    "input": null,
+    "output": {
+      "items": []
+    },
+    "status_code": 200,
+    "duration_ms": 6.6,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 233,
+    "timestamp": "2026-05-24T15:44:22.294351",
+    "endpoint": "/api/calendar/stats",
+    "method": "GET",
+    "input": null,
+    "output": {
+      "total": 0,
+      "draft": 0,
+      "review": 0,
+      "published": 0,
+      "upcoming": 0,
+      "overdue": 0
+    },
+    "status_code": 200,
+    "duration_ms": 268.8,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 234,
+    "timestamp": "2026-05-24T15:45:07.429784",
+    "endpoint": "/api/calendar/items",
+    "method": "GET",
+    "input": null,
+    "output": {
+      "items": []
+    },
+    "status_code": 200,
+    "duration_ms": 2.0,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 235,
+    "timestamp": "2026-05-24T15:45:07.721130",
+    "endpoint": "/api/calendar/stats",
+    "method": "GET",
+    "input": null,
+    "output": {
+      "total": 0,
+      "draft": 0,
+      "review": 0,
+      "published": 0,
+      "upcoming": 0,
+      "overdue": 0
+    },
+    "status_code": 200,
+    "duration_ms": 4.0,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 236,
+    "timestamp": "2026-05-24T15:45:08.037026",
+    "endpoint": "/api/calendar/items",
+    "method": "GET",
+    "input": null,
+    "output": {
+      "items": []
+    },
+    "status_code": 200,
+    "duration_ms": 3.6,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 237,
+    "timestamp": "2026-05-24T15:45:08.302683",
+    "endpoint": "/api/calendar/stats",
+    "method": "GET",
+    "input": null,
+    "output": {
+      "total": 0,
+      "draft": 0,
+      "review": 0,
+      "published": 0,
+      "upcoming": 0,
+      "overdue": 0
+    },
+    "status_code": 200,
+    "duration_ms": 284.7,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 238,
+    "timestamp": "2026-05-24T15:48:51.635894",
+    "endpoint": "/api/auth/login",
+    "method": "POST",
+    "input": {
+      "email": "admin",
+      "password": "trannhuy"
+    },
+    "output": {
+      "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwiZW1haWwiOiJhZG1pbiIsInJvbGUiOiJhZG1pbiIsImV4cCI6MTc3OTYxNDMzMSwidHlwZSI6ImFjY2VzcyJ9.RWpeRHoWRksheZ6ZFUdCQQEAwu8ta3OowSLTLx2Kg3Q",
+      "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwiZW1haWwiOiJhZG1pbiIsInJvbGUiOiJhZG1pbiIsImV4cCI6MTc4MDIxNzMzMSwidHlwZSI6InJlZnJlc2gifQ.gEZErNI1A0OmQ0NSz4Xyu_6XniwKmn4tkYSGL8lK2jY",
+      "token_type": "bearer",
+      "user": {
+        "id": 1,
+        "email": "admin",
+        "full_name": "Admin",
+        "role": "admin",
+        "is_active": true,
+        "created_at": "2026-05-23 02:05:28",
+        "last_login": "2026-05-24T08:27:47.394893+00:00"
+      }
+    },
+    "status_code": 200,
+    "duration_ms": 435.8,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 239,
+    "timestamp": "2026-05-24T15:48:51.999720",
+    "endpoint": "/api/ga4-overview",
+    "method": "POST",
+    "input": {
+      "days": 30
+    },
+    "output": {
+      "fetched_at": "2026-05-24T15:48:51.958128",
+      "period_days": 30,
+      "data_source": "error",
+      "property_id": "",
+      "overview": {},
+      "traffic_sources": [],
+      "top_pages": [],
+      "daily_sessions": [],
+      "error": "GA4_PROPERTY_ID chưa được cấu hình. Vào Google Analytics → Admin → Property Details để lấy Property ID."
+    },
+    "status_code": 200,
+    "duration_ms": 2.0,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 240,
+    "timestamp": "2026-05-24T15:48:52.278249",
+    "endpoint": "/api/ai-keywords",
+    "method": "POST",
+    "input": {},
+    "output": {
+      "analyzed_at": "2026-05-24T15:48:51.957134",
+      "site_url": "",
+      "gsc_keywords": [],
+      "total_clicks": 0,
+      "total_impressions": 0,
+      "ai_analysis": "",
+      "recommended_keywords": [],
+      "keyword_clusters": [],
+      "content_strategy": [],
+      "top_performing": [],
+      "quick_wins": [],
+      "summary": "Cần kết nối Google Search Console để lấy dữ liệu từ khóa thật trước khi phân tích.",
+      "data_source": "no_data",
+      "ai_provider": "none",
+      "error": "Chưa có dữ liệu GSC. Cấu hình Google Search Console để phân tích từ khóa thật."
+    },
+    "status_code": 200,
+    "duration_ms": 234.6,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 241,
+    "timestamp": "2026-05-24T15:48:52.560751",
+    "endpoint": "/api/serp/live",
+    "method": "POST",
+    "input": {
+      "keyword": "mitsubishi binh phuoc",
+      "location": "vn",
+      "num_results": 10
+    },
+    "output": {
+      "keyword": "mitsubishi binh phuoc",
+      "location": "Viet Nam",
+      "organic_results": [],
+      "serp_features": [],
+      "total_results": 0,
+      "results_count": 0,
+      "source": "missing_credentials",
+      "error": "Can cau hinh DataForSEO API de lay Google SERP. Set DATAFORSEO_LOGIN va DATAFORSEO_PASSWORD trong backend/.env. Dang ky tai https://dataforseo.com",
+      "analyzed_at": "2026-05-24T15:48:51.958362"
+    },
+    "status_code": 200,
+    "duration_ms": 530.4,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 242,
+    "timestamp": "2026-05-24T15:48:52.835404",
+    "endpoint": "/api/ga4-overview",
+    "method": "POST",
+    "input": {
+      "days": 30
+    },
+    "output": {
+      "fetched_at": "2026-05-24T15:48:52.752599",
+      "period_days": 30,
+      "data_source": "error",
+      "property_id": "",
+      "overview": {},
+      "traffic_sources": [],
+      "top_pages": [],
+      "daily_sessions": [],
+      "error": "GA4_PROPERTY_ID chưa được cấu hình. Vào Google Analytics → Admin → Property Details để lấy Property ID."
+    },
+    "status_code": 200,
+    "duration_ms": 2.7,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 243,
+    "timestamp": "2026-05-24T15:48:53.149199",
+    "endpoint": "/api/ai-keywords",
+    "method": "POST",
+    "input": {},
+    "output": {
+      "analyzed_at": "2026-05-24T15:48:52.752347",
+      "site_url": "",
+      "gsc_keywords": [],
+      "total_clicks": 0,
+      "total_impressions": 0,
+      "ai_analysis": "",
+      "recommended_keywords": [],
+      "keyword_clusters": [],
+      "content_strategy": [],
+      "top_performing": [],
+      "quick_wins": [],
+      "summary": "Cần kết nối Google Search Console để lấy dữ liệu từ khóa thật trước khi phân tích.",
+      "data_source": "no_data",
+      "ai_provider": "none",
+      "error": "Chưa có dữ liệu GSC. Cấu hình Google Search Console để phân tích từ khóa thật."
+    },
+    "status_code": 200,
+    "duration_ms": 307.9,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 244,
+    "timestamp": "2026-05-24T15:48:53.420185",
+    "endpoint": "/api/serp/live",
+    "method": "POST",
+    "input": {
+      "keyword": "mitsubishi binh phuoc",
+      "location": "vn",
+      "num_results": 10
+    },
+    "output": {
+      "keyword": "mitsubishi binh phuoc",
+      "location": "Viet Nam",
+      "organic_results": [],
+      "serp_features": [],
+      "total_results": 0,
+      "results_count": 0,
+      "source": "missing_credentials",
+      "error": "Can cau hinh DataForSEO API de lay Google SERP. Set DATAFORSEO_LOGIN va DATAFORSEO_PASSWORD trong backend/.env. Dang ky tai https://dataforseo.com",
+      "analyzed_at": "2026-05-24T15:48:53.057225"
+    },
+    "status_code": 200,
+    "duration_ms": 594.5,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 245,
+    "timestamp": "2026-05-24T15:52:33.406207",
+    "endpoint": "/api/ga4-overview",
+    "method": "POST",
+    "input": {
+      "days": 30
+    },
+    "output": {
+      "fetched_at": "2026-05-24T15:52:33.363768",
+      "period_days": 30,
+      "data_source": "error",
+      "property_id": "",
+      "overview": {},
+      "traffic_sources": [],
+      "top_pages": [],
+      "daily_sessions": [],
+      "error": "GA4_PROPERTY_ID chưa được cấu hình. Vào Google Analytics → Admin → Property Details để lấy Property ID."
+    },
+    "status_code": 200,
+    "duration_ms": 5.0,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 246,
+    "timestamp": "2026-05-24T15:52:33.673605",
+    "endpoint": "/api/ga4-overview",
+    "method": "POST",
+    "input": {
+      "days": 30
+    },
+    "output": {
+      "fetched_at": "2026-05-24T15:52:33.364242",
+      "period_days": 30,
+      "data_source": "error",
+      "property_id": "",
+      "overview": {},
+      "traffic_sources": [],
+      "top_pages": [],
+      "daily_sessions": [],
+      "error": "GA4_PROPERTY_ID chưa được cấu hình. Vào Google Analytics → Admin → Property Details để lấy Property ID."
+    },
+    "status_code": 200,
+    "duration_ms": 239.9,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 247,
+    "timestamp": "2026-05-24T15:52:33.949062",
+    "endpoint": "/api/ai-keywords",
+    "method": "POST",
+    "input": {},
+    "output": {
+      "analyzed_at": "2026-05-24T15:52:33.363418",
+      "site_url": "",
+      "gsc_keywords": [],
+      "total_clicks": 0,
+      "total_impressions": 0,
+      "ai_analysis": "",
+      "recommended_keywords": [],
+      "keyword_clusters": [],
+      "content_strategy": [],
+      "top_performing": [],
+      "quick_wins": [],
+      "summary": "Cần kết nối Google Search Console để lấy dữ liệu từ khóa thật trước khi phân tích.",
+      "data_source": "no_data",
+      "ai_provider": "none",
+      "error": "Chưa có dữ liệu GSC. Cấu hình Google Search Console để phân tích từ khóa thật."
+    },
+    "status_code": 200,
+    "duration_ms": 516.7,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 248,
+    "timestamp": "2026-05-24T15:52:34.225931",
+    "endpoint": "/api/ai-keywords",
+    "method": "POST",
+    "input": {},
+    "output": {
+      "analyzed_at": "2026-05-24T15:52:33.364125",
+      "site_url": "",
+      "gsc_keywords": [],
+      "total_clicks": 0,
+      "total_impressions": 0,
+      "ai_analysis": "",
+      "recommended_keywords": [],
+      "keyword_clusters": [],
+      "content_strategy": [],
+      "top_performing": [],
+      "quick_wins": [],
+      "summary": "Cần kết nối Google Search Console để lấy dữ liệu từ khóa thật trước khi phân tích.",
+      "data_source": "no_data",
+      "ai_provider": "none",
+      "error": "Chưa có dữ liệu GSC. Cấu hình Google Search Console để phân tích từ khóa thật."
+    },
+    "status_code": 200,
+    "duration_ms": 790.8,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 249,
+    "timestamp": "2026-05-24T15:52:34.505615",
+    "endpoint": "/api/serp/live",
+    "method": "POST",
+    "input": {
+      "keyword": "mitsubishi binh phuoc",
+      "location": "vn",
+      "num_results": 10
+    },
+    "output": {
+      "keyword": "mitsubishi binh phuoc",
+      "location": "Viet Nam",
+      "organic_results": [],
+      "serp_features": [],
+      "total_results": 0,
+      "results_count": 0,
+      "source": "missing_credentials",
+      "error": "Can cau hinh DataForSEO API de lay Google SERP. Set DATAFORSEO_LOGIN va DATAFORSEO_PASSWORD trong backend/.env. Dang ky tai https://dataforseo.com",
+      "analyzed_at": "2026-05-24T15:52:34.152402"
+    },
+    "status_code": 200,
+    "duration_ms": 1074.3,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 250,
+    "timestamp": "2026-05-24T15:52:34.777781",
+    "endpoint": "/api/serp/live",
+    "method": "POST",
+    "input": {
+      "keyword": "mitsubishi binh phuoc",
+      "location": "vn",
+      "num_results": 10
+    },
+    "output": {
+      "keyword": "mitsubishi binh phuoc",
+      "location": "Viet Nam",
+      "organic_results": [],
+      "serp_features": [],
+      "total_results": 0,
+      "results_count": 0,
+      "source": "missing_credentials",
+      "error": "Can cau hinh DataForSEO API de lay Google SERP. Set DATAFORSEO_LOGIN va DATAFORSEO_PASSWORD trong backend/.env. Dang ky tai https://dataforseo.com",
+      "analyzed_at": "2026-05-24T15:52:34.436191"
+    },
+    "status_code": 200,
+    "duration_ms": 1341.5,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 251,
+    "timestamp": "2026-05-24T15:54:23.604294",
+    "endpoint": "/api/serp/live",
+    "method": "POST",
+    "input": {
+      "keyword": "xe",
+      "location": "vn",
+      "num_results": 10
+    },
+    "output": {
+      "keyword": "xe",
+      "location": "Viet Nam",
+      "organic_results": [],
+      "serp_features": [],
+      "total_results": 0,
+      "results_count": 0,
+      "source": "missing_credentials",
+      "error": "Can cau hinh DataForSEO API de lay Google SERP. Set DATAFORSEO_LOGIN va DATAFORSEO_PASSWORD trong backend/.env. Dang ky tai https://dataforseo.com",
+      "analyzed_at": "2026-05-24T15:54:23.567551"
+    },
+    "status_code": 200,
+    "duration_ms": 1.2,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 252,
+    "timestamp": "2026-05-24T15:54:31.125958",
+    "endpoint": "/api/ai-keywords",
+    "method": "POST",
+    "input": {},
+    "output": {
+      "analyzed_at": "2026-05-24T15:54:31.087003",
+      "site_url": "",
+      "gsc_keywords": [],
+      "total_clicks": 0,
+      "total_impressions": 0,
+      "ai_analysis": "",
+      "recommended_keywords": [],
+      "keyword_clusters": [],
+      "content_strategy": [],
+      "top_performing": [],
+      "quick_wins": [],
+      "summary": "Cần kết nối Google Search Console để lấy dữ liệu từ khóa thật trước khi phân tích.",
+      "data_source": "no_data",
+      "ai_provider": "none",
+      "error": "Chưa có dữ liệu GSC. Cấu hình Google Search Console để phân tích từ khóa thật."
+    },
+    "status_code": 200,
+    "duration_ms": 1.2,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 253,
+    "timestamp": "2026-05-24T15:54:31.386276",
+    "endpoint": "/api/ga4-overview",
+    "method": "POST",
+    "input": {
+      "days": 30
+    },
+    "output": {
+      "fetched_at": "2026-05-24T15:54:31.321921",
+      "period_days": 30,
+      "data_source": "error",
+      "property_id": "",
+      "overview": {},
+      "traffic_sources": [],
+      "top_pages": [],
+      "daily_sessions": [],
+      "error": "GA4_PROPERTY_ID chưa được cấu hình. Vào Google Analytics → Admin → Property Details để lấy Property ID."
+    },
+    "status_code": 200,
+    "duration_ms": 0.8,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 254,
+    "timestamp": "2026-05-24T15:54:31.654921",
+    "endpoint": "/api/ga4-overview",
+    "method": "POST",
+    "input": {
+      "days": 30
+    },
+    "output": {
+      "fetched_at": "2026-05-24T15:54:31.584833",
+      "period_days": 30,
+      "data_source": "error",
+      "property_id": "",
+      "overview": {},
+      "traffic_sources": [],
+      "top_pages": [],
+      "daily_sessions": [],
+      "error": "GA4_PROPERTY_ID chưa được cấu hình. Vào Google Analytics → Admin → Property Details để lấy Property ID."
+    },
+    "status_code": 200,
+    "duration_ms": 3.2,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 255,
+    "timestamp": "2026-05-24T15:54:31.926645",
+    "endpoint": "/api/ai-keywords",
+    "method": "POST",
+    "input": {},
+    "output": {
+      "analyzed_at": "2026-05-24T15:54:31.584646",
+      "site_url": "",
+      "gsc_keywords": [],
+      "total_clicks": 0,
+      "total_impressions": 0,
+      "ai_analysis": "",
+      "recommended_keywords": [],
+      "keyword_clusters": [],
+      "content_strategy": [],
+      "top_performing": [],
+      "quick_wins": [],
+      "summary": "Cần kết nối Google Search Console để lấy dữ liệu từ khóa thật trước khi phân tích.",
+      "data_source": "no_data",
+      "ai_provider": "none",
+      "error": "Chưa có dữ liệu GSC. Cấu hình Google Search Console để phân tích từ khóa thật."
+    },
+    "status_code": 200,
+    "duration_ms": 270.8,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 256,
+    "timestamp": "2026-05-24T15:54:32.188709",
+    "endpoint": "/api/serp/live",
+    "method": "POST",
+    "input": {
+      "keyword": "mitsubishi binh phuoc",
+      "location": "vn",
+      "num_results": 10
+    },
+    "output": {
+      "keyword": "mitsubishi binh phuoc",
+      "location": "Viet Nam",
+      "organic_results": [],
+      "serp_features": [],
+      "total_results": 0,
+      "results_count": 0,
+      "source": "missing_credentials",
+      "error": "Can cau hinh DataForSEO API de lay Google SERP. Set DATAFORSEO_LOGIN va DATAFORSEO_PASSWORD trong backend/.env. Dang ky tai https://dataforseo.com",
+      "analyzed_at": "2026-05-24T15:54:31.853106"
+    },
+    "status_code": 200,
+    "duration_ms": 528.9,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 257,
+    "timestamp": "2026-05-24T15:54:32.440071",
+    "endpoint": "/api/serp/live",
+    "method": "POST",
+    "input": {
+      "keyword": "mitsubishi binh phuoc",
+      "location": "vn",
+      "num_results": 10
+    },
+    "output": {
+      "keyword": "mitsubishi binh phuoc",
+      "location": "Viet Nam",
+      "organic_results": [],
+      "serp_features": [],
+      "total_results": 0,
+      "results_count": 0,
+      "source": "missing_credentials",
+      "error": "Can cau hinh DataForSEO API de lay Google SERP. Set DATAFORSEO_LOGIN va DATAFORSEO_PASSWORD trong backend/.env. Dang ky tai https://dataforseo.com",
+      "analyzed_at": "2026-05-24T15:54:32.110957"
+    },
+    "status_code": 200,
+    "duration_ms": 790.9,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 258,
+    "timestamp": "2026-05-24T15:55:20.810066",
+    "endpoint": "/api/auth/login",
+    "method": "POST",
+    "input": {
+      "password": "trannhuy",
+      "username": "admin"
+    },
+    "output": {
+      "detail": [
+        {
+          "type": "missing",
+          "loc": [
+            "body",
+            "email"
+          ],
+          "msg": "Field required",
+          "input": {
+            "password": "trannhuy",
+            "username": "admin"
+          }
+        }
+      ]
+    },
+    "status_code": 422,
+    "duration_ms": 7.8,
+    "error": null,
+    "success": false
+  },
+  {
+    "id": 259,
+    "timestamp": "2026-05-24T15:55:29.858653",
+    "endpoint": "/api/auth/login",
+    "method": "POST",
+    "input": null,
+    "output": {
+      "detail": [
+        {
+          "type": "model_attributes_type",
+          "loc": [
+            "body"
+          ],
+          "msg": "Input should be a valid dictionary or object to extract fields from",
+          "input": "username=admin&password=trannhuy"
+        }
+      ]
+    },
+    "status_code": 422,
+    "duration_ms": 11.6,
+    "error": null,
+    "success": false
+  },
+  {
+    "id": 260,
+    "timestamp": "2026-05-24T15:56:16.269705",
+    "endpoint": "/api/auth/register",
+    "method": "POST",
+    "input": {
+      "email": "test99@test.com",
+      "full_name": "Test",
+      "password": "test123"
+    },
+    "output": {
+      "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzIiwiZW1haWwiOiJ0ZXN0OTlAdGVzdC5jb20iLCJyb2xlIjoidmlld2VyIiwiZXhwIjoxNzc5NjE0Nzc2LCJ0eXBlIjoiYWNjZXNzIn0.Ee19187JOp_0Q-UPbE9S10GOProil_uLvjVb5et7LTo",
+      "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzIiwiZW1haWwiOiJ0ZXN0OTlAdGVzdC5jb20iLCJyb2xlIjoidmlld2VyIiwiZXhwIjoxNzgwMjE3Nzc2LCJ0eXBlIjoicmVmcmVzaCJ9._VWGlgdw8h2FObq9QhB3jMzCbOiQ8Fb_3WePE8kA2Vg",
+      "token_type": "bearer",
+      "user": {
+        "id": 3,
+        "email": "test99@test.com",
+        "full_name": "Test",
+        "role": "viewer",
+        "is_active": true,
+        "created_at": "2026-05-24T08:56:15.709416+00:00",
+        "last_login": null
+      }
+    },
+    "status_code": 201,
+    "duration_ms": 492.9,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 261,
+    "timestamp": "2026-05-24T15:56:38.007426",
+    "endpoint": "/api/sites/list",
+    "method": "GET",
+    "input": null,
+    "output": {
+      "sites": [
+        {
+          "id": 1,
+          "name": "Mitsubishi Bình Phước",
+          "url": "https://binhphuocmitsubishi.com",
+          "description": "Đại lý chính hãng Mitsubishi tại Bình Phước",
+          "niche": "ô tô",
+          "is_active": 1,
+          "last_scan_score": 0,
+          "last_scan_date": null,
+          "created_at": "2026-05-11 10:32:23"
+        }
+      ]
+    },
+    "status_code": 200,
+    "duration_ms": 1.4,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 262,
+    "timestamp": "2026-05-24T16:00:07.139370",
+    "endpoint": "/api/sites/list",
+    "method": "GET",
+    "input": null,
+    "output": {
+      "sites": [
+        {
+          "id": 1,
+          "name": "Mitsubishi Bình Phước",
+          "url": "https://binhphuocmitsubishi.com",
+          "description": "Đại lý chính hãng Mitsubishi tại Bình Phước",
+          "niche": "ô tô",
+          "is_active": 1,
+          "last_scan_score": 0,
+          "last_scan_date": null,
+          "created_at": "2026-05-11 10:32:23"
+        }
+      ]
+    },
+    "status_code": 200,
+    "duration_ms": 1.2,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 263,
+    "timestamp": "2026-05-24T16:00:07.417154",
+    "endpoint": "/api/sites/active",
+    "method": "GET",
+    "input": null,
+    "output": {
+      "id": 1,
+      "name": "Mitsubishi Bình Phước",
+      "url": "https://binhphuocmitsubishi.com",
+      "description": "Đại lý chính hãng Mitsubishi tại Bình Phước",
+      "niche": "ô tô",
+      "is_active": 1,
+      "last_scan_score": 0,
+      "last_scan_date": null,
+      "created_at": "2026-05-11 10:32:23"
+    },
+    "status_code": 200,
+    "duration_ms": 1.7,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 264,
+    "timestamp": "2026-05-24T16:00:07.724611",
+    "endpoint": "/api/rank-tracker/keywords",
+    "method": "GET",
+    "input": null,
+    "output": {
+      "keywords": [
+        {
+          "keyword": "https://fongfog.site",
+          "tag": "",
+          "position": null,
+          "previous_position": null,
+          "change": null,
+          "clicks": 0,
+          "impressions": 0,
+          "ctr": 0,
+          "source": "pending",
+          "last_checked": null,
+          "created_at": "2026-05-13 01:43:48"
+        }
+      ]
+    },
+    "status_code": 200,
+    "duration_ms": 3.1,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 265,
+    "timestamp": "2026-05-24T16:00:07.995756",
+    "endpoint": "/api/calendar/items",
+    "method": "GET",
+    "input": null,
+    "output": {
+      "items": []
+    },
+    "status_code": 200,
+    "duration_ms": 1.4,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 266,
+    "timestamp": "2026-05-24T16:00:08.276874",
+    "endpoint": "/api/ab-test/list",
+    "method": "GET",
+    "input": null,
+    "output": {
+      "tests": []
+    },
+    "status_code": 200,
+    "duration_ms": 1.7,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 267,
+    "timestamp": "2026-05-24T16:00:08.534467",
+    "endpoint": "/api/convert/formats",
+    "method": "GET",
+    "input": null,
+    "output": {
+      "formats": {
+        ".pdf": "PDF Document",
+        ".docx": "Microsoft Word",
+        ".doc": "Microsoft Word (Legacy)",
+        ".pptx": "Microsoft PowerPoint",
+        ".xlsx": "Microsoft Excel",
+        ".xls": "Microsoft Excel (Legacy)",
+        ".csv": "CSV Spreadsheet",
+        ".html": "HTML Page",
+        ".htm": "HTML Page",
+        ".json": "JSON Data",
+        ".xml": "XML Data",
+        ".txt": "Plain Text",
+        ".md": "Markdown",
+        ".epub": "E-Book (EPUB)",
+        ".zip": "ZIP Archive",
+        ".jpg": "JPEG Image",
+        ".jpeg": "JPEG Image",
+        ".png": "PNG Image",
+        ".mp3": "Audio (MP3)",
+        ".wav": "Audio (WAV)"
+      },
+      "total": 20
+    },
+    "status_code": 200,
+    "duration_ms": 14.9,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 268,
+    "timestamp": "2026-05-24T16:00:17.972386",
+    "endpoint": "/api/usage-history",
+    "method": "GET",
+    "input": null,
+    "output": [
+      {
+        "id": 267,
+        "timestamp": "2026-05-24T16:00:08.534467",
+        "endpoint": "/api/convert/formats",
+        "method": "GET",
+        "input": null,
+        "output": {
+          "formats": {
+            ".pdf": "PDF Document",
+            ".docx": "Microsoft Word",
+            ".doc": "Microsoft Word (Legacy)",
+            ".pptx": "Microsoft PowerPoint",
+            ".xlsx": "Microsoft Excel",
+            ".xls": "Microsoft Excel (Legacy)",
+            ".csv": "CSV Spreadsheet",
+            ".html": "HTML Page",
+            ".htm": "HTML Page",
+            ".json": "JSON Data",
+            ".xml": "XML Data",
+            ".txt": "Plain Text",
+            ".md": "Markdown",
+            ".epub": "E-Book (EPUB)",
+            ".zip": "ZIP Archive",
+            ".jpg": "JPEG Image",
+            ".jpeg": "JPEG Image",
+            ".png": "PNG Image",
+            ".mp3": "Audio (MP3)",
+            ".wav": "Audio (WAV)"
+          },
+          "total": 20
+        },
+        "status_code": 200,
+        "duration_ms": 14.9,
+        "error": null,
+        "success": true
+      },
+      {
+        "id": 266,
+        "timestamp": "2026-05-24T16:00:08.276874",
+        "endpoint": "/api/ab-test/list",
+        "method": "GET",
+        "input": null,
+        "output": {
+          "tests": []
+        },
+        "status_code": 200,
+        "duration_ms": 1.7,
+        "error": null,
+        "success": true
+      },
+      {
+        "id": 265,
+        "timestamp": "2026-05-24T16:00:07.995756",
+        "endpoint": "/api/calendar/items",
+        "method": "GET",
+        "input": null,
+        "output": {
+          "items": []
+        },
+        "status_code": 200,
+        "duration_ms": 1.4,
+        "error": null,
+        "success": true
+      },
+      {
+        "id": 264,
+        "timestamp": "2026-05-24T16:00:07.724611",
+        "endpoint": "/api/rank-tracker/keywords",
+        "method": "GET",
+        "input": null,
+        "output": {
+          "keywords": [
+            {
+              "keyword": "https://fongfog.site",
+              "tag": "",
+              "position": null,
+              "previous_position": null,
+              "change": null,
+              "clicks": 0,
+              "impressions": 0,
+              "ctr": 0,
+              "source": "pending",
+              "last_checked": null,
+              "created_at": "2026-05-13 01:43:48"
+            }
+          ]
+        },
+        "status_code": 200,
+        "duration_ms": 3.1,
+        "error": null,
+        "success": true
+      },
+      {
+        "id": 263,
+        "timestamp": "2026-05-24T16:00:07.417154",
+        "endpoint": "/api/sites/active",
+        "method": "GET",
+        "input": null,
+        "output": {
+          "id": 1,
+          "name": "Mitsubishi Bình Phước",
+          "url": "https://binhphuocmitsubishi.com",
+          "description": "Đại lý chính hãng Mitsubishi tại Bình Phước",
+          "niche": "ô tô",
+          "is_active": 1,
+          "last_scan_score": 0,
+          "last_scan_date": null,
+          "created_at": "2026-05-11 10:32:23"
+        },
+        "status_code": 200,
+        "duration_ms": 1.7,
+        "error": null,
+        "success": true
+      },
+      {
+        "id": 262,
+        "timestamp": "2026-05-24T16:00:07.139370",
+        "endpoint": "/api/sites/list",
+        "method": "GET",
+        "input": null,
+        "output": {
+          "sites": [
+            {
+              "id": 1,
+              "name": "Mitsubishi Bình Phước",
+              "url": "https://binhphuocmitsubishi.com",
+              "description": "Đại lý chính hãng Mitsubishi tại Bình Phước",
+              "niche": "ô tô",
+              "is_active": 1,
+              "last_scan_score": 0,
+              "last_scan_date": null,
+              "created_at": "2026-05-11 10:32:23"
+            }
+          ]
+        },
+        "status_code": 200,
+        "duration_ms": 1.2,
+        "error": null,
+        "success": true
+      },
+      {
+        "id": 261,
+        "timestamp": "2026-05-24T15:56:38.007426",
+        "endpoint": "/api/sites/list",
+        "method": "GET",
+        "input": null,
+        "output": {
+          "sites": [
+            {
+              "id": 1,
+              "name": "Mitsubishi Bình Phước",
+              "url": "https://binhphuocmitsubishi.com",
+              "description": "Đại lý chính hãng Mitsubishi tại Bình Phước",
+              "niche": "ô tô",
+              "is_active": 1,
+              "last_scan_score": 0,
+              "last_scan_date": null,
+              "created_at": "2026-05-11 10:32:23"
+            }
+          ]
+        },
+        "status_code": 200,
+        "duration_ms": 1.4,
+        "error": null,
+        "success": true
+      },
+      {
+        "id": 260,
+        "timestamp": "2026-05-24T15:56:16.269705",
+        "endpoint": "/api/auth/register",
+        "method": "POST",
+        "input": {
+          "email": "test99@test.com",
+          "full_name": "Test",
+          "password": "test123"
+        },
+        "output": {
+          "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzIiwiZW1haWwiOiJ0ZXN0OTlAdGVzdC5jb20iLCJyb2xlIjoidmlld2VyIiwiZXhwIjoxNzc5NjE0Nzc2LCJ0eXBlIjoiYWNjZXNzIn0.Ee19187JOp_0Q-UPbE9S10GOProil_uLvjVb5et7LTo",
+          "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzIiwiZW1haWwiOiJ0ZXN0OTlAdGVzdC5jb20iLCJyb2xlIjoidmlld2VyIiwiZXhwIjoxNzgwMjE3Nzc2LCJ0eXBlIjoicmVmcmVzaCJ9._VWGlgdw8h2FObq9QhB3jMzCbOiQ8Fb_3WePE8kA2Vg",
+          "token_type": "bearer",
+          "user": {
+            "id": 3,
+            "email": "test99@test.com",
+            "full_name": "Test",
+            "role": "viewer",
+            "is_active": true,
+            "created_at": "2026-05-24T08:56:15.709416+00:00",
+            "last_login": null
+          }
+        },
+        "status_code": 201,
+        "duration_ms": 492.9,
+        "error": null,
+        "success": true
+      },
+      {
+        "id": 259,
+        "timestamp": "2026-05-24T15:55:29.858653",
+        "endpoint": "/api/auth/login",
+        "method": "POST",
+        "input": null,
+        "output": {
+          "detail": [
+            {
+              "type": "model_attributes_type",
+              "loc": [
+                "body"
+              ],
+              "msg": "Input should be a valid dictionary or object to extract fields from",
+              "input": "username=admin&password=trannhuy"
+            }
+          ]
+        },
+        "status_code": 422,
+        "duration_ms": 11.6,
+        "error": null,
+        "success": false
+      },
+      {
+        "id": 258,
+        "timestamp": "2026-05-24T15:55:20.810066",
+        "endpoint": "/api/auth/login",
+        "method": "POST",
+        "input": {
+          "password": "trannhuy",
+          "username": "admin"
+        },
+        "output": {
+          "detail": [
+            {
+              "type": "missing",
+              "loc": [
+                "body",
+                "email"
+              ],
+              "msg": "Field required",
+              "input": {
+                "password": "trannhuy",
+                "username": "admin"
+              }
+            }
+          ]
+        },
+        "status_code": 422,
+        "duration_ms": 7.8,
+        "error": null,
+        "success": false
+      }
+    ],
+    "status_code": 200,
+    "duration_ms": 363.9,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 269,
+    "timestamp": "2026-05-24T16:00:18.307009",
+    "endpoint": "/api/usage-stats",
+    "method": "GET",
+    "input": null,
+    "output": {
+      "total_calls": 268,
+      "success": 240,
+      "errors": 28,
+      "success_rate": 89.6,
+      "endpoints": {
+        "/api/ab-test/list": {
+          "calls": 10,
+          "success": 10,
+          "errors": 0,
+          "avg_ms": 3.7
+        },
+        "/api/serp/live": {
+          "calls": 45,
+          "success": 26,
+          "errors": 19,
+          "avg_ms": 644.4
+        },
+        "/api/ai-keywords": {
+          "calls": 37,
+          "success": 37,
+          "errors": 0,
+          "avg_ms": 1044.6
+        },
+        "/api/ga4-overview": {
+          "calls": 36,
+          "success": 36,
+          "errors": 0,
+          "avg_ms": 1633.0
+        },
+        "/api/audit-url": {
+          "calls": 5,
+          "success": 5,
+          "errors": 0,
+          "avg_ms": 1486.6
+        },
+        "/api/spineditor/scrape": {
+          "calls": 2,
+          "success": 2,
+          "errors": 0,
+          "avg_ms": 547.8
+        },
+        "/api/rank-tracker/keywords": {
+          "calls": 18,
+          "success": 18,
+          "errors": 0,
+          "avg_ms": 10.2
+        },
+        "/api/rank-tracker/tags": {
+          "calls": 14,
+          "success": 14,
+          "errors": 0,
+          "avg_ms": 33.9
+        },
+        "/api/rank-tracker/alerts": {
+          "calls": 15,
+          "success": 15,
+          "errors": 0,
+          "avg_ms": 58.5
+        },
+        "/api/rank-tracker/sync": {
+          "calls": 2,
+          "success": 2,
+          "errors": 0,
+          "avg_ms": 2144.8
+        },
+        "/api/usage-history": {
+          "calls": 11,
+          "success": 11,
+          "errors": 0,
+          "avg_ms": 67.4
+        },
+        "/api/usage-stats": {
+          "calls": 11,
+          "success": 11,
+          "errors": 0,
+          "avg_ms": 50.7
+        },
+        "/api/calendar/items": {
+          "calls": 12,
+          "success": 12,
+          "errors": 0,
+          "avg_ms": 4.5
+        },
+        "/api/calendar/stats": {
+          "calls": 10,
+          "success": 10,
+          "errors": 0,
+          "avg_ms": 117.8
+        },
+        "/api/satellite/sites": {
+          "calls": 2,
+          "success": 2,
+          "errors": 0,
+          "avg_ms": 1.4
+        },
+        "/api/satellite/posts": {
+          "calls": 2,
+          "success": 2,
+          "errors": 0,
+          "avg_ms": 32.4
+        },
+        "/api/serp/deep-analyze": {
+          "calls": 1,
+          "success": 1,
+          "errors": 0,
+          "avg_ms": 1252.9
+        },
+        "/api/sites/list": {
+          "calls": 10,
+          "success": 10,
+          "errors": 0,
+          "avg_ms": 1.6
+        },
+        "/api/backlinks/analyze": {
+          "calls": 1,
+          "success": 1,
+          "errors": 0,
+          "avg_ms": 1642.8
+        },
+        "/api/rank-tracker/add": {
+          "calls": 1,
+          "success": 1,
+          "errors": 0,
+          "avg_ms": 6.1
+        }
+      },
+      "last_call": "2026-05-24T16:00:17.972386"
+    },
+    "status_code": 200,
+    "duration_ms": 38.6,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 270,
+    "timestamp": "2026-05-24T16:00:18.621953",
+    "endpoint": "/api/satellite/sites",
+    "method": "GET",
+    "input": null,
+    "output": {
+      "sites": []
+    },
+    "status_code": 200,
+    "duration_ms": 10.4,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 271,
+    "timestamp": "2026-05-24T16:00:18.929691",
+    "endpoint": "/api/rank-tracker/tags",
+    "method": "GET",
+    "input": null,
+    "output": {
+      "tags": []
+    },
+    "status_code": 200,
+    "duration_ms": 4.3,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 272,
+    "timestamp": "2026-05-24T16:00:19.245002",
+    "endpoint": "/api/rank-tracker/alerts",
+    "method": "GET",
+    "input": null,
+    "output": {
+      "alerts": []
+    },
+    "status_code": 200,
+    "duration_ms": 2.0,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 273,
+    "timestamp": "2026-05-24T16:00:30.116164",
+    "endpoint": "/api/auth/login",
+    "method": "POST",
+    "input": {
+      "username": "admin",
+      "password": "trannhuy"
+    },
+    "output": {
+      "detail": [
+        {
+          "type": "missing",
+          "loc": [
+            "body",
+            "email"
+          ],
+          "msg": "Field required",
+          "input": {
+            "username": "admin",
+            "password": "trannhuy"
+          }
+        }
+      ]
+    },
+    "status_code": 422,
+    "duration_ms": 1.0,
+    "error": null,
+    "success": false
+  },
+  {
+    "id": 274,
+    "timestamp": "2026-05-24T16:00:30.423278",
+    "endpoint": "/api/auth/login",
+    "method": "POST",
+    "input": null,
+    "output": {
+      "detail": [
+        {
+          "type": "model_attributes_type",
+          "loc": [
+            "body"
+          ],
+          "msg": "Input should be a valid dictionary or object to extract fields from",
+          "input": "username=admin&password=trannhuy"
+        }
+      ]
+    },
+    "status_code": 422,
+    "duration_ms": 1.5,
+    "error": null,
+    "success": false
+  },
+  {
+    "id": 275,
+    "timestamp": "2026-05-24T16:01:08.043886",
+    "endpoint": "/api/auth/login",
+    "method": "POST",
+    "input": {
+      "email": "admin",
+      "password": "trannhuy"
+    },
+    "output": {
+      "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwiZW1haWwiOiJhZG1pbiIsInJvbGUiOiJhZG1pbiIsImV4cCI6MTc3OTYxNTA2NywidHlwZSI6ImFjY2VzcyJ9.L3hxDmvrmYBDpnVjbJwvH_esyP6wCLsrLIAr2BAGoHc",
+      "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwiZW1haWwiOiJhZG1pbiIsInJvbGUiOiJhZG1pbiIsImV4cCI6MTc4MDIxODA2NywidHlwZSI6InJlZnJlc2gifQ.zuXn7zV3jByIc7OlMCXOlf2b0NYzC-6sKrRwrbvb1eo",
+      "token_type": "bearer",
+      "user": {
+        "id": 1,
+        "email": "admin",
+        "full_name": "Admin",
+        "role": "admin",
+        "is_active": true,
+        "created_at": "2026-05-23 02:05:28",
+        "last_login": "2026-05-24T08:48:51.545650+00:00"
+      }
+    },
+    "status_code": 200,
+    "duration_ms": 386.9,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 276,
+    "timestamp": "2026-05-24T16:04:20.743966",
+    "endpoint": "/api/auth/login",
+    "method": "POST",
+    "input": {
+      "email": "admin",
+      "password": "trannhuy"
+    },
+    "output": {
+      "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwiZW1haWwiOiJhZG1pbiIsInJvbGUiOiJhZG1pbiIsImV4cCI6MTc3OTYxNTI2MCwidHlwZSI6ImFjY2VzcyJ9.yIIT1-NfwwOlQbltA15nmsv1kWyDH9jnIbR-DSrUKWQ",
+      "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwiZW1haWwiOiJhZG1pbiIsInJvbGUiOiJhZG1pbiIsImV4cCI6MTc4MDIxODI2MCwidHlwZSI6InJlZnJlc2gifQ.9yWGDbInglgpmf9VzwlCPQ96CnsBeGpY6-bOffXtyCI",
+      "token_type": "bearer",
+      "user": {
+        "id": 1,
+        "email": "admin",
+        "full_name": "Admin",
+        "role": "admin",
+        "is_active": true,
+        "created_at": "2026-05-23 02:05:28",
+        "last_login": "2026-05-24T09:01:07.951888+00:00"
+      }
+    },
+    "status_code": 200,
+    "duration_ms": 434.2,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 277,
+    "timestamp": "2026-05-24T16:04:21.130960",
+    "endpoint": "/api/ga4-overview",
+    "method": "POST",
+    "input": {
+      "days": 30
+    },
+    "output": {
+      "fetched_at": "2026-05-24T16:04:21.085844",
+      "period_days": 30,
+      "data_source": "error",
+      "property_id": "",
+      "overview": {},
+      "traffic_sources": [],
+      "top_pages": [],
+      "daily_sessions": [],
+      "error": "GA4_PROPERTY_ID chưa được cấu hình. Vào Google Analytics → Admin → Property Details để lấy Property ID."
+    },
+    "status_code": 200,
+    "duration_ms": 1.3,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 278,
+    "timestamp": "2026-05-24T16:04:21.406626",
+    "endpoint": "/api/ai-keywords",
+    "method": "POST",
+    "input": {},
+    "output": {
+      "analyzed_at": "2026-05-24T16:04:21.085733",
+      "site_url": "",
+      "gsc_keywords": [],
+      "total_clicks": 0,
+      "total_impressions": 0,
+      "ai_analysis": "",
+      "recommended_keywords": [],
+      "keyword_clusters": [],
+      "content_strategy": [],
+      "top_performing": [],
+      "quick_wins": [],
+      "summary": "Cần kết nối Google Search Console để lấy dữ liệu từ khóa thật trước khi phân tích.",
+      "data_source": "no_data",
+      "ai_provider": "none",
+      "error": "Chưa có dữ liệu GSC. Cấu hình Google Search Console để phân tích từ khóa thật."
+    },
+    "status_code": 200,
+    "duration_ms": 246.1,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 279,
+    "timestamp": "2026-05-24T16:04:21.705637",
+    "endpoint": "/api/serp/live",
+    "method": "POST",
+    "input": {
+      "keyword": "mitsubishi binh phuoc",
+      "location": "vn",
+      "num_results": 10
+    },
+    "output": {
+      "keyword": "mitsubishi binh phuoc",
+      "location": "Viet Nam",
+      "organic_results": [],
+      "serp_features": [],
+      "total_results": 0,
+      "results_count": 0,
+      "source": "missing_credentials",
+      "error": "Can cau hinh DataForSEO API de lay Google SERP. Set DATAFORSEO_LOGIN va DATAFORSEO_PASSWORD trong backend/.env. Dang ky tai https://dataforseo.com",
+      "analyzed_at": "2026-05-24T16:04:21.631295"
+    },
+    "status_code": 200,
+    "duration_ms": 548.0,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 280,
+    "timestamp": "2026-05-24T16:04:21.998920",
+    "endpoint": "/api/ai-keywords",
+    "method": "POST",
+    "input": {},
+    "output": {
+      "analyzed_at": "2026-05-24T16:04:21.918096",
+      "site_url": "",
+      "gsc_keywords": [],
+      "total_clicks": 0,
+      "total_impressions": 0,
+      "ai_analysis": "",
+      "recommended_keywords": [],
+      "keyword_clusters": [],
+      "content_strategy": [],
+      "top_performing": [],
+      "quick_wins": [],
+      "summary": "Cần kết nối Google Search Console để lấy dữ liệu từ khóa thật trước khi phân tích.",
+      "data_source": "no_data",
+      "ai_provider": "none",
+      "error": "Chưa có dữ liệu GSC. Cấu hình Google Search Console để phân tích từ khóa thật."
+    },
+    "status_code": 200,
+    "duration_ms": 287.6,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 281,
+    "timestamp": "2026-05-24T16:04:22.277371",
+    "endpoint": "/api/ga4-overview",
+    "method": "POST",
+    "input": {
+      "days": 30
+    },
+    "output": {
+      "fetched_at": "2026-05-24T16:04:21.918920",
+      "period_days": 30,
+      "data_source": "error",
+      "property_id": "",
+      "overview": {},
+      "traffic_sources": [],
+      "top_pages": [],
+      "daily_sessions": [],
+      "error": "GA4_PROPERTY_ID chưa được cấu hình. Vào Google Analytics → Admin → Property Details để lấy Property ID."
+    },
+    "status_code": 200,
+    "duration_ms": 289.6,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 282,
+    "timestamp": "2026-05-24T16:04:22.563671",
+    "endpoint": "/api/serp/live",
+    "method": "POST",
+    "input": {
+      "keyword": "mitsubishi binh phuoc",
+      "location": "vn",
+      "num_results": 10
+    },
+    "output": {
+      "keyword": "mitsubishi binh phuoc",
+      "location": "Viet Nam",
+      "organic_results": [],
+      "serp_features": [],
+      "total_results": 0,
+      "results_count": 0,
+      "source": "missing_credentials",
+      "error": "Can cau hinh DataForSEO API de lay Google SERP. Set DATAFORSEO_LOGIN va DATAFORSEO_PASSWORD trong backend/.env. Dang ky tai https://dataforseo.com",
+      "analyzed_at": "2026-05-24T16:04:22.488222"
+    },
+    "status_code": 200,
+    "duration_ms": 571.5,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 283,
+    "timestamp": "2026-05-24T16:17:25.758990",
+    "endpoint": "/api/auth/login",
+    "method": "POST",
+    "input": {
+      "email": "admin",
+      "password": "trannhuy"
+    },
+    "output": {
+      "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwiZW1haWwiOiJhZG1pbiIsInJvbGUiOiJhZG1pbiIsImV4cCI6MTc3OTYxNjA0NSwidHlwZSI6ImFjY2VzcyJ9.tH8d__CQXQX_rO_xepDobJ6_RsqwpPccNYgWOD3foXo",
+      "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwiZW1haWwiOiJhZG1pbiIsInJvbGUiOiJhZG1pbiIsImV4cCI6MTc4MDIxOTA0NSwidHlwZSI6InJlZnJlc2gifQ.lgrM6nxy3W2v-jznWhNbn250mprEbsg7hX_xAgCbdHs",
+      "token_type": "bearer",
+      "user": {
+        "id": 1,
+        "email": "admin",
+        "full_name": "Admin",
+        "role": "admin",
+        "is_active": true,
+        "created_at": "2026-05-23 02:05:28",
+        "last_login": "2026-05-24T09:04:20.650434+00:00"
+      }
+    },
+    "status_code": 200,
+    "duration_ms": 369.0,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 284,
+    "timestamp": "2026-05-24T16:18:12.525207",
+    "endpoint": "/api/calendar/items",
+    "method": "GET",
+    "input": null,
+    "output": {
+      "items": []
+    },
+    "status_code": 200,
+    "duration_ms": 3.4,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 285,
+    "timestamp": "2026-05-24T16:18:12.831474",
+    "endpoint": "/api/calendar/stats",
+    "method": "GET",
+    "input": null,
+    "output": {
+      "total": 0,
+      "draft": 0,
+      "review": 0,
+      "published": 0,
+      "upcoming": 0,
+      "overdue": 0
+    },
+    "status_code": 200,
+    "duration_ms": 257.9,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 286,
+    "timestamp": "2026-05-24T16:18:13.108718",
+    "endpoint": "/api/calendar/items",
+    "method": "GET",
+    "input": null,
+    "output": {
+      "items": []
+    },
+    "status_code": 200,
+    "duration_ms": 7.3,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 287,
+    "timestamp": "2026-05-24T16:18:13.408228",
+    "endpoint": "/api/calendar/items",
+    "method": "GET",
+    "input": null,
+    "output": {
+      "items": []
+    },
+    "status_code": 200,
+    "duration_ms": 307.3,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 288,
+    "timestamp": "2026-05-24T16:18:13.693258",
+    "endpoint": "/api/calendar/stats",
+    "method": "GET",
+    "input": null,
+    "output": {
+      "total": 0,
+      "draft": 0,
+      "review": 0,
+      "published": 0,
+      "upcoming": 0,
+      "overdue": 0
+    },
+    "status_code": 200,
+    "duration_ms": 4.6,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 289,
+    "timestamp": "2026-05-24T16:18:13.968301",
+    "endpoint": "/api/calendar/items",
+    "method": "GET",
+    "input": null,
+    "output": {
+      "items": []
+    },
+    "status_code": 200,
+    "duration_ms": 277.6,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 290,
+    "timestamp": "2026-05-24T16:18:14.252128",
+    "endpoint": "/api/calendar/stats",
+    "method": "GET",
+    "input": null,
+    "output": {
+      "total": 0,
+      "draft": 0,
+      "review": 0,
+      "published": 0,
+      "upcoming": 0,
+      "overdue": 0
+    },
+    "status_code": 200,
+    "duration_ms": 285.0,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 291,
+    "timestamp": "2026-05-24T16:20:13.996757",
+    "endpoint": "/api/audit-url",
+    "method": "POST",
+    "input": {
+      "url": "https://binhphuocmitsubishi.com"
+    },
+    "output": {
+      "detail": [
+        {
+          "type": "missing",
+          "loc": [
+            "body",
+            "primary_keyword"
+          ],
+          "msg": "Field required",
+          "input": {
+            "url": "https://binhphuocmitsubishi.com"
+          }
+        }
+      ]
+    },
+    "status_code": 422,
+    "duration_ms": 9.7,
+    "error": null,
+    "success": false
+  },
+  {
+    "id": 292,
+    "timestamp": "2026-05-24T16:20:44.368343",
+    "endpoint": "/api/audit-url",
+    "method": "POST",
+    "input": {
+      "url": "https://binhphuocmitsubishi.com",
+      "primary_keyword": "mitsubishi binh phuoc"
+    },
+    "output": {
+      "primary_keyword": "mitsubishi binh phuoc",
+      "keyword_analysis": {
+        "word_count": 16,
+        "primary_keyword": {
+          "keyword": "mitsubishi binh phuoc",
+          "exact_matches": 0,
+          "total_occurrences": 0,
+          "density": 0.0,
+          "target_density": 1.5,
+          "density_status": "too_low",
+          "positions": [],
+          "critical_placements": {
+            "in_first_100_words": false,
+            "in_conclusion": false,
+            "in_h1": false,
+            "in_h2_headings": "0/0",
+            "h2_keyword_ratio": 0
+          },
+          "section_distribution": [
+            {
+              "section_index": 0,
+              "section_type": "intro",
+              "header": "",
+              "keyword_count": 0,
+              "word_count": 16,
+              "density": 0.0
+            }
+          ]
+        },
+        "keyword_stuffing": {
+          "risk_level": "none",
+          "warnings": [],
+          "safe": true
+        },
+        "distribution_heatmap": [
+          {
+            "section": "Section 1",
+            "keyword_count": 0,
+            "heat_level": 0,
+            "density": 0.0
+          }
+        ],
+        "lsi_keywords": [
+          "mitsubishi bình",
+          "bình phước",
+          "xe mitsubishi",
+          "mitsubishi chính",
+          "chính hãng"
+        ],
+        "recommendations": [
+          "⚠️ Primary keyword density is too low (0.0%). Target is 1.5%. Add mitsubishi binh phuoc naturally in more paragraphs.",
+          "⚠️ Primary keyword missing from first 100 words - add it to the introduction",
+          "⚠️ Primary keyword missing from H1 headline - include it in the title",
+          "ℹ️ Primary keyword appears in only 0/0 H2 headings. Aim for 2-3 H2s with keyword variations.",
+          "ℹ️ Consider mentioning primary keyword in the conclusion for better optimization"
+        ]
+      },
+      "seo_quality": {
+        "overall_score": 58.2,
+        "grade": "F (Yếu)",
+        "publishing_ready": false,
+        "category_scores": {
+          "content": 65,
+          "keyword_optimization": 50,
+          "meta_elements": 35,
+          "structure": 55,
+          "links": 65,
+          "readability": 95
+        },
+        "critical_issues": [
+          "Nội dung quá ngắn (16 từ). Tối thiểu cần 2000 từ.",
+          "Từ khóa chính \"mitsubishi binh phuoc\" chưa xuất hiện trong H1",
+          "Từ khóa chính \"mitsubishi binh phuoc\" chưa xuất hiện trong 100 từ đầu tiên",
+          "Thiếu meta description",
+          "Thiếu tiêu đề H1"
+        ],
+        "warnings": [
+          "Keyword density quá thấp (0.0%). Nên đạt 1.0-2.0%",
+          "Meta title quá dài (78 ký tự). Nên đạt 50-60 ký tự.",
+          "Từ khóa chính \"mitsubishi binh phuoc\" chưa có trong meta title",
+          "Quá ít mục H2 (0). Nên bổ sung thêm (khuyến nghị: 6).",
+          "Internal links quá ít (hiện tại: 0). Nên bổ sung thêm 3 liên kết nội bộ (khuyến nghị: 5).",
+          "External links quá ít (hiện tại: 0). Nên bổ sung nguồn uy tín (khuyến nghị: 3)."
+        ],
+        "suggestions": [
+          "Đoạn văn quá ngắn (trung bình 16 từ). Nên bổ sung thêm chi tiết.",
+          "Chưa có danh sách (bullet/numbered list). Nên sử dụng để tăng khả năng quét nội dung."
+        ],
+        "details": {
+          "word_count": 16,
+          "h2_count": 0,
+          "has_h1": false,
+          "keyword_in_h1": false,
+          "keyword_in_first_100": false
+        }
+      },
+      "cro_analysis": {
+        "overall_cro_score": 13.4,
+        "cro_grade": "F (Yếu)",
+        "cro_checklist": {
+          "score": 18,
+          "grade": "F (Yếu)",
+          "passes_audit": false,
+          "summary": {
+            "total_checks": 28,
+            "passed": 5,
+            "failed": 23,
+            "critical_failures": 6,
+            "warnings": 9
+          },
+          "critical_failures": [
+            "headline: Có tiêu đề (Headline)",
+            "value_proposition: Có giá trị cốt lõi",
+            "social_proof: Có đánh giá khách hàng",
+            "ctas: Có CTA",
+            "ctas: CTA trên màn hình đầu",
+            "risk_reversal: Có dùng thử miễn phí"
+          ],
+          "warnings": [
+            "headline: Tiêu đề chứa lợi ích",
+            "headline: Tiêu đề không chung chung",
+            "social_proof: Hiển thị số khách hàng",
+            "ctas: Số lượng CTA phù hợp",
+            "objection_handling: Có mục FAQ hoặc Hỏi-Đáp",
+            "risk_reversal: Không cần thẻ tín dụng",
+            "risk_reversal: Cam kết giảm rủi ro gần CTA",
+            "structure: Đủ số mục nội dung",
+            "structure: Độ dài nội dung phù hợp"
+          ],
+          "category_scores": {
+            "headline": 0,
+            "value_proposition": 33,
+            "social_proof": 25,
+            "ctas": 40,
+            "objection_handling": 0,
+            "risk_reversal": 0,
+            "urgency": 50,
+            "structure": 0
+          },
+          "recommendations": [
+            {
+              "priority": "critical",
+              "category": "headline",
+              "check": "Có tiêu đề (Headline)",
+              "recommendation": "Thiếu tiêu đề H1"
+            },
+            {
+              "priority": "critical",
+              "category": "value_proposition",
+              "check": "Có giá trị cốt lõi",
+              "recommendation": "Chưa có giá trị cốt lõi rõ ràng"
+            },
+            {
+              "priority": "critical",
+              "category": "social_proof",
+              "check": "Có đánh giá khách hàng",
+              "recommendation": "Nên thêm đánh giá khách hàng"
+            },
+            {
+              "priority": "critical",
+              "category": "ctas",
+              "check": "Có CTA",
+              "recommendation": "Không tìm thấy CTA"
+            },
+            {
+              "priority": "critical",
+              "category": "ctas",
+              "check": "CTA trên màn hình đầu",
+              "recommendation": "Nên thêm CTA trên màn hình đầu"
+            },
+            {
+              "priority": "critical",
+              "category": "risk_reversal",
+              "check": "Có dùng thử miễn phí",
+              "recommendation": "Nên thêm ưu đãi dùng thử"
+            },
+            {
+              "priority": "important",
+              "category": "headline",
+              "check": "Tiêu đề chứa lợi ích",
+              "recommendation": "Chưa có lợi ích rõ ràng trong tiêu đề"
+            },
+            {
+              "priority": "important",
+              "category": "headline",
+              "check": "Tiêu đề không chung chung",
+              "recommendation": "Phát hiện mẫu tiêu đề chung chung"
+            },
+            {
+              "priority": "important",
+              "category": "social_proof",
+              "check": "Hiển thị số khách hàng",
+              "recommendation": "Nên thêm số lượng khách hàng"
+            },
+            {
+              "priority": "important",
+              "category": "ctas",
+              "check": "Số lượng CTA phù hợp",
+              "recommendation": "0 CTA (khuyến nghị: 3-6)"
+            }
+          ]
+        },
+        "cta_analysis": {
+          "total_ctas": 0,
+          "avg_quality_score": 0,
+          "distribution_score": 0,
+          "goal_alignment_score": 20,
+          "overall_effectiveness": 6.0,
+          "ctas_found": [],
+          "distribution": {
+            "first_cta_position": null,
+            "has_above_fold": false,
+            "has_closing": false,
+            "distribution_quality": "none"
+          },
+          "recommendations": [
+            {
+              "priority": "high",
+              "category": "distribution",
+              "issue": "No CTA above the fold",
+              "recommendation": "Add a prominent CTA in the first 20% of the page, ideally right after the headline."
+            },
+            {
+              "priority": "high",
+              "category": "distribution",
+              "issue": "No closing CTA",
+              "recommendation": "Add a strong CTA at the end of the page to capture visitors who read through."
+            },
+            {
+              "priority": "high",
+              "category": "goal_alignment",
+              "issue": "CTAs not aligned with trial goal",
+              "recommendation": "Use goal-specific CTA text. Examples: Start Your Free Trial, Try Free for 14 Days"
+            },
+            {
+              "priority": "medium",
+              "category": "distribution",
+              "issue": "Only 0 CTA(s) found",
+              "recommendation": "Add CTAs throughout the page. Aim for 3-5 CTAs distributed across sections."
+            }
+          ]
+        },
+        "above_fold_analysis": {
+          "overall_score": 7.0,
+          "grade": "F (Yếu)",
+          "passes_5_second_test": false,
+          "element_scores": {
+            "headline": 0,
+            "value_prop": 10,
+            "cta": 0,
+            "trust": 30
+          },
+          "headline_quality": "missing",
+          "headline_text": null,
+          "cta_above_fold": false,
+          "cta_text": null,
+          "trust_signal_above_fold": false,
+          "issues": [
+            {
+              "severity": "critical",
+              "element": "headline",
+              "issue": "Thiếu tiêu đề H1"
+            },
+            {
+              "severity": "critical",
+              "element": "cta",
+              "issue": "Không có CTA trên màn hình đầu"
+            },
+            {
+              "severity": "warning",
+              "element": "value_prop",
+              "issue": "Giá trị cốt lõi chưa rõ ràng"
+            },
+            {
+              "severity": "suggestion",
+              "element": "trust",
+              "issue": "Nên thêm tín hiệu uy tín trên màn hình đầu"
+            }
+          ],
+          "recommendations": [
+            "Thêm tiêu đề H1 tập trung vào lợi ích ngay lập tức.",
+            "Thêm nút CTA nổi bật trên màn hình đầu.",
+            "Làm rõ giá trị cốt lõi: nêu rõ khách nhận được gì và nhanh như thế nào.",
+            "Thêm tín hiệu uy tín: số khách hàng, đánh giá, hoặc nhận xét ngắn."
+          ]
+        },
+        "trust_signals": {
+          "overall_score": 0,
+          "grade": "F (Yếu)",
+          "summary": {
+            "testimonials_found": 0,
+            "has_social_proof": false,
+            "has_risk_reversal": false,
+            "authority_signals": 0,
+            "security_present": false
+          },
+          "strengths": [],
+          "weaknesses": [
+            "Chưa có đánh giá khách hàng",
+            "Chưa có bằng chứng xã hội",
+            "Chưa có cam kết giảm rủi ro"
+          ],
+          "testimonials": [],
+          "social_proof": {
+            "customer_counts": [],
+            "specific_results": []
+          },
+          "risk_reversals": {
+            "free_trial_found": false,
+            "no_credit_card_found": false,
+            "cancel_anytime_found": false,
+            "guarantee_found": false
+          },
+          "authority_signals": {
+            "media_mentions": false,
+            "awards": false,
+            "years_in_business": false
+          },
+          "recommendations": [
+            {
+              "priority": "high",
+              "category": "testimonials",
+              "issue": "Chưa có đánh giá khách hàng",
+              "recommendation": "Thêm 2-3 đánh giá khách hàng có tên và kết quả cụ thể."
+            },
+            {
+              "priority": "high",
+              "category": "social_proof",
+              "issue": "Chưa hiển thị số lượng khách hàng",
+              "recommendation": "Thêm số lượng khách hàng (ví dụ: \"50.000+ khách hàng tin tưởng\" hoặc \"Hàng nghìn khách hàng\")."
+            },
+            {
+              "priority": "high",
+              "category": "risk_reversal",
+              "issue": "Chưa có cam kết giảm rủi ro",
+              "recommendation": "Thêm cam kết giảm rủi ro gần CTA: thời gian dùng thử, không cần thẻ, hoặc bảo hành/hoàn tiền."
+            },
+            {
+              "priority": "medium",
+              "category": "social_proof",
+              "issue": "Chưa có kết quả cụ thể",
+              "recommendation": "Thêm kết quả cụ thể của khách hàng với số liệu (ví dụ: \"tăng lượng truy cập 300%\")."
+            },
+            {
+              "priority": "low",
+              "category": "authority",
+              "issue": "Chưa có tín hiệu uy tín",
+              "recommendation": "Nên thêm: số năm hoạt động, báo chí đưa tin, giải thưởng, hoặc đối tác."
+            }
+          ]
+        },
+        "sales_risk_alerts": [
+          {
+            "severity": "high",
+            "message": "Điểm CRO thấp — trang khó chuyển đổi khách truy cập."
+          },
+          {
+            "severity": "high",
+            "message": "Phát hiện 6 lỗi CRO nghiêm trọng."
+          },
+          {
+            "severity": "high",
+            "message": "Không tìm thấy CTA nào — khách không có hành động rõ ràng."
+          },
+          {
+            "severity": "medium",
+            "message": "CTA chưa phù hợp với mục tiêu chuyển đổi."
+          },
+          {
+            "severity": "high",
+            "message": "Chưa có bằng chứng xã hội — độ tin cậy thấp với khách mới."
+          },
+          {
+            "severity": "medium",
+            "message": "Chưa có cam kết giảm rủi ro (bảo hành/dùng thử/hoàn tiền) — khách có thể do dự."
+          },
+          {
+            "severity": "high",
+            "message": "Trang không đạt bài test 5 giây — khách có thể rời ngay."
+          },
+          {
+            "severity": "high",
+            "message": "Không có CTA hiển thị trên màn hình đầu."
+          }
+        ]
+      }
+    },
+    "status_code": 200,
+    "duration_ms": 722.7,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 293,
+    "timestamp": "2026-05-24T16:20:56.605426",
+    "endpoint": "/api/audit-url",
+    "method": "POST",
+    "input": {
+      "url": "https://binhphuocmitsubishi.com",
+      "primary_keyword": "mitsubishi binh phuoc"
+    },
+    "output": {
+      "primary_keyword": "mitsubishi binh phuoc",
+      "keyword_analysis": {
+        "word_count": 16,
+        "primary_keyword": {
+          "keyword": "mitsubishi binh phuoc",
+          "exact_matches": 0,
+          "total_occurrences": 0,
+          "density": 0.0,
+          "target_density": 1.5,
+          "density_status": "too_low",
+          "positions": [],
+          "critical_placements": {
+            "in_first_100_words": false,
+            "in_conclusion": false,
+            "in_h1": false,
+            "in_h2_headings": "0/0",
+            "h2_keyword_ratio": 0
+          },
+          "section_distribution": [
+            {
+              "section_index": 0,
+              "section_type": "intro",
+              "header": "",
+              "keyword_count": 0,
+              "word_count": 16,
+              "density": 0.0
+            }
+          ]
+        },
+        "keyword_stuffing": {
+          "risk_level": "none",
+          "warnings": [],
+          "safe": true
+        },
+        "distribution_heatmap": [
+          {
+            "section": "Section 1",
+            "keyword_count": 0,
+            "heat_level": 0,
+            "density": 0.0
+          }
+        ],
+        "lsi_keywords": [
+          "mitsubishi bình",
+          "bình phước",
+          "xe mitsubishi",
+          "mitsubishi chính",
+          "chính hãng"
+        ],
+        "recommendations": [
+          "⚠️ Primary keyword density is too low (0.0%). Target is 1.5%. Add mitsubishi binh phuoc naturally in more paragraphs.",
+          "⚠️ Primary keyword missing from first 100 words - add it to the introduction",
+          "⚠️ Primary keyword missing from H1 headline - include it in the title",
+          "ℹ️ Primary keyword appears in only 0/0 H2 headings. Aim for 2-3 H2s with keyword variations.",
+          "ℹ️ Consider mentioning primary keyword in the conclusion for better optimization"
+        ]
+      },
+      "seo_quality": {
+        "overall_score": 58.2,
+        "grade": "F (Yếu)",
+        "publishing_ready": false,
+        "category_scores": {
+          "content": 65,
+          "keyword_optimization": 50,
+          "meta_elements": 35,
+          "structure": 55,
+          "links": 65,
+          "readability": 95
+        },
+        "critical_issues": [
+          "Nội dung quá ngắn (16 từ). Tối thiểu cần 2000 từ.",
+          "Từ khóa chính \"mitsubishi binh phuoc\" chưa xuất hiện trong H1",
+          "Từ khóa chính \"mitsubishi binh phuoc\" chưa xuất hiện trong 100 từ đầu tiên",
+          "Thiếu meta description",
+          "Thiếu tiêu đề H1"
+        ],
+        "warnings": [
+          "Keyword density quá thấp (0.0%). Nên đạt 1.0-2.0%",
+          "Meta title quá dài (78 ký tự). Nên đạt 50-60 ký tự.",
+          "Từ khóa chính \"mitsubishi binh phuoc\" chưa có trong meta title",
+          "Quá ít mục H2 (0). Nên bổ sung thêm (khuyến nghị: 6).",
+          "Internal links quá ít (hiện tại: 0). Nên bổ sung thêm 3 liên kết nội bộ (khuyến nghị: 5).",
+          "External links quá ít (hiện tại: 0). Nên bổ sung nguồn uy tín (khuyến nghị: 3)."
+        ],
+        "suggestions": [
+          "Đoạn văn quá ngắn (trung bình 16 từ). Nên bổ sung thêm chi tiết.",
+          "Chưa có danh sách (bullet/numbered list). Nên sử dụng để tăng khả năng quét nội dung."
+        ],
+        "details": {
+          "word_count": 16,
+          "h2_count": 0,
+          "has_h1": false,
+          "keyword_in_h1": false,
+          "keyword_in_first_100": false
+        }
+      },
+      "cro_analysis": {
+        "overall_cro_score": 13.4,
+        "cro_grade": "F (Yếu)",
+        "cro_checklist": {
+          "score": 18,
+          "grade": "F (Yếu)",
+          "passes_audit": false,
+          "summary": {
+            "total_checks": 28,
+            "passed": 5,
+            "failed": 23,
+            "critical_failures": 6,
+            "warnings": 9
+          },
+          "critical_failures": [
+            "headline: Có tiêu đề (Headline)",
+            "value_proposition: Có giá trị cốt lõi",
+            "social_proof: Có đánh giá khách hàng",
+            "ctas: Có CTA",
+            "ctas: CTA trên màn hình đầu",
+            "risk_reversal: Có dùng thử miễn phí"
+          ],
+          "warnings": [
+            "headline: Tiêu đề chứa lợi ích",
+            "headline: Tiêu đề không chung chung",
+            "social_proof: Hiển thị số khách hàng",
+            "ctas: Số lượng CTA phù hợp",
+            "objection_handling: Có mục FAQ hoặc Hỏi-Đáp",
+            "risk_reversal: Không cần thẻ tín dụng",
+            "risk_reversal: Cam kết giảm rủi ro gần CTA",
+            "structure: Đủ số mục nội dung",
+            "structure: Độ dài nội dung phù hợp"
+          ],
+          "category_scores": {
+            "headline": 0,
+            "value_proposition": 33,
+            "social_proof": 25,
+            "ctas": 40,
+            "objection_handling": 0,
+            "risk_reversal": 0,
+            "urgency": 50,
+            "structure": 0
+          },
+          "recommendations": [
+            {
+              "priority": "critical",
+              "category": "headline",
+              "check": "Có tiêu đề (Headline)",
+              "recommendation": "Thiếu tiêu đề H1"
+            },
+            {
+              "priority": "critical",
+              "category": "value_proposition",
+              "check": "Có giá trị cốt lõi",
+              "recommendation": "Chưa có giá trị cốt lõi rõ ràng"
+            },
+            {
+              "priority": "critical",
+              "category": "social_proof",
+              "check": "Có đánh giá khách hàng",
+              "recommendation": "Nên thêm đánh giá khách hàng"
+            },
+            {
+              "priority": "critical",
+              "category": "ctas",
+              "check": "Có CTA",
+              "recommendation": "Không tìm thấy CTA"
+            },
+            {
+              "priority": "critical",
+              "category": "ctas",
+              "check": "CTA trên màn hình đầu",
+              "recommendation": "Nên thêm CTA trên màn hình đầu"
+            },
+            {
+              "priority": "critical",
+              "category": "risk_reversal",
+              "check": "Có dùng thử miễn phí",
+              "recommendation": "Nên thêm ưu đãi dùng thử"
+            },
+            {
+              "priority": "important",
+              "category": "headline",
+              "check": "Tiêu đề chứa lợi ích",
+              "recommendation": "Chưa có lợi ích rõ ràng trong tiêu đề"
+            },
+            {
+              "priority": "important",
+              "category": "headline",
+              "check": "Tiêu đề không chung chung",
+              "recommendation": "Phát hiện mẫu tiêu đề chung chung"
+            },
+            {
+              "priority": "important",
+              "category": "social_proof",
+              "check": "Hiển thị số khách hàng",
+              "recommendation": "Nên thêm số lượng khách hàng"
+            },
+            {
+              "priority": "important",
+              "category": "ctas",
+              "check": "Số lượng CTA phù hợp",
+              "recommendation": "0 CTA (khuyến nghị: 3-6)"
+            }
+          ]
+        },
+        "cta_analysis": {
+          "total_ctas": 0,
+          "avg_quality_score": 0,
+          "distribution_score": 0,
+          "goal_alignment_score": 20,
+          "overall_effectiveness": 6.0,
+          "ctas_found": [],
+          "distribution": {
+            "first_cta_position": null,
+            "has_above_fold": false,
+            "has_closing": false,
+            "distribution_quality": "none"
+          },
+          "recommendations": [
+            {
+              "priority": "high",
+              "category": "distribution",
+              "issue": "No CTA above the fold",
+              "recommendation": "Add a prominent CTA in the first 20% of the page, ideally right after the headline."
+            },
+            {
+              "priority": "high",
+              "category": "distribution",
+              "issue": "No closing CTA",
+              "recommendation": "Add a strong CTA at the end of the page to capture visitors who read through."
+            },
+            {
+              "priority": "high",
+              "category": "goal_alignment",
+              "issue": "CTAs not aligned with trial goal",
+              "recommendation": "Use goal-specific CTA text. Examples: Start Your Free Trial, Try Free for 14 Days"
+            },
+            {
+              "priority": "medium",
+              "category": "distribution",
+              "issue": "Only 0 CTA(s) found",
+              "recommendation": "Add CTAs throughout the page. Aim for 3-5 CTAs distributed across sections."
+            }
+          ]
+        },
+        "above_fold_analysis": {
+          "overall_score": 7.0,
+          "grade": "F (Yếu)",
+          "passes_5_second_test": false,
+          "element_scores": {
+            "headline": 0,
+            "value_prop": 10,
+            "cta": 0,
+            "trust": 30
+          },
+          "headline_quality": "missing",
+          "headline_text": null,
+          "cta_above_fold": false,
+          "cta_text": null,
+          "trust_signal_above_fold": false,
+          "issues": [
+            {
+              "severity": "critical",
+              "element": "headline",
+              "issue": "Thiếu tiêu đề H1"
+            },
+            {
+              "severity": "critical",
+              "element": "cta",
+              "issue": "Không có CTA trên màn hình đầu"
+            },
+            {
+              "severity": "warning",
+              "element": "value_prop",
+              "issue": "Giá trị cốt lõi chưa rõ ràng"
+            },
+            {
+              "severity": "suggestion",
+              "element": "trust",
+              "issue": "Nên thêm tín hiệu uy tín trên màn hình đầu"
+            }
+          ],
+          "recommendations": [
+            "Thêm tiêu đề H1 tập trung vào lợi ích ngay lập tức.",
+            "Thêm nút CTA nổi bật trên màn hình đầu.",
+            "Làm rõ giá trị cốt lõi: nêu rõ khách nhận được gì và nhanh như thế nào.",
+            "Thêm tín hiệu uy tín: số khách hàng, đánh giá, hoặc nhận xét ngắn."
+          ]
+        },
+        "trust_signals": {
+          "overall_score": 0,
+          "grade": "F (Yếu)",
+          "summary": {
+            "testimonials_found": 0,
+            "has_social_proof": false,
+            "has_risk_reversal": false,
+            "authority_signals": 0,
+            "security_present": false
+          },
+          "strengths": [],
+          "weaknesses": [
+            "Chưa có đánh giá khách hàng",
+            "Chưa có bằng chứng xã hội",
+            "Chưa có cam kết giảm rủi ro"
+          ],
+          "testimonials": [],
+          "social_proof": {
+            "customer_counts": [],
+            "specific_results": []
+          },
+          "risk_reversals": {
+            "free_trial_found": false,
+            "no_credit_card_found": false,
+            "cancel_anytime_found": false,
+            "guarantee_found": false
+          },
+          "authority_signals": {
+            "media_mentions": false,
+            "awards": false,
+            "years_in_business": false
+          },
+          "recommendations": [
+            {
+              "priority": "high",
+              "category": "testimonials",
+              "issue": "Chưa có đánh giá khách hàng",
+              "recommendation": "Thêm 2-3 đánh giá khách hàng có tên và kết quả cụ thể."
+            },
+            {
+              "priority": "high",
+              "category": "social_proof",
+              "issue": "Chưa hiển thị số lượng khách hàng",
+              "recommendation": "Thêm số lượng khách hàng (ví dụ: \"50.000+ khách hàng tin tưởng\" hoặc \"Hàng nghìn khách hàng\")."
+            },
+            {
+              "priority": "high",
+              "category": "risk_reversal",
+              "issue": "Chưa có cam kết giảm rủi ro",
+              "recommendation": "Thêm cam kết giảm rủi ro gần CTA: thời gian dùng thử, không cần thẻ, hoặc bảo hành/hoàn tiền."
+            },
+            {
+              "priority": "medium",
+              "category": "social_proof",
+              "issue": "Chưa có kết quả cụ thể",
+              "recommendation": "Thêm kết quả cụ thể của khách hàng với số liệu (ví dụ: \"tăng lượng truy cập 300%\")."
+            },
+            {
+              "priority": "low",
+              "category": "authority",
+              "issue": "Chưa có tín hiệu uy tín",
+              "recommendation": "Nên thêm: số năm hoạt động, báo chí đưa tin, giải thưởng, hoặc đối tác."
+            }
+          ]
+        },
+        "sales_risk_alerts": [
+          {
+            "severity": "high",
+            "message": "Điểm CRO thấp — trang khó chuyển đổi khách truy cập."
+          },
+          {
+            "severity": "high",
+            "message": "Phát hiện 6 lỗi CRO nghiêm trọng."
+          },
+          {
+            "severity": "high",
+            "message": "Không tìm thấy CTA nào — khách không có hành động rõ ràng."
+          },
+          {
+            "severity": "medium",
+            "message": "CTA chưa phù hợp với mục tiêu chuyển đổi."
+          },
+          {
+            "severity": "high",
+            "message": "Chưa có bằng chứng xã hội — độ tin cậy thấp với khách mới."
+          },
+          {
+            "severity": "medium",
+            "message": "Chưa có cam kết giảm rủi ro (bảo hành/dùng thử/hoàn tiền) — khách có thể do dự."
+          },
+          {
+            "severity": "high",
+            "message": "Trang không đạt bài test 5 giây — khách có thể rời ngay."
+          },
+          {
+            "severity": "high",
+            "message": "Không có CTA hiển thị trên màn hình đầu."
+          }
+        ]
+      }
+    },
+    "status_code": 200,
+    "duration_ms": 3562.0,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 294,
+    "timestamp": "2026-05-24T16:21:12.430330",
+    "endpoint": "/api/tech-seo/scan",
+    "method": "POST",
+    "input": {
+      "url": "https://binhphuocmitsubishi.com"
+    },
+    "output": {
+      "url": "https://binhphuocmitsubishi.com",
+      "final_url": "https://binhphuocmitsubishi.com",
+      "score": 83,
+      "max_score": 100,
+      "grade": "B",
+      "grade_label": "Tốt",
+      "load_time": 1.56,
+      "redirects": 0,
+      "breakdown": {
+        "meta_tags": {
+          "score": 20,
+          "max": 30,
+          "details": {
+            "score": 20,
+            "max": 30,
+            "title": "Mitsubishi Bình Phước ☎ 0327 066 523 | Đại Lý Xe Mitsubishi Chính Hãng Giá Tốt",
+            "description": "Đại lý Mitsubishi Bình Phước chính hãng ✅ Xforce, Xpander, Triton, Attrage giá tốt nhất ✅ Trả góp 80% ✅ Giảm 50-100% trước bạ ✅ Giao xe tận nơi. Hotline 0327 066 523",
+            "issues": [
+              {
+                "severity": "warning",
+                "message": "Title quá dài (78 ký tự)",
+                "fix": "Title nên dưới 60 ký tự",
+                "category": "Meta Tags"
+              }
+            ]
+          }
+        },
+        "headings": {
+          "score": 10,
+          "max": 15,
+          "details": {
+            "score": 10,
+            "max": 15,
+            "h1_count": 1,
+            "h2_count": 0,
+            "issues": [
+              {
+                "severity": "info",
+                "message": "Không có thẻ H2",
+                "fix": "Chia nội dung thành các section với H2",
+                "category": "Headings"
+              }
+            ]
+          }
+        },
+        "images": {
+          "score": 5,
+          "max": 15,
+          "details": {
+            "score": 5,
+            "max": 15,
+            "total": 0,
+            "issues": []
+          }
+        },
+        "mobile": {
+          "score": 15,
+          "max": 15,
+          "details": {
+            "score": 15,
+            "max": 15,
+            "has_viewport": true,
+            "issues": []
+          }
+        },
+        "links": {
+          "score": 10,
+          "max": 10,
+          "details": {
+            "score": 10,
+            "max": 10,
+            "total_internal": 10,
+            "total_external": 0,
+            "checked": 10,
+            "broken": [],
+            "issues": []
+          }
+        },
+        "sitemap_robots": {
+          "score": 10,
+          "max": 10,
+          "details": {
+            "score": 10,
+            "max": 10,
+            "has_robots": true,
+            "has_sitemap": true,
+            "robots_details": {
+              "disallow_rules": [
+                "/api/",
+                "/node_modules/"
+              ],
+              "allow_rules": [
+                "/",
+                "/"
+              ],
+              "sitemap_refs": [
+                "https://binhphuocmitsubishi.com/sitemap.xml"
+              ],
+              "crawl_delay": "1",
+              "total_lines": 13
+            },
+            "sitemap_details": {
+              "url_count": 14,
+              "sitemap_count": 0,
+              "is_index": false,
+              "has_lastmod": true,
+              "size_kb": 4.2
+            },
+            "issues": []
+          }
+        },
+        "performance": {
+          "score": 8,
+          "max": 10,
+          "details": {
+            "score": 8,
+            "max": 10,
+            "load_time": 1.56,
+            "page_size_kb": 17,
+            "compressed": true,
+            "issues": []
+          }
+        },
+        "security": {
+          "score": 5,
+          "max": 5,
+          "details": {
+            "score": 5,
+            "max": 5,
+            "https": true,
+            "issues": [
+              {
+                "severity": "info",
+                "message": "Thiếu một số security headers",
+                "fix": "Thêm X-Content-Type-Options, X-Frame-Options, HSTS",
+                "category": "Bảo mật"
+              }
+            ]
+          }
+        }
+      },
+      "issues": [
+        {
+          "severity": "warning",
+          "message": "Title quá dài (78 ký tự)",
+          "fix": "Title nên dưới 60 ký tự",
+          "category": "Meta Tags"
+        },
+        {
+          "severity": "info",
+          "message": "Không có thẻ H2",
+          "fix": "Chia nội dung thành các section với H2",
+          "category": "Headings"
+        },
+        {
+          "severity": "info",
+          "message": "Thiếu một số security headers",
+          "fix": "Thêm X-Content-Type-Options, X-Frame-Options, HSTS",
+          "category": "Bảo mật"
+        }
+      ],
+      "total_issues": 3,
+      "critical_count": 0,
+      "warning_count": 1
+    },
+    "status_code": 200,
+    "duration_ms": 2760.2,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 295,
+    "timestamp": "2026-05-24T16:21:24.802073",
+    "endpoint": "/api/tech-seo/scan",
+    "method": "POST",
+    "input": {
+      "url": "https://binhphuocmitsubishi.com"
+    },
+    "output": {
+      "url": "https://binhphuocmitsubishi.com",
+      "final_url": "https://binhphuocmitsubishi.com",
+      "score": 80,
+      "max_score": 100,
+      "grade": "B",
+      "grade_label": "Tốt",
+      "load_time": 3.56,
+      "redirects": 0,
+      "breakdown": {
+        "meta_tags": {
+          "score": 20,
+          "max": 30,
+          "details": {
+            "score": 20,
+            "max": 30,
+            "title": "Mitsubishi Bình Phước ☎ 0327 066 523 | Đại Lý Xe Mitsubishi Chính Hãng Giá Tốt",
+            "description": "Đại lý Mitsubishi Bình Phước chính hãng ✅ Xforce, Xpander, Triton, Attrage giá tốt nhất ✅ Trả góp 80% ✅ Giảm 50-100% trước bạ ✅ Giao xe tận nơi. Hotline 0327 066 523",
+            "issues": [
+              {
+                "severity": "warning",
+                "message": "Title quá dài (78 ký tự)",
+                "fix": "Title nên dưới 60 ký tự",
+                "category": "Meta Tags"
+              }
+            ]
+          }
+        },
+        "headings": {
+          "score": 10,
+          "max": 15,
+          "details": {
+            "score": 10,
+            "max": 15,
+            "h1_count": 1,
+            "h2_count": 0,
+            "issues": [
+              {
+                "severity": "info",
+                "message": "Không có thẻ H2",
+                "fix": "Chia nội dung thành các section với H2",
+                "category": "Headings"
+              }
+            ]
+          }
+        },
+        "images": {
+          "score": 5,
+          "max": 15,
+          "details": {
+            "score": 5,
+            "max": 15,
+            "total": 0,
+            "issues": []
+          }
+        },
+        "mobile": {
+          "score": 15,
+          "max": 15,
+          "details": {
+            "score": 15,
+            "max": 15,
+            "has_viewport": true,
+            "issues": []
+          }
+        },
+        "links": {
+          "score": 10,
+          "max": 10,
+          "details": {
+            "score": 10,
+            "max": 10,
+            "total_internal": 10,
+            "total_external": 0,
+            "checked": 10,
+            "broken": [],
+            "issues": []
+          }
+        },
+        "sitemap_robots": {
+          "score": 10,
+          "max": 10,
+          "details": {
+            "score": 10,
+            "max": 10,
+            "has_robots": true,
+            "has_sitemap": true,
+            "robots_details": {
+              "disallow_rules": [
+                "/api/",
+                "/node_modules/"
+              ],
+              "allow_rules": [
+                "/",
+                "/"
+              ],
+              "sitemap_refs": [
+                "https://binhphuocmitsubishi.com/sitemap.xml"
+              ],
+              "crawl_delay": "1",
+              "total_lines": 13
+            },
+            "sitemap_details": {
+              "url_count": 14,
+              "sitemap_count": 0,
+              "is_index": false,
+              "has_lastmod": true,
+              "size_kb": 4.2
+            },
+            "issues": []
+          }
+        },
+        "performance": {
+          "score": 5,
+          "max": 10,
+          "details": {
+            "score": 5,
+            "max": 10,
+            "load_time": 3.56,
+            "page_size_kb": 17,
+            "compressed": true,
+            "issues": [
+              {
+                "severity": "critical",
+                "message": "Trang tải rất chậm (3.56s)",
+                "fix": "Cần tối ưu performance: nén, cache, CDN",
+                "category": "Performance"
+              }
+            ]
+          }
+        },
+        "security": {
+          "score": 5,
+          "max": 5,
+          "details": {
+            "score": 5,
+            "max": 5,
+            "https": true,
+            "issues": [
+              {
+                "severity": "info",
+                "message": "Thiếu một số security headers",
+                "fix": "Thêm X-Content-Type-Options, X-Frame-Options, HSTS",
+                "category": "Bảo mật"
+              }
+            ]
+          }
+        }
+      },
+      "issues": [
+        {
+          "severity": "critical",
+          "message": "Trang tải rất chậm (3.56s)",
+          "fix": "Cần tối ưu performance: nén, cache, CDN",
+          "category": "Performance"
+        },
+        {
+          "severity": "warning",
+          "message": "Title quá dài (78 ký tự)",
+          "fix": "Title nên dưới 60 ký tự",
+          "category": "Meta Tags"
+        },
+        {
+          "severity": "info",
+          "message": "Không có thẻ H2",
+          "fix": "Chia nội dung thành các section với H2",
+          "category": "Headings"
+        },
+        {
+          "severity": "info",
+          "message": "Thiếu một số security headers",
+          "fix": "Thêm X-Content-Type-Options, X-Frame-Options, HSTS",
+          "category": "Bảo mật"
+        }
+      ],
+      "total_issues": 4,
+      "critical_count": 1,
+      "warning_count": 1
+    },
+    "status_code": 200,
+    "duration_ms": 4812.7,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 296,
+    "timestamp": "2026-05-24T16:21:45.029966",
+    "endpoint": "/api/seo-tools/broken-links",
+    "method": "POST",
+    "input": {
+      "url": "https://binhphuocmitsubishi.com"
+    },
+    "output": {
+      "url": "https://binhphuocmitsubishi.com/",
+      "duration_seconds": 5.38,
+      "summary": {
+        "total_links_found": 19,
+        "total_checked": 19,
+        "broken_count": 2,
+        "redirected_count": 0,
+        "ok_count": 17,
+        "internal_broken": 0,
+        "external_broken": 2
+      },
+      "broken_links": [
+        {
+          "url": "https://fonts.googleapis.com",
+          "source_tag": "link",
+          "anchor_text": "preconnect",
+          "type": "external",
+          "status": 404
+        },
+        {
+          "url": "https://fonts.gstatic.com",
+          "source_tag": "link",
+          "anchor_text": "preconnect",
+          "type": "external",
+          "status": 404
+        }
+      ],
+      "redirected_links": [],
+      "health_score": {
+        "score": 89,
+        "grade": "B",
+        "label": "Tốt"
+      },
+      "recommendations": [
+        "2 link ngoài bị hỏng. Xóa hoặc thay bằng link hoạt động."
+      ]
+    },
+    "status_code": 200,
+    "duration_ms": 5386.6,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 297,
+    "timestamp": "2026-05-24T16:21:45.893495",
+    "endpoint": "/api/seo-tools/validate-schema",
+    "method": "POST",
+    "input": {
+      "url": "https://binhphuocmitsubishi.com"
+    },
+    "output": {
+      "url": "https://binhphuocmitsubishi.com/",
+      "schemas_found": 4,
+      "valid": true,
+      "blocks": [
+        {
+          "index": 1,
+          "type": "AutoDealer",
+          "valid": true,
+          "errors": [],
+          "warnings": [
+            "Block #1: @type 'AutoDealer' không phổ biến. Kiểm tra xem Google có hỗ trợ rich results cho type này không."
+          ],
+          "properties": [
+            "@context",
+            "@type",
+            "@id",
+            "name",
+            "alternateName",
+            "description",
+            "url",
+            "telephone",
+            "email",
+            "logo"
+          ]
+        },
+        {
+          "index": 2,
+          "type": "WebSite",
+          "valid": true,
+          "errors": [],
+          "warnings": [
+            "Block #2 (WebSite): Nên thêm thuộc tính 'potentialAction' để rich results đầy đủ hơn."
+          ],
+          "properties": [
+            "@context",
+            "@type",
+            "name",
+            "url",
+            "description",
+            "inLanguage",
+            "publisher"
+          ]
+        },
+        {
+          "index": 3,
+          "type": "FAQPage",
+          "valid": true,
+          "errors": [],
+          "warnings": [],
+          "properties": [
+            "@context",
+            "@type",
+            "mainEntity"
+          ]
+        },
+        {
+          "index": 4,
+          "type": "BreadcrumbList",
+          "valid": true,
+          "errors": [],
+          "warnings": [],
+          "properties": [
+            "@context",
+            "@type",
+            "itemListElement"
+          ]
+        }
+      ],
+      "errors": [],
+      "warnings": [
+        "Block #1: @type 'AutoDealer' không phổ biến. Kiểm tra xem Google có hỗ trợ rich results cho type này không.",
+        "Block #2 (WebSite): Nên thêm thuộc tính 'potentialAction' để rich results đầy đủ hơn."
+      ],
+      "types_found": [
+        "FAQPage",
+        "WebSite",
+        "BreadcrumbList",
+        "AutoDealer"
+      ],
+      "summary": "4 JSON-LD block(s) — 0 lỗi, 2 cảnh báo"
+    },
+    "status_code": 200,
+    "duration_ms": 561.0,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 298,
+    "timestamp": "2026-05-24T16:21:47.414876",
+    "endpoint": "/api/seo-tools/validate-sitemap",
+    "method": "POST",
+    "input": {
+      "url": "https://binhphuocmitsubishi.com/sitemap.xml"
+    },
+    "output": {
+      "url": "https://binhphuocmitsubishi.com/sitemap.xml",
+      "valid": true,
+      "is_index": false,
+      "url_count": 14,
+      "size_kb": 4.3,
+      "has_lastmod": true,
+      "errors": [],
+      "warnings": [],
+      "sample_urls": [
+        {
+          "url": "https://binhphuocmitsubishi.com/",
+          "status": 200
+        },
+        {
+          "url": "https://binhphuocmitsubishi.com/san-pham",
+          "status": 200
+        },
+        {
+          "url": "https://binhphuocmitsubishi.com/bang-gia",
+          "status": 200
+        },
+        {
+          "url": "https://binhphuocmitsubishi.com/tra-gop",
+          "status": 200
+        },
+        {
+          "url": "https://binhphuocmitsubishi.com/lien-he",
+          "status": 200
+        },
+        {
+          "url": "https://binhphuocmitsubishi.com/san-pham/destinator",
+          "status": 200
+        },
+        {
+          "url": "https://binhphuocmitsubishi.com/san-pham/xforce",
+          "status": 200
+        },
+        {
+          "url": "https://binhphuocmitsubishi.com/san-pham/xpander",
+          "status": 200
+        },
+        {
+          "url": "https://binhphuocmitsubishi.com/san-pham/xpander-cross",
+          "status": 200
+        },
+        {
+          "url": "https://binhphuocmitsubishi.com/san-pham/triton",
+          "status": 200
+        }
+      ],
+      "summary": "Sitemap — 14 URLs, 0 lỗi, 0 cảnh báo"
+    },
+    "status_code": 200,
+    "duration_ms": 1212.5,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 299,
+    "timestamp": "2026-05-24T16:22:04.415192",
+    "endpoint": "/api/ai-keywords",
+    "method": "POST",
+    "input": {
+      "keyword": "mitsubishi xpander",
+      "site_url": "https://binhphuocmitsubishi.com"
+    },
+    "output": {
+      "analyzed_at": "2026-05-24T16:22:04.377087",
+      "site_url": "",
+      "gsc_keywords": [],
+      "total_clicks": 0,
+      "total_impressions": 0,
+      "ai_analysis": "",
+      "recommended_keywords": [],
+      "keyword_clusters": [],
+      "content_strategy": [],
+      "top_performing": [],
+      "quick_wins": [],
+      "summary": "Cần kết nối Google Search Console để lấy dữ liệu từ khóa thật trước khi phân tích.",
+      "data_source": "no_data",
+      "ai_provider": "none",
+      "error": "Chưa có dữ liệu GSC. Cấu hình Google Search Console để phân tích từ khóa thật."
+    },
+    "status_code": 200,
+    "duration_ms": 1.1,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 300,
+    "timestamp": "2026-05-24T16:22:05.394022",
+    "endpoint": "/api/seo-tools/core-web-vitals",
+    "method": "POST",
+    "input": {
+      "url": "https://binhphuocmitsubishi.com"
+    },
+    "output": {
+      "error": "Vượt giới hạn API PageSpeed Insights. Thử lại sau hoặc thêm API key.",
+      "status": "rate_limited"
+    },
+    "status_code": 200,
+    "duration_ms": 633.5,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 301,
+    "timestamp": "2026-05-24T16:22:13.831338",
+    "endpoint": "/api/ai-keywords",
+    "method": "POST",
+    "input": {
+      "keyword": "mitsubishi xpander",
+      "site_url": "https://binhphuocmitsubishi.com"
+    },
+    "output": {
+      "analyzed_at": "2026-05-24T16:22:13.792270",
+      "site_url": "",
+      "gsc_keywords": [],
+      "total_clicks": 0,
+      "total_impressions": 0,
+      "ai_analysis": "",
+      "recommended_keywords": [],
+      "keyword_clusters": [],
+      "content_strategy": [],
+      "top_performing": [],
+      "quick_wins": [],
+      "summary": "Cần kết nối Google Search Console để lấy dữ liệu từ khóa thật trước khi phân tích.",
+      "data_source": "no_data",
+      "ai_provider": "none",
+      "error": "Chưa có dữ liệu GSC. Cấu hình Google Search Console để phân tích từ khóa thật."
+    },
+    "status_code": 200,
+    "duration_ms": 1.1,
+    "error": null,
+    "success": true
+  },
+  {
+    "id": 302,
+    "timestamp": "2026-05-24T16:22:22.094159",
+    "endpoint": "/api/seo-tools/core-web-vitals",
+    "method": "POST",
+    "input": {
+      "url": "https://binhphuocmitsubishi.com"
+    },
+    "output": {
+      "error": "Vượt giới hạn API PageSpeed Insights. Thử lại sau hoặc thêm API key.",
+      "status": "rate_limited"
+    },
+    "status_code": 200,
+    "duration_ms": 647.5,
+    "error": null,
+    "success": true
   }
 ]

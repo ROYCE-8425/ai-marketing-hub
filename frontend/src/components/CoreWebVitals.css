@@ -1,0 +1,320 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   Core Web Vitals — Dark Glassmorphism Styles
+   ═══════════════════════════════════════════════════════════════════════ */
+
+:root {
+  --cwv-good: #15803d;
+  --cwv-warning: #eab308;
+  --cwv-poor: #ef4444;
+}
+
+/* ── Container ────────────────────────────────────────────────────────── */
+.cwv-container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  animation: cwv-fade-up 0.5s ease both;
+}
+
+@keyframes cwv-fade-up {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Overall Status Banner ────────────────────────────────────────────── */
+.cwv-status-banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+  border-radius: var(--radius);
+  border: 1px solid;
+  backdrop-filter: blur(12px);
+  font-size: 15px;
+  font-weight: 600;
+}
+.cwv-status-banner.status-good {
+  background: rgba(34, 197, 94, 0.08);
+  border-color: rgba(34, 197, 94, 0.25);
+  color: var(--cwv-good);
+}
+.cwv-status-banner.status-warning {
+  background: rgba(234, 179, 8, 0.08);
+  border-color: rgba(234, 179, 8, 0.25);
+  color: var(--cwv-warning);
+}
+.cwv-status-banner.status-poor {
+  background: rgba(239, 68, 68, 0.08);
+  border-color: rgba(239, 68, 68, 0.25);
+  color: var(--cwv-poor);
+}
+.cwv-status-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  animation: cwv-pulse 2s ease-in-out infinite;
+}
+@keyframes cwv-pulse {
+  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 currentColor; }
+  50%      { opacity: 0.7; box-shadow: 0 0 0 6px transparent; }
+}
+
+/* ── Strategy Toggle ─────────────────────────────────────────────────── */
+.cwv-strategy-toggle {
+  display: flex;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 99px;
+  padding: 3px;
+  gap: 2px;
+}
+.cwv-strategy-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  border: none;
+  color: var(--text-dim);
+  font-family: "DM Sans", sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 7px 16px;
+  border-radius: 99px;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+.cwv-strategy-btn:hover { color: var(--text-h); background: var(--surface2); }
+.cwv-strategy-btn.active {
+  background: linear-gradient(135deg, #16a34a, #15803d) !important;
+  color: #fff !important;
+  box-shadow: 0 2px 8px rgba(22,163,74,0.4);
+}
+
+/* ── Metrics Grid (3-col for LCP/INP/CLS) ────────────────────────────── */
+.cwv-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+@media (max-width: 768px) {
+  .cwv-metrics-grid { grid-template-columns: 1fr; }
+}
+
+/* ── Metric Card ─────────────────────────────────────────────────────── */
+.cwv-metric-card {
+  background: linear-gradient(145deg, rgba(255,255,255,0.9), rgba(240,244,240,0.7));
+  border: 1px solid rgba(22,163,74,0.1);
+  border-radius: var(--radius);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+  transition: border-color 0.3s, transform 0.2s;
+  animation: cwv-fade-up 0.5s ease both;
+}
+.cwv-metric-card:nth-child(2) { animation-delay: 0.1s; }
+.cwv-metric-card:nth-child(3) { animation-delay: 0.2s; }
+.cwv-metric-card:hover {
+  border-color: rgba(22,163,74,0.3);
+  transform: translateY(-2px);
+}
+
+.cwv-metric-name {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+/* ── SVG Gauge ───────────────────────────────────────────────────────── */
+.cwv-gauge {
+  position: relative;
+  width: 130px;
+  height: 130px;
+}
+.cwv-gauge svg {
+  width: 100%;
+  height: 100%;
+}
+.cwv-gauge-track {
+  fill: none;
+  stroke: rgba(0,0,0,0.06);
+  stroke-width: 8;
+}
+.cwv-gauge-fill {
+  fill: none;
+  stroke-width: 8;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 1.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.cwv-gauge-value {
+  font-size: 22px;
+  font-weight: 700;
+  font-family: "DM Mono", monospace;
+  fill: var(--text-h);
+}
+.cwv-gauge-unit {
+  font-size: 11px;
+  font-weight: 500;
+  fill: var(--text-dim);
+}
+
+/* ── Metric Status Label ─────────────────────────────────────────────── */
+.cwv-metric-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: 99px;
+  border: 1px solid;
+}
+.cwv-metric-status.good {
+  background: rgba(34,197,94,0.1);
+  color: var(--cwv-good);
+  border-color: rgba(34,197,94,0.3);
+}
+.cwv-metric-status.warning {
+  background: rgba(234,179,8,0.1);
+  color: var(--cwv-warning);
+  border-color: rgba(234,179,8,0.3);
+}
+.cwv-metric-status.poor {
+  background: rgba(239,68,68,0.1);
+  color: var(--cwv-poor);
+  border-color: rgba(239,68,68,0.3);
+}
+.cwv-metric-status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+/* ── Lighthouse Scores Grid (4-col) ──────────────────────────────────── */
+.cwv-scores-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+@media (max-width: 768px) {
+  .cwv-scores-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 480px) {
+  .cwv-scores-grid { grid-template-columns: 1fr; }
+}
+
+.cwv-score-card {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 18px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  transition: border-color 0.2s, transform 0.15s;
+  animation: cwv-fade-up 0.5s ease both;
+}
+.cwv-score-card:nth-child(1) { animation-delay: 0.05s; }
+.cwv-score-card:nth-child(2) { animation-delay: 0.1s; }
+.cwv-score-card:nth-child(3) { animation-delay: 0.15s; }
+.cwv-score-card:nth-child(4) { animation-delay: 0.2s; }
+.cwv-score-card:hover {
+  border-color: rgba(22,163,74,0.3);
+  transform: translateY(-1px);
+}
+.cwv-score-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  text-align: center;
+}
+.cwv-score-value {
+  font-size: 28px;
+  font-weight: 700;
+  font-family: "DM Mono", monospace;
+}
+
+/* ── Opportunities Table ─────────────────────────────────────────────── */
+.cwv-opportunities {
+  background: linear-gradient(145deg, rgba(255,255,255,0.85), rgba(240,244,240,0.6));
+  border: 1px solid rgba(22,163,74,0.1);
+  border-radius: var(--radius);
+  padding: 24px;
+  overflow-x: auto;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+}
+.cwv-opportunities h3 {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 8px;
+  margin-bottom: 16px;
+}
+.cwv-opps-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.cwv-opps-table th {
+  text-align: left;
+  padding: 10px 12px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+.cwv-opps-table td {
+  padding: 10px 12px;
+  color: var(--text);
+  border-bottom: 1px solid rgba(22,163,74,0.5);
+  vertical-align: top;
+}
+.cwv-opps-table tr:hover td {
+  background: rgba(22,163,74,0.04);
+}
+.cwv-opps-table .opps-name {
+  color: var(--text-h);
+  font-weight: 600;
+}
+.cwv-opps-table .opps-desc {
+  font-size: 12px;
+  color: var(--text-dim);
+  max-width: 320px;
+}
+.cwv-opps-table .opps-savings {
+  font-family: "DM Mono", monospace;
+  font-weight: 600;
+  color: var(--cwv-good);
+  white-space: nowrap;
+}
+.cwv-opps-table .opps-score {
+  font-family: "DM Mono", monospace;
+  font-weight: 600;
+}
+
+/* ── Section Title ───────────────────────────────────────────────────── */
+.cwv-section-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 8px;
+}

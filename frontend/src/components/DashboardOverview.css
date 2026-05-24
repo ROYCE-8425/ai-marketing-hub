@@ -11,12 +11,12 @@
   align-items: center;
   gap: 0.6rem;
   padding: 0.65rem 1rem;
-  background: linear-gradient(135deg, rgba(16,185,129,0.08), rgba(6,182,212,0.06));
+  background: linear-gradient(135deg, rgba(16,185,129,0.08), rgba(5,150,105,0.06));
   border: 1px solid rgba(16,185,129,0.2);
   border-radius: 0.65rem;
   margin-bottom: 1.25rem;
   font-size: 0.8rem;
-  color: #6ee7b7;
+  color: #059669;
   animation: fadeSlideIn 0.5s ease-out;
 }
 
@@ -48,8 +48,8 @@
 .dash-card {
   position: relative;
   padding: 1.25rem;
-  background: rgba(255,255,255,0.03);
-  border: 1px solid rgba(255,255,255,0.06);
+  background: rgba(22,163,74,0.04);
+  border: 1px solid rgba(0,0,0,0.06);
   border-radius: 0.85rem;
   transition: all 0.3s;
   overflow: hidden;
@@ -60,14 +60,14 @@
   position: absolute;
   top: 0; left: 0;
   width: 100%; height: 3px;
-  background: var(--card-accent, linear-gradient(90deg, #8b5cf6, #6366f1));
+  background: var(--card-accent, linear-gradient(90deg, #16a34a, #059669));
   border-radius: 0.85rem 0.85rem 0 0;
 }
 
 .dash-card:hover {
-  background: rgba(255,255,255,0.05);
+  background: rgba(22,163,74,0.06);
   transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.05);
 }
 
 .dash-card-icon {
@@ -78,20 +78,20 @@
   align-items: center;
   justify-content: center;
   margin-bottom: 0.75rem;
-  background: rgba(139,92,246,0.12);
-  color: #c4b5fd;
+  background: rgba(22,163,74,0.12);
+  color: #15803d;
 }
 
 .dash-card-value {
   font-size: 1.8rem;
   font-weight: 700;
-  color: #f1f5f9;
+  color: #111827;
   line-height: 1.1;
 }
 
 .dash-card-label {
   font-size: 0.78rem;
-  color: rgba(255,255,255,0.45);
+  color: var(--text-dim);
   margin-top: 0.25rem;
   text-transform: uppercase;
   letter-spacing: 0.04em;
@@ -107,7 +107,7 @@
   padding: 0.15rem 0.45rem;
   border-radius: 999px;
   background: rgba(16,185,129,0.12);
-  color: #6ee7b7;
+  color: #059669;
 }
 
 /* ── Charts ─────────────────────────────────────────────────────────────────── */
@@ -126,8 +126,8 @@
 }
 
 .chart-card {
-  background: rgba(255,255,255,0.02);
-  border: 1px solid rgba(255,255,255,0.06);
+  background: rgba(0,0,0,0.02);
+  border: 1px solid rgba(0,0,0,0.06);
   border-radius: 0.85rem;
   padding: 1rem 1rem 0.5rem;
   transition: all 0.3s;
@@ -139,8 +139,8 @@
 .chart-card:nth-child(4) { animation-delay: 0.3s; }
 
 .chart-card:hover {
-  background: rgba(255,255,255,0.035);
-  border-color: rgba(139,92,246,0.15);
+  background: rgba(0,0,0,0.03);
+  border-color: rgba(22,163,74,0.15);
 }
 
 .chart-card-sm {
@@ -150,7 +150,7 @@
 .chart-title {
   font-size: 0.82rem;
   font-weight: 600;
-  color: #cbd5e1;
+  color: #374151;
   margin: 0 0 0.75rem;
   display: flex;
   align-items: center;
@@ -164,19 +164,19 @@
   align-items: center;
   justify-content: center;
   height: 200px;
-  color: rgba(255,255,255,0.25);
+  color: var(--text-dim);
   font-size: 0.82rem;
 }
 
 /* ── Chart Tooltip ─────────────────────────────────────────────────────────── */
 
 .chart-tooltip {
-  background: rgba(15,23,42,0.95);
-  border: 1px solid rgba(139,92,246,0.3);
+  background: #ffffff;
+  border: 1px solid rgba(22,163,74,0.3);
   border-radius: 0.5rem;
   padding: 0.5rem 0.75rem;
   font-size: 0.75rem;
-  color: #e2e8f0;
+  color: #1f2937;
   box-shadow: 0 4px 20px rgba(0,0,0,0.5);
   backdrop-filter: blur(10px);
 }
@@ -184,13 +184,13 @@
 .chart-tooltip-label {
   font-weight: 600;
   margin-bottom: 0.25rem;
-  color: #f1f5f9;
+  color: #111827;
 }
 
 /* ── Recharts overrides ────────────────────────────────────────────────────── */
 
 .recharts-cartesian-axis-tick-value {
-  fill: rgba(255,255,255,0.4) !important;
+  fill: var(--text-dim) !important;
   font-size: 0.7rem !important;
 }
 
@@ -200,7 +200,7 @@
 }
 
 .recharts-polar-angle-axis-tick-value {
-  fill: rgba(255,255,255,0.5) !important;
+  fill: var(--text-dim) !important;
 }
 
 /* ── History section ───────────────────────────────────────────────────────── */
@@ -212,7 +212,7 @@
 .dash-history-title {
   font-size: 1rem;
   font-weight: 600;
-  color: #e2e8f0;
+  color: #1f2937;
   margin-bottom: 0.75rem;
   display: flex;
   align-items: center;
@@ -230,16 +230,16 @@
   align-items: center;
   gap: 0.75rem;
   padding: 0.65rem 0.85rem;
-  background: rgba(255,255,255,0.02);
+  background: rgba(0,0,0,0.02);
   border-radius: 0.6rem;
-  border: 1px solid rgba(255,255,255,0.04);
+  border: 1px solid rgba(0,0,0,0.03);
   transition: all 0.2s;
   cursor: pointer;
 }
 
 .dash-history-item:hover {
-  background: rgba(139,92,246,0.06);
-  border-color: rgba(139,92,246,0.15);
+  background: rgba(22,163,74,0.06);
+  border-color: rgba(22,163,74,0.15);
 }
 
 .history-type-badge {
@@ -252,14 +252,14 @@
   flex-shrink: 0;
 }
 
-.history-type-badge.type-seo { background: rgba(59,130,246,0.12); color: #93c5fd; }
-.history-type-badge.type-serp { background: rgba(139,92,246,0.12); color: #c4b5fd; }
-.history-type-badge.type-competitor { background: rgba(245,158,11,0.12); color: #fcd34d; }
-.history-type-badge.type-content { background: rgba(16,185,129,0.12); color: #6ee7b7; }
+.history-type-badge.type-seo { background: rgba(59,130,246,0.12); color: #3b82f6; }
+.history-type-badge.type-serp { background: rgba(22,163,74,0.12); color: #15803d; }
+.history-type-badge.type-competitor { background: rgba(245,158,11,0.12); color: #d97706; }
+.history-type-badge.type-content { background: rgba(16,185,129,0.12); color: #059669; }
 
 .history-keyword {
   font-size: 0.85rem;
-  color: #e2e8f0;
+  color: #1f2937;
   font-weight: 500;
   flex: 1;
   white-space: nowrap;
@@ -269,7 +269,7 @@
 
 .history-time {
   font-size: 0.72rem;
-  color: rgba(255,255,255,0.3);
+  color: var(--text-dim);
   flex-shrink: 0;
 }
 
@@ -297,31 +297,31 @@
   padding: 0.55rem 0.9rem;
   font-size: 0.8rem;
   font-weight: 500;
-  color: rgba(255,255,255,0.65);
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.08);
+  color: var(--text);
+  background: rgba(0,0,0,0.03);
+  border: 1px solid rgba(0,0,0,0.06);
   border-radius: 0.6rem;
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .dash-action-btn:hover {
-  background: rgba(139,92,246,0.1);
-  border-color: rgba(139,92,246,0.25);
-  color: #c4b5fd;
+  background: rgba(22,163,74,0.1);
+  border-color: rgba(22,163,74,0.25);
+  color: #15803d;
 }
 
 .dash-action-primary {
-  background: linear-gradient(135deg, rgba(139,92,246,0.2), rgba(99,102,241,0.15));
-  border-color: rgba(139,92,246,0.35);
-  color: #c4b5fd;
+  background: linear-gradient(135deg, rgba(22,163,74,0.2), rgba(99,102,241,0.15));
+  border-color: rgba(22,163,74,0.35);
+  color: #15803d;
   font-weight: 600;
 }
 
 .dash-action-primary:hover {
-  background: linear-gradient(135deg, rgba(139,92,246,0.3), rgba(99,102,241,0.25));
-  border-color: rgba(139,92,246,0.5);
-  color: #e0d5ff;
+  background: linear-gradient(135deg, rgba(22,163,74,0.3), rgba(99,102,241,0.25));
+  border-color: rgba(22,163,74,0.5);
+  color: #15803d;
   transform: translateY(-1px);
 }
 
@@ -334,9 +334,9 @@
   padding: 0.4rem 0.75rem;
   font-size: 0.75rem;
   font-weight: 500;
-  color: rgba(255,255,255,0.55);
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.08);
+  color: var(--text-dim);
+  background: rgba(0,0,0,0.03);
+  border: 1px solid rgba(0,0,0,0.06);
   border-radius: 0.45rem;
   cursor: pointer;
   transition: all 0.2s;
@@ -345,7 +345,7 @@
 .export-btn:hover {
   background: rgba(239,68,68,0.1);
   border-color: rgba(239,68,68,0.25);
-  color: #fca5a5;
+  color: #dc2626;
 }
 
 /* ── Empty state ───────────────────────────────────────────────────────────── */
@@ -353,12 +353,12 @@
 .dash-empty {
   text-align: center;
   padding: 3rem 1rem;
-  color: rgba(255,255,255,0.35);
+  color: var(--text-dim);
 }
 
 .dash-empty-icon { font-size: 2.5rem; margin-bottom: 0.75rem; }
 .dash-empty-text { font-size: 0.9rem; margin-bottom: 0.5rem; }
-.dash-empty-sub { font-size: 0.78rem; color: rgba(255,255,255,0.25); }
+.dash-empty-sub { font-size: 0.78rem; color: var(--text-dim); }
 
 /* ── Live Banners ──────────────────────────────────────────────────────────── */
 
@@ -386,15 +386,15 @@
 .top-pages-table thead th {
   text-align: left;
   padding: 0.45rem 0.6rem;
-  color: rgba(255,255,255,0.45);
+  color: var(--text-dim);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.03em;
   font-size: 0.68rem;
-  border-bottom: 1px solid rgba(255,255,255,0.06);
+  border-bottom: 1px solid rgba(0,0,0,0.06);
   position: sticky;
   top: 0;
-  background: rgba(15,23,42,0.95);
+  background: #ffffff;
 }
 
 .top-pages-table tbody tr {
@@ -402,17 +402,17 @@
 }
 
 .top-pages-table tbody tr:hover {
-  background: rgba(139,92,246,0.06);
+  background: rgba(22,163,74,0.06);
 }
 
 .top-pages-table tbody td {
   padding: 0.4rem 0.6rem;
-  color: #e2e8f0;
-  border-bottom: 1px solid rgba(255,255,255,0.03);
+  color: #1f2937;
+  border-bottom: 1px solid rgba(22,163,74,0.04);
 }
 
 .top-pages-table .rank {
-  color: rgba(255,255,255,0.35);
+  color: var(--text-dim);
   font-weight: 600;
   width: 30px;
 }
@@ -422,7 +422,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  color: #c4b5fd;
+  color: #15803d;
 }
 
 /* ── Connect Button (OAuth) ────────────────────────────────────────────────── */
@@ -437,8 +437,8 @@
   font-size: 0.72rem;
   font-weight: 600;
   color: #fff;
-  background: linear-gradient(135deg, #6366f1, #8b5cf6);
-  border: 1px solid rgba(139,92,246,0.5);
+  background: linear-gradient(135deg, #059669, #16a34a);
+  border: 1px solid rgba(22,163,74,0.5);
   border-radius: 999px;
   cursor: pointer;
   transition: all 0.25s;
@@ -446,10 +446,10 @@
 }
 
 .dash-connect-btn:hover {
-  background: linear-gradient(135deg, #7c3aed, #a855f7);
+  background: linear-gradient(135deg, #16a34a, #059669);
   border-color: rgba(168,85,247,0.6);
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(139,92,246,0.3);
+  box-shadow: 0 4px 12px rgba(22,163,74,0.3);
 }
 
 .dash-connect-btn:disabled {

@@ -70,8 +70,8 @@ function CompetitorRadar({ data }: { data: CompetitorGapResponse }) {
                 key={m.key}
                 name={m.label}
                 dataKey={m.key}
-                stroke="#8b5cf6"
-                fill="#8b5cf6"
+                stroke="#16a34a"
+                fill="#16a34a"
                 fillOpacity={0.15}
                 strokeWidth={2}
               />
@@ -123,8 +123,8 @@ function CompetitorBars({ data }: { data: CompetitorGapResponse }) {
               }}
             />
             <Legend wrapperStyle={{ color: "var(--text)", fontSize: 12 }} />
-            <Bar dataKey="Word Count" fill="#8b5cf6" radius={[4, 4, 0, 0]} />
-            <Bar dataKey="Structures" fill="#22d3ee" radius={[4, 4, 0, 0]} />
+            <Bar dataKey="Word Count" fill="#16a34a" radius={[4, 4, 0, 0]} />
+            <Bar dataKey="Structures" fill="#10b981" radius={[4, 4, 0, 0]} />
             <Bar dataKey="Gaps Found" fill="#ef4444" radius={[4, 4, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>

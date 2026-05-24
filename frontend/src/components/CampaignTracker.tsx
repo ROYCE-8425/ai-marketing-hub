@@ -4,8 +4,8 @@ import "./CampaignTracker.css";
 // ─── Intent badge colors ───────────────────────────────────────────────────────
 
 const INTENT_COLOR: Record<string, string> = {
-  informational: "#8b5cf6",
-  navigational: "#22d3ee",
+  informational: "#16a34a",
+  navigational: "#10b981",
   transactional: "#10b981",
   commercial_investigation: "#f59e0b",
 };
@@ -185,7 +185,7 @@ const PRIORITY_COLOR: Record<string, string> = {
   CRITICAL: "#ef4444",
   HIGH: "#f97316",
   MEDIUM: "#f59e0b",
-  LOW: "#22d3ee",
+  LOW: "#10b981",
   SKIP: "#4a5578",
 };
 
@@ -304,7 +304,7 @@ export function CampaignTrackerPanel({ data }: { data: OpportunitiesResponse }) 
           <InsightList
             title="Content Intent Recommendations"
             items={intent_analysis.recommendations.slice(0, 4)}
-            color="#8b5cf6"
+            color="#16a34a"
           />
         )}
       </div>
@@ -322,7 +322,7 @@ export function CampaignTrackerPanel({ data }: { data: OpportunitiesResponse }) 
             {insight_adjustments.map((adj, i) => (
               <li key={i} className="insight-item">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
-                  stroke="#22d3ee" strokeWidth="2.5" aria-hidden="true">
+                  stroke="#10b981" strokeWidth="2.5" aria-hidden="true">
                   <circle cx="12" cy="12" r="10" />
                   <line x1="12" y1="8" x2="12" y2="12" />
                   <line x1="12" y1="16" x2="12.01" y2="16" />

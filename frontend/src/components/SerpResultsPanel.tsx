@@ -203,13 +203,13 @@ function DeepAnalyzePanel({
 
           {data.recommendation.recommended_optimal != null && (
             <div className="deep-stats-row" style={{ marginTop: "0.5rem" }}>
-              <div className="deep-stat-card" style={{ borderColor: "rgba(139,92,246,0.3)", borderWidth: "1px", borderStyle: "solid" }}>
+              <div className="deep-stat-card" style={{ borderColor: "rgba(22,163,74,0.3)", borderWidth: "1px", borderStyle: "solid" }}>
                 <div className="deep-stat-label">Đề xuất tối thiểu</div>
                 <div className="deep-stat-value">{data.recommendation.recommended_min?.toLocaleString()}</div>
               </div>
               <div className="deep-stat-card" style={{ borderColor: "rgba(16,185,129,0.4)", borderWidth: "1px", borderStyle: "solid" }}>
                 <div className="deep-stat-label">✨ Mục tiêu tối ưu</div>
-                <div className="deep-stat-value" style={{ color: "#6ee7b7" }}>
+                <div className="deep-stat-value" style={{ color: "#059669" }}>
                   {data.recommendation.recommended_optimal?.toLocaleString()}
                 </div>
               </div>
@@ -307,7 +307,7 @@ export function SerpResultsPanel({ data }: { data: SerpLiveResponse }) {
           background: "rgba(245,158,11,0.08)",
           border: "1px solid rgba(245,158,11,0.2)",
           borderRadius: "0.6rem",
-          color: "#fcd34d",
+          color: "#d97706",
           fontSize: "0.82rem",
         }}>
           {data.note || data.error}
@@ -321,7 +321,7 @@ export function SerpResultsPanel({ data }: { data: SerpLiveResponse }) {
       {data.organic_results.length > 0 ? (
         <RankingTable results={data.organic_results} />
       ) : (
-        <p style={{ color: "rgba(255,255,255,0.4)", textAlign: "center", padding: "2rem" }}>
+        <p style={{ color: "#9ca3af", textAlign: "center", padding: "2rem" }}>
           Không tìm thấy kết quả. Vui lòng thử lại.
         </p>
       )}

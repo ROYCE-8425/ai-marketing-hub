@@ -33,7 +33,7 @@ interface TopicSuggestion {
 const STATUS_META: Record<string, { label: string; color: string; bg: string }> = {
   draft: { label: "Nháp", color: "#94a3b8", bg: "rgba(148,163,184,0.12)" },
   review: { label: "Đang duyệt", color: "#f59e0b", bg: "rgba(245,158,11,0.12)" },
-  published: { label: "Đã đăng", color: "#22c55e", bg: "rgba(34,197,94,0.12)" },
+  published: { label: "Đã đăng", color: "#15803d", bg: "rgba(34,197,94,0.12)" },
 };
 
 const PRIORITY_META: Record<string, { label: string; color: string }> = {
@@ -73,7 +73,7 @@ export function ContentCalendar() {
     } catch { /* ignore */ }
   };
 
-  useEffect(() => { fetchItems(); fetchStats(); }, [fetchItems]);
+  useEffect(() => { void fetchItems(); void fetchStats(); }, [fetchItems]); // eslint-disable-line
 
   const handleAdd = async () => {
     if (!form.title.trim()) return;
@@ -136,9 +136,9 @@ export function ContentCalendar() {
           <div className="spin-stat"><span className="spin-stat-label">Tổng</span><span className="spin-stat-value">{stats.total}</span></div>
           <div className="spin-stat"><span className="spin-stat-label">Nháp</span><span className="spin-stat-value" style={{ color: "#94a3b8" }}>{stats.draft}</span></div>
           <div className="spin-stat"><span className="spin-stat-label">Đang duyệt</span><span className="spin-stat-value" style={{ color: "#f59e0b" }}>{stats.review}</span></div>
-          <div className="spin-stat"><span className="spin-stat-label">Đã đăng</span><span className="spin-stat-value" style={{ color: "#22c55e" }}>{stats.published}</span></div>
+          <div className="spin-stat"><span className="spin-stat-label">Đã đăng</span><span className="spin-stat-value" style={{ color: "#15803d" }}>{stats.published}</span></div>
           {stats.overdue > 0 && <div className="spin-stat"><span className="spin-stat-label">Quá hạn</span><span className="spin-stat-value" style={{ color: "#ef4444" }}>{stats.overdue}</span></div>}
-          {stats.upcoming > 0 && <div className="spin-stat"><span className="spin-stat-label">Sắp tới</span><span className="spin-stat-value" style={{ color: "#8b5cf6" }}>{stats.upcoming}</span></div>}
+          {stats.upcoming > 0 && <div className="spin-stat"><span className="spin-stat-label">Sắp tới</span><span className="spin-stat-value" style={{ color: "#16a34a" }}>{stats.upcoming}</span></div>}
         </div>
       )}
 

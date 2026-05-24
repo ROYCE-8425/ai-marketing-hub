@@ -4,6 +4,7 @@ API Router — Phase 10-13 (Upgraded): Rank Tracker, Spin Editor, GEO Optimizer
 
 from fastapi import APIRouter, Body
 from fastapi.responses import PlainTextResponse, Response
+from pydantic import BaseModel, Field
 from typing import List, Optional
 import os
 
@@ -251,3 +252,186 @@ async def validate_schema_api(
     from core.geo_analyzer import validate_schema_on_page
     return await validate_schema_on_page(url)
 
+
+# ─── Phase 5: Advanced Schema.org Generators ────────────────────────────
+
+
+class OrganizationSchemaRequest(BaseModel):
+    name: str
+    url: str = ""
+    logo_url: str = ""
+    description: str = ""
+    founder_name: str = ""
+    email: str = ""
+    phone: str = ""
+    street: str = ""
+    city: str = ""
+    region: str = ""
+    country: str = "VN"
+    postal_code: str = ""
+    social_profiles: Optional[List[str]] = None
+
+
+class WebSiteSchemaRequest(BaseModel):
+    name: str
+    url: str = ""
+    description: str = ""
+    search_url_template: str = ""
+
+
+class JobPostingSchemaRequest(BaseModel):
+    title: str
+    description: str = ""
+    company_name: str = ""
+    company_url: str = ""
+    city: str = ""
+    region: str = ""
+    country: str = "VN"
+    salary_min: float = 0
+    salary_max: float = 0
+    salary_currency: str = "VND"
+    employment_type: str = "FULL_TIME"
+    date_posted: str = ""
+    valid_through: str = ""
+    remote: bool = False
+
+
+class EventSchemaRequest(BaseModel):
+    name: str
+    description: str = ""
+    start_date: str = ""
+    end_date: str = ""
+    location_name: str = ""
+    location_address: str = ""
+    url: str = ""
+    image_url: str = ""
+    performer_name: str = ""
+    offers_price: float = 0
+    offers_currency: str = "VND"
+    offers_url: str = ""
+
+
+class HowToStep(BaseModel):
+    name: str = ""
+    text: str = ""
+    image_url: str = ""
+
+
+class HowToSchemaRequest(BaseModel):
+    name: str
+    description: str = ""
+    total_time: str = ""
+    steps: Optional[List[HowToStep]] = None
+    tools: Optional[List[str]] = None
+    supplies: Optional[List[str]] = None
+
+
+class VideoSchemaRequest(BaseModel):
+    name: str
+    description: str = ""
+    thumbnail_url: str = ""
+    upload_date: str = ""
+    duration: str = ""
+    content_url: str = ""
+    embed_url: str = ""
+
+
+class ReviewSchemaRequest(BaseModel):
+    item_name: str
+    item_type: str = "Product"
+    author_name: str = ""
+    rating_value: float = 0
+    best_rating: float = 5
+    review_body: str = ""
+    date_published: str = ""
+
+
+@router.post("/api/geo/generate-organization-schema")
+async def generate_organization_schema_api(req: OrganizationSchemaRequest):
+    from core.geo_analyzer import generate_organization_schema
+    result = generate_organization_schema(
+        name=req.name, url=req.url, logo_url=req.logo_url,
+        description=req.description, founder_name=req.founder_name,
+        email=req.email, phone=req.phone,
+        street=req.street, city=req.city, region=req.region,
+        country=req.country, postal_code=req.postal_code,
+        social_profiles=req.social_profiles,
+    )
+    return result
+
+
+@router.post("/api/geo/generate-website-schema")
+async def generate_website_schema_api(req: WebSiteSchemaRequest):
+    from core.geo_analyzer import generate_website_schema
+    result = generate_website_schema(
+        name=req.name, url=req.url, description=req.description,
+        search_url_template=req.search_url_template,
+    )
+    return result
+
+
+@router.post("/api/geo/generate-jobposting-schema")
+async def generate_jobposting_schema_api(req: JobPostingSchemaRequest):
+    from core.geo_analyzer import generate_jobposting_schema
+    result = generate_jobposting_schema(
+        title=req.title, description=req.description,
+        company_name=req.company_name, company_url=req.company_url,
+        city=req.city, region=req.region, country=req.country,
+        salary_min=req.salary_min, salary_max=req.salary_max,
+        salary_currency=req.salary_currency,
+        employment_type=req.employment_type,
+        date_posted=req.date_posted, valid_through=req.valid_through,
+        remote=req.remote,
+    )
+    return result
+
+
+@router.post("/api/geo/generate-event-schema")
+async def generate_event_schema_api(req: EventSchemaRequest):
+    from core.geo_analyzer import generate_event_schema
+    result = generate_event_schema(
+        name=req.name, description=req.description,
+        start_date=req.start_date, end_date=req.end_date,
+        location_name=req.location_name, location_address=req.location_address,
+        url=req.url, image_url=req.image_url,
+        performer_name=req.performer_name,
+        offers_price=req.offers_price, offers_currency=req.offers_currency,
+        offers_url=req.offers_url,
+    )
+    return result
+
+
+@router.post("/api/geo/generate-howto-schema")
+async def generate_howto_schema_api(req: HowToSchemaRequest):
+    from core.geo_analyzer import generate_howto_schema
+    steps_dicts = [s.model_dump() for s in req.steps] if req.steps else None
+    result = generate_howto_schema(
+        name=req.name, description=req.description,
+        total_time=req.total_time, steps=steps_dicts,
+        tools=req.tools, supplies=req.supplies,
+    )
+    return result
+
+
+@router.post("/api/geo/generate-video-schema")
+async def generate_video_schema_api(req: VideoSchemaRequest):
+    from core.geo_analyzer import generate_video_schema
+    result = generate_video_schema(
+        name=req.name, description=req.description,
+        thumbnail_url=req.thumbnail_url, upload_date=req.upload_date,
+        duration=req.duration, content_url=req.content_url,
+        embed_url=req.embed_url,
+    )
+    return result
+
+
+@router.post("/api/geo/generate-review-schema")
+async def generate_review_schema_api(req: ReviewSchemaRequest):
+    from core.geo_analyzer import generate_review_schema
+    result = generate_review_schema(
+        item_name=req.item_name, item_type=req.item_type,
+        author_name=req.author_name, rating_value=req.rating_value,
+        best_rating=req.best_rating, review_body=req.review_body,
+        date_published=req.date_published,
+    )
+    return result

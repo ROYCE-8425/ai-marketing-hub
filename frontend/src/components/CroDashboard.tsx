@@ -43,7 +43,7 @@ function RiskAlertBadge({ alert }: { alert: SalesRiskAlert }) {
 
 function GlassCard({ children, title, accent }: { children: React.ReactNode; title: string; accent?: string }) {
   return (
-    <div className="glass-card" style={{ "--accent": accent ?? "#8b5cf6" } as React.CSSProperties}>
+    <div className="glass-card" style={{ "--accent": accent ?? "#16a34a" } as React.CSSProperties}>
       <h3 className="glass-card-title">{title}</h3>
       {children}
     </div>
@@ -76,7 +76,7 @@ function CtaCard({ cta }: { cta: CtaAnalysis }) {
     : "#ef4444";
 
   return (
-    <GlassCard title="Phân tích CTA (Call-to-Action)" accent="#22d3ee">
+    <GlassCard title="Phân tích CTA (Call-to-Action)" accent="#10b981">
       <div className="cta-grid">
         <div className="cta-stat">
           <span className="cta-stat-num" style={{ color: qualityColor }}>
@@ -152,7 +152,7 @@ function AboveFoldCard({ atf }: { atf: AboveFoldAnalysis }) {
   const passColor = atf.passes_5_second_test ? "#10b981" : "#ef4444";
 
   return (
-    <GlassCard title="Above the Fold (Màn hình đầu tiên)" accent="#a78bfa">
+    <GlassCard title="Above the Fold (Màn hình đầu tiên)" accent="#4ade80">
       <div className="atf-summary">
         <div
           className="atf-pass-badge"
@@ -212,7 +212,7 @@ function AboveFoldCard({ atf }: { atf: AboveFoldAnalysis }) {
       {atf.cta_text && (
         <div className="atf-cta-preview">
           <span className="atf-hl-label">CTA đầu tiên</span>
-          <p className="atf-hl-text" style={{ color: "#22d3ee" }}>
+          <p className="atf-hl-text" style={{ color: "#10b981" }}>
             "{atf.cta_text}"
           </p>
         </div>

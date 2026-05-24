@@ -59,6 +59,7 @@ export default function FileConverter() {
       const data: ConvertResult = await resp.json();
       if (!data.success) throw new Error(data.error || "Conversion failed");
       setResult(data);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- API response data
     } catch (err: any) {
       setError(err.message || "Lỗi chuyển đổi file");
     } finally {
@@ -81,6 +82,7 @@ export default function FileConverter() {
       const data: ConvertResult = await resp.json();
       if (!data.success) throw new Error(data.error || "Conversion failed");
       setResult(data);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- API response data
     } catch (err: any) {
       setError(err.message || "Lỗi chuyển đổi URL");
     } finally {
@@ -119,7 +121,7 @@ export default function FileConverter() {
       <h2 style={{ marginBottom: 6, display: "flex", alignItems: "center", gap: 10 }}>
         <span style={{ fontSize: 28 }}>📎</span> File Converter
         <span style={{
-          fontSize: 11, background: "linear-gradient(135deg, #8b5cf6, #06b6d4)",
+          fontSize: 11, background: "linear-gradient(135deg, #16a34a, #059669)",
           padding: "3px 10px", borderRadius: 12, fontWeight: 600, marginLeft: 8
         }}>MarkItDown</span>
       </h2>
@@ -133,14 +135,14 @@ export default function FileConverter() {
           className={`submit-btn ${mode === "file" ? "" : "secondary"}`}
           onClick={() => { setMode("file"); setResult(null); setError(""); }}
           style={mode !== "file" ? {
-            background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)"
+            background: "rgba(0,0,0,0.06)", border: "1px solid rgba(0,0,0,0.08)"
           } : {}}
         >📁 Upload File</button>
         <button
           className={`submit-btn ${mode === "url" ? "" : "secondary"}`}
           onClick={() => { setMode("url"); setResult(null); setError(""); }}
           style={mode !== "url" ? {
-            background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)"
+            background: "rgba(0,0,0,0.06)", border: "1px solid rgba(0,0,0,0.08)"
           } : {}}
         >🌐 Từ URL</button>
       </div>
@@ -154,14 +156,14 @@ export default function FileConverter() {
             onDrop={handleFileDrop}
             onClick={() => fileRef.current?.click()}
             style={{
-              border: `2px dashed ${dragOver ? "#8b5cf6" : "rgba(255,255,255,0.15)"}`,
+              border: `2px dashed ${dragOver ? "#16a34a" : "rgba(22,163,74,0.2)"}`,
               borderRadius: 16,
               padding: selectedFile ? "24px" : "48px 24px",
               textAlign: "center",
               cursor: "pointer",
               transition: "all 0.3s ease",
               background: dragOver
-                ? "rgba(139,92,246,0.08)"
+                ? "rgba(22,163,74,0.08)"
                 : "rgba(255,255,255,0.02)",
               marginBottom: 16,
             }}
@@ -224,8 +226,8 @@ export default function FileConverter() {
               placeholder="https://example.com/article"
               style={{
                 flex: 1, padding: "12px 16px", borderRadius: 10,
-                background: "rgba(255,255,255,0.05)",
-                border: "1px solid rgba(255,255,255,0.1)",
+                background: "rgba(0,0,0,0.06)",
+                border: "1px solid rgba(0,0,0,0.08)",
                 color: "var(--text-h)", fontSize: 14, outline: "none",
               }}
               onKeyDown={(e) => e.key === "Enter" && convertUrl()}
@@ -262,7 +264,7 @@ export default function FileConverter() {
           }}>
             <div style={{
               padding: "10px 16px", borderRadius: 10,
-              background: "rgba(139,92,246,0.1)", border: "1px solid rgba(139,92,246,0.2)",
+              background: "rgba(22,163,74,0.1)", border: "1px solid rgba(22,163,74,0.2)",
               fontSize: 13
             }}>
               📊 <strong>{result.word_count.toLocaleString()}</strong> từ
@@ -291,7 +293,7 @@ export default function FileConverter() {
               {copied ? "✅ Đã copy!" : "📋 Copy Markdown"}
             </button>
             <button className="submit-btn" onClick={downloadMarkdown}
-              style={{ fontSize: 13, padding: "8px 16px", background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)" }}
+              style={{ fontSize: 13, padding: "8px 16px", background: "rgba(22,163,74,0.08)", border: "1px solid rgba(22,163,74,0.2)" }}
             >
               💾 Download .md
             </button>
@@ -307,7 +309,7 @@ export default function FileConverter() {
             </div>
             <pre style={{
               background: "rgba(0,0,0,0.3)",
-              border: "1px solid rgba(255,255,255,0.08)",
+              border: "1px solid rgba(22,163,74,0.08)",
               borderRadius: 10, padding: 16,
               maxHeight: 500, overflow: "auto",
               fontSize: 12.5, lineHeight: 1.6,
@@ -332,7 +334,7 @@ export default function FileConverter() {
           display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))",
           gap: 8, marginTop: 12, padding: 16,
           background: "rgba(255,255,255,0.02)", borderRadius: 12,
-          border: "1px solid rgba(255,255,255,0.06)"
+          border: "1px solid rgba(0,0,0,0.05)"
         }}>
           {Object.entries(FORMAT_ICONS).map(([ext, icon]) => (
             <div key={ext} style={{

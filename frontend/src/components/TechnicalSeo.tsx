@@ -11,6 +11,7 @@ interface Issue {
 interface BreakdownItem {
   score: number;
   max: number;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- API response data
   details: any;
 }
 
@@ -29,12 +30,12 @@ interface ScanResult {
 }
 
 const SECTION_META: Record<string, { icon: string; label: string; color: string }> = {
-  meta_tags: { icon: "🏷️", label: "Meta Tags", color: "#8b5cf6" },
+  meta_tags: { icon: "🏷️", label: "Meta Tags", color: "#16a34a" },
   headings: { icon: "📑", label: "Headings", color: "#3b82f6" },
   images: { icon: "🖼️", label: "Hình ảnh", color: "#f59e0b" },
-  mobile: { icon: "📱", label: "Mobile", color: "#22c55e" },
+  mobile: { icon: "📱", label: "Mobile", color: "#15803d" },
   links: { icon: "🔗", label: "Links", color: "#ec4899" },
-  sitemap_robots: { icon: "🗺️", label: "Sitemap/Robots", color: "#06b6d4" },
+  sitemap_robots: { icon: "🗺️", label: "Sitemap/Robots", color: "#059669" },
   performance: { icon: "⚡", label: "Performance", color: "#eab308" },
   security: { icon: "🔒", label: "Bảo mật", color: "#10b981" },
 };
@@ -56,11 +57,12 @@ export function TechnicalSeo() {
       });
       const d = await r.json();
       if (d.error) setError(d.error); else setResult(d);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- API response data
     } catch (e: any) { setError(e.message); }
     setLoading(false);
   };
 
-  const gradeColor = (g: string) => ({ A: "#22c55e", B: "#3b82f6", C: "#f59e0b", D: "#ef4444", F: "#ef4444" }[g] || "#888");
+  const gradeColor = (g: string) => ({ A: "#15803d", B: "#3b82f6", C: "#f59e0b", D: "#ef4444", F: "#ef4444" }[g] || "#888");
   const sevIcon = (s: string) => ({ critical: "🔴", warning: "🟡", info: "🔵" }[s] || "⚪");
 
   return (
@@ -88,7 +90,7 @@ export function TechnicalSeo() {
           <div className="geo-score-hero">
             <div className="geo-score-ring">
               <svg viewBox="0 0 120 120" width="140" height="140">
-                <circle cx="60" cy="60" r="52" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="8" />
+                <circle cx="60" cy="60" r="52" fill="none" stroke="rgba(0,0,0,0.05)" strokeWidth="8" />
                 <circle cx="60" cy="60" r="52" fill="none" stroke={gradeColor(result.grade)}
                   strokeWidth="8" strokeLinecap="round"
                   strokeDasharray={`${(result.score / 100) * 327} 327`}
