@@ -4,9 +4,13 @@ import { BacklinkAnalyzer } from "./BacklinkAnalyzer";
 import { CoreWebVitals } from "./CoreWebVitals";
 import { BrokenLinkChecker } from "./BrokenLinkChecker";
 import { SchemaValidator } from "./SchemaValidator";
+import { CroDashboard } from "./CroDashboard";
+import { useSeoAudit } from "../hooks/useSeoAudit";
 
-// Note: CroDashboard requires `cro` prop from audit data.
-// In workspace mode, we show a placeholder until user runs SEO Audit on main page.
+// ═══════════════════════════════════════════════════════════════════════
+// SeoWorkspace — All tabs self-contained, including CRO
+// CRO tab now has inline audit form → fetches data → renders CroDashboard
+// ═══════════════════════════════════════════════════════════════════════
 
 type SeoTab = "techseo" | "cro" | "backlinks" | "cwv" | "brokenlinks" | "schema";
 
@@ -23,6 +27,70 @@ interface SeoWorkspaceProps {
   initialTab?: SeoTab;
 }
 
+// ── CRO Audit Panel — self-contained ──────────────────────────────────────────
+function CroAuditPanel() {
+  const [url, setUrl] = useState("");
+  const [keyword, setKeyword] = useState("");
+  const { data, loading, error, analyze } = useSeoAudit();
+
+  const handleAudit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (url.trim() && keyword.trim()) {
+      analyze({ url: url.trim(), primary_keyword: keyword.trim() });
+    }
+  };
+
+  return (
+    <div>
+      <form className="ws-form" onSubmit={handleAudit}>
+        <div className="ws-form-row">
+          <div className="ws-field ws-field-grow">
+            <label className="ws-label">URL trang cần phân tích</label>
+            <input
+              className="ws-input"
+              placeholder="https://example.com/landing-page"
+              value={url}
+              onChange={(e) => setUrl(e.target.value)}
+              required
+            />
+          </div>
+          <div className="ws-field ws-field-grow">
+            <label className="ws-label">Từ khóa chính</label>
+            <input
+              className="ws-input"
+              placeholder="VD: mua xe ô tô"
+              value={keyword}
+              onChange={(e) => setKeyword(e.target.value)}
+              required
+            />
+          </div>
+          <div className="ws-field ws-field-btn">
+            <button type="submit" className="ws-submit" disabled={loading || !url.trim() || !keyword.trim()}>
+              {loading ? <span className="btn-spinner" /> : "📊 Phân tích CRO"}
+            </button>
+          </div>
+        </div>
+      </form>
+      {error && <div className="ws-error">❌ {error}</div>}
+      {loading && (
+        <div className="ws-loading">
+          <span className="btn-spinner" style={{ width: 24, height: 24 }} />
+          <p>Đang phân tích CRO & tín hiệu uy tín... (15-30s)</p>
+        </div>
+      )}
+      {data && <CroDashboard cro={data.cro_analysis} />}
+      {!data && !loading && !error && (
+        <div className="ws-empty">
+          <span className="ws-empty-icon">📊</span>
+          <p>Phân tích CRO, CTA, Above-the-Fold và Trust Signals cho landing page.</p>
+          <p className="ws-empty-hint">Nhập URL và từ khóa chính để bắt đầu.</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Main Workspace ────────────────────────────────────────────────────────────
 export function SeoWorkspace({ initialTab }: SeoWorkspaceProps) {
   const [activeTab, setActiveTab] = useState<SeoTab>(initialTab || "techseo");
 
@@ -42,15 +110,7 @@ export function SeoWorkspace({ initialTab }: SeoWorkspaceProps) {
       </div>
       <div className="workspace-content">
         {activeTab === "techseo" && <TechnicalSeo />}
-        {activeTab === "cro" && (
-          <div className="workspace-placeholder">
-            <div>
-              <p style={{fontSize: "16px", fontWeight: 600, marginBottom: "8px"}}>📊 CRO & Uy tín</p>
-              <p>Chạy <strong>Kiểm tra SEO</strong> trước để xem phân tích CRO.</p>
-              <p style={{fontSize: "12px", color: "var(--text-muted)", marginTop: "4px"}}>CRO data được tạo tự động khi bạn audit một URL.</p>
-            </div>
-          </div>
-        )}
+        {activeTab === "cro" && <CroAuditPanel />}
         {activeTab === "backlinks" && <BacklinkAnalyzer />}
         {activeTab === "cwv" && <CoreWebVitals />}
         {activeTab === "brokenlinks" && <BrokenLinkChecker />}

@@ -144,13 +144,13 @@ const NAV_GROUPS: NavGroup[] = [
   ]},
   { group: "SEO", icon: "", items: [
     { id: "seo", label: "Kiểm tra SEO", icon: "seo" },
-    { id: "seoworkspace", label: "SEO Workspace", icon: "techseo" },
+    { id: "seoworkspace", label: "Trung tâm SEO", icon: "techseo" },
   ]},
   { group: "Từ khóa", icon: "", items: [
-    { id: "keywordhub", label: "Keyword Intelligence", icon: "aikeys" },
+    { id: "keywordhub", label: "Trung tâm Từ khóa", icon: "aikeys" },
   ]},
   { group: "Nội dung AI", icon: "", items: [
-    { id: "contentstudio", label: "Content Studio", icon: "planner" },
+    { id: "contentstudio", label: "Xưởng Nội dung AI", icon: "planner" },
   ]},
   { group: "Schema & GEO", icon: "", items: [
     { id: "schemageo", label: "Schema & GEO", icon: "geo" },
@@ -159,7 +159,7 @@ const NAV_GROUPS: NavGroup[] = [
     { id: "calendar", label: "Lịch nội dung", icon: "calendar" },
     { id: "abtest", label: "A/B Testing", icon: "abtest" },
     { id: "report", label: "Báo cáo AI", icon: "report" },
-    { id: "fileconvert", label: "File Converter", icon: "fileconvert" },
+    { id: "fileconvert", label: "Chuyển đổi file", icon: "fileconvert" },
   ]},
   { group: "Cài đặt", icon: "", items: [
     { id: "sites", label: "Quản lý site", icon: "sites" },
