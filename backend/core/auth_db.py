@@ -36,6 +36,31 @@ def create_user(email: str, full_name: str, password: str, role: str = "viewer")
         db.close()
 
 
+def create_google_user(email: str, full_name: str) -> dict:
+    """Create a new user from Google OAuth (no password needed).
+
+    Returns the created user dict or raises ValueError if email taken.
+    """
+    db = SessionLocal()
+    try:
+        existing = db.query(User).filter(User.email == email).first()
+        if existing:
+            raise ValueError("Email đã được đăng ký")
+
+        new_user = User(
+            email=email,
+            full_name=full_name,
+            hashed_password="GOOGLE_OAUTH",  # Marker: no password login
+            role="viewer",
+            is_active=True
+        )
+        db.add(new_user)
+        db.commit()
+        db.refresh(new_user)
+        return get_user_by_id(new_user.id)
+    finally:
+        db.close()
+
 def get_user_by_email(email: str) -> Optional[dict]:
     """Look up user by email."""
     db = SessionLocal()

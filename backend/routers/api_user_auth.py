@@ -20,6 +20,7 @@ from __future__ import annotations
 from datetime import datetime, timedelta, timezone
 
 from fastapi import APIRouter, Depends, HTTPException, status
+from pydantic import BaseModel
 
 from core.auth import (
     MessageResponse,
@@ -103,6 +104,62 @@ async def register(body: UserCreate):
         )
     except ValueError as e:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(e))
+
+    update_last_login(user["id"])
+
+    # Send welcome email in background (non-blocking)
+    import asyncio
+    async def _send():
+        from core.email_service import send_welcome_email
+        await asyncio.to_thread(send_welcome_email, user["email"], user["full_name"])
+    asyncio.create_task(_send())
+
+    return _generate_tokens(user)
+
+
+# ── POST /api/auth/google ───────────────────────────────────────────────────
+
+class GoogleAuthRequest(BaseModel):
+    credential: str
+
+@router.post("/google", response_model=TokenResponse)
+async def google_auth(body: GoogleAuthRequest):
+    """Authenticate or register user via Google OAuth.
+
+    Receives a Google ID token from the frontend GSI flow.
+    Verifies the token, then:
+      - If user exists → login
+      - If user doesn't exist → auto-register → login
+    """
+    from core.google_oauth import verify_google_token
+    from core.auth_db import create_google_user
+
+    google_data = await verify_google_token(body.credential)
+    if not google_data:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Token Google không hợp lệ hoặc đã hết hạn",
+        )
+
+    email = google_data["email"].lower()
+    name = google_data["name"]
+
+    # Check if user already exists
+    user = get_user_by_email(email)
+
+    if not user:
+        # Auto-register new Google user
+        try:
+            user = create_google_user(email=email, full_name=name)
+        except ValueError:
+            # Race condition: user was created between check and insert
+            user = get_user_by_email(email)
+
+    if not user or not user.get("is_active"):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Tài khoản đã bị vô hiệu hóa",
+        )
 
     update_last_login(user["id"])
     return _generate_tokens(user)
