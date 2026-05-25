@@ -13,6 +13,8 @@ services:
       - "8000:8000"
     env_file:
       - ./backend/.env
+    environment:
+      - GOOGLE_CLIENT_ID=45850011490-he8uqnuad0moqkvirjdg25f98gi3slu1.apps.googleusercontent.com
     volumes:
       - backend-data:/app/data
       - ./backend/.env:/app/.env:rw
@@ -47,6 +49,7 @@ services:
       context: ./frontend
       args:
         VITE_API_BASE_URL: /api
+        VITE_GOOGLE_CLIENT_ID: "45850011490-he8uqnuad0moqkvirjdg25f98gi3slu1.apps.googleusercontent.com"
     container_name: amh-frontend
     ports:
       - "80:80"
