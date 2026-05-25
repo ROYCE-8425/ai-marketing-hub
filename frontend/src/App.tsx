@@ -29,6 +29,7 @@ import AuthPage from "./components/AuthPage";
 import UserMenu from "./components/UserMenu";
 import UserManagement from "./components/UserManagement";
 import { isAuthenticated } from "./lib/auth";
+import { ViewerGuard } from "./components/ViewerGuard";
 import { addToHistory } from "./lib/history";
 import type { AuditResponse } from "./types/seo";
 import type { CompetitorGapResponse, PlanContentResponse } from "./types/content";
@@ -1468,35 +1469,35 @@ export default function App() {
         } />
 
         {/* ── NEW Workspace Routes ── */}
-        <Route path="/seo-workspace" element={<SeoWorkspace />} />
-        <Route path="/keyword-hub" element={<KeywordHub />} />
-        <Route path="/content-studio" element={<ContentStudio />} />
-        <Route path="/schema-geo" element={<SchemaGeo />} />
+        <Route path="/seo-workspace" element={<ViewerGuard><SeoWorkspace /></ViewerGuard>} />
+        <Route path="/keyword-hub" element={<ViewerGuard><KeywordHub /></ViewerGuard>} />
+        <Route path="/content-studio" element={<ViewerGuard><ContentStudio /></ViewerGuard>} />
+        <Route path="/schema-geo" element={<ViewerGuard><SchemaGeo /></ViewerGuard>} />
 
         {/* ── Legacy routes (backward compat) ── */}
-        <Route path="/rank-tracker" element={<KeywordHub initialTab="tracker" />} />
-        <Route path="/spin-editor" element={<ContentStudio initialTab="spin" />} />
-        <Route path="/geo-optimizer" element={<SchemaGeo initialTab="generate" />} />
-        <Route path="/technical-seo" element={<SeoWorkspace initialTab="techseo" />} />
-        <Route path="/backlinks" element={<SeoWorkspace initialTab="backlinks" />} />
-        <Route path="/core-web-vitals" element={<SeoWorkspace initialTab="cwv" />} />
-        <Route path="/broken-links" element={<SeoWorkspace initialTab="brokenlinks" />} />
-        <Route path="/schema-validator" element={<SchemaGeo initialTab="validate" />} />
-        <Route path="/keywords" element={<KeywordHub initialTab="research" />} />
-        <Route path="/competitor" element={<KeywordHub initialTab="competitor" />} />
-        <Route path="/serp" element={<KeywordHub initialTab="serp" />} />
-        <Route path="/campaign" element={<KeywordHub initialTab="campaign" />} />
+        <Route path="/rank-tracker" element={<ViewerGuard><KeywordHub initialTab="tracker" /></ViewerGuard>} />
+        <Route path="/spin-editor" element={<ViewerGuard><ContentStudio initialTab="spin" /></ViewerGuard>} />
+        <Route path="/geo-optimizer" element={<ViewerGuard><SchemaGeo initialTab="generate" /></ViewerGuard>} />
+        <Route path="/technical-seo" element={<ViewerGuard><SeoWorkspace initialTab="techseo" /></ViewerGuard>} />
+        <Route path="/backlinks" element={<ViewerGuard><SeoWorkspace initialTab="backlinks" /></ViewerGuard>} />
+        <Route path="/core-web-vitals" element={<ViewerGuard><SeoWorkspace initialTab="cwv" /></ViewerGuard>} />
+        <Route path="/broken-links" element={<ViewerGuard><SeoWorkspace initialTab="brokenlinks" /></ViewerGuard>} />
+        <Route path="/schema-validator" element={<ViewerGuard><SchemaGeo initialTab="validate" /></ViewerGuard>} />
+        <Route path="/keywords" element={<ViewerGuard><KeywordHub initialTab="research" /></ViewerGuard>} />
+        <Route path="/competitor" element={<ViewerGuard><KeywordHub initialTab="competitor" /></ViewerGuard>} />
+        <Route path="/serp" element={<ViewerGuard><KeywordHub initialTab="serp" /></ViewerGuard>} />
+        <Route path="/campaign" element={<ViewerGuard><KeywordHub initialTab="campaign" /></ViewerGuard>} />
 
         {/* ── Operations routes ── */}
-        <Route path="/report" element={<ReportGenerator />} />
-        <Route path="/content-calendar" element={<ContentCalendar />} />
-        <Route path="/sites" element={<SiteManager />} />
-        <Route path="/ab-testing" element={<AbTesting />} />
+        <Route path="/report" element={<ViewerGuard><ReportGenerator /></ViewerGuard>} />
+        <Route path="/content-calendar" element={<ViewerGuard><ContentCalendar /></ViewerGuard>} />
+        <Route path="/sites" element={<ViewerGuard><SiteManager /></ViewerGuard>} />
+        <Route path="/ab-testing" element={<ViewerGuard><AbTesting /></ViewerGuard>} />
         <Route path="/file-converter" element={<FileConverter />} />
-        <Route path="/google-setup" element={<GoogleSetup />} />
+        <Route path="/google-setup" element={<ViewerGuard><GoogleSetup /></ViewerGuard>} />
 
         {/* Catch-all */}
-        <Route path="*" element={<DashboardOverview onNavigate={(tab) => navigate(getPathFromTabId(tab))} />} />
+        <Route path="*" element={<ViewerGuard><DashboardOverview onNavigate={(tab) => navigate(getPathFromTabId(tab))} /></ViewerGuard>} />
 
         </Routes>
       </main>
