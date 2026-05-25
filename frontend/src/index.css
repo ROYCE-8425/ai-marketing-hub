@@ -3278,3 +3278,136 @@ body {
   .ws-form-row { flex-direction: column; }
   .ws-field-grow { min-width: 100%; }
 }
+
+/* ── AI Keywords — Stat Row & Insight Cards ────────────────────────────────── */
+
+.ws-stat-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+.ws-stat-card {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 0.85rem;
+  text-align: center;
+}
+.ws-stat-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-h);
+  line-height: 1.2;
+}
+.ws-stat-label {
+  font-size: 0.72rem;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-top: 0.2rem;
+}
+
+.ws-section-block {
+  margin-top: 1.25rem;
+}
+.ws-section-block h4 {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-h);
+  margin-bottom: 0.6rem;
+}
+
+.ws-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 0.6rem;
+}
+
+.ws-insight-card {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 0.75rem;
+  transition: border-color 0.2s;
+}
+.ws-insight-card:hover {
+  border-color: var(--primary);
+}
+.ws-insight-card strong {
+  display: block;
+  font-size: 0.82rem;
+  color: var(--text-h);
+  margin-bottom: 0.3rem;
+}
+.ws-insight-card p {
+  font-size: 0.75rem;
+  color: var(--text-dim);
+  margin-top: 0.3rem;
+  line-height: 1.4;
+}
+
+.ws-insight-win { border-left: 3px solid #10b981; }
+.ws-insight-rec { border-left: 3px solid #8b5cf6; }
+.ws-insight-cluster { border-left: 3px solid #06b6d4; }
+
+.ws-tag-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  margin-top: 0.3rem;
+}
+.ws-mini-tag {
+  display: inline-block;
+  padding: 2px 7px;
+  border-radius: 99px;
+  font-size: 0.65rem;
+  font-weight: 600;
+  background: rgba(139,92,246,0.1);
+  color: #8b5cf6;
+}
+.ws-mini-tag-pri {
+  background: rgba(6,182,212,0.1);
+  color: #06b6d4;
+}
+
+.ws-pos-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  background: rgba(245,158,11,0.12);
+  color: #d97706;
+  margin-left: 0.4rem;
+}
+
+.ws-ai-badge {
+  display: inline-block;
+  margin-top: 0.5rem;
+  padding: 2px 8px;
+  border-radius: 99px;
+  font-size: 0.65rem;
+  font-weight: 600;
+  background: rgba(139,92,246,0.12);
+  color: #a78bfa;
+}
+
+.ws-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.4rem 0.8rem;
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--text);
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.ws-back-btn:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}

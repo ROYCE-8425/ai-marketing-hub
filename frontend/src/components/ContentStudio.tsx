@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { SpinEditor } from "./SpinEditor";
 import { ContentPlannerPanel } from "./ContentPlanner";
+import { PublishModal } from "./PublishModal";
 import { API_BASE } from "../lib/apiConfig";
 import type { PlanContentResponse } from "../types/content";
 
@@ -28,6 +29,11 @@ function ContentPlannerWrapper() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [plan, setPlan] = useState<PlanContentResponse | null>(null);
+
+  // Publish modal state
+  const [publishTitle, setPublishTitle] = useState("");
+  const [publishContent, setPublishContent] = useState("");
+  const [showPublishModal, setShowPublishModal] = useState(false);
 
   const handlePlan = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -58,6 +64,12 @@ function ContentPlannerWrapper() {
     }
   };
 
+  const handlePublish = (articleTitle: string, articleContent: string) => {
+    setPublishTitle(articleTitle);
+    setPublishContent(articleContent);
+    setShowPublishModal(true);
+  };
+
   // If plan is loaded, show the full planner with write/polish/publish
   if (plan) {
     return (
@@ -70,7 +82,14 @@ function ContentPlannerWrapper() {
             ← Tạo kế hoạch mới
           </button>
         </div>
-        <ContentPlannerPanel plan={plan} />
+        <ContentPlannerPanel plan={plan} onPublish={handlePublish} />
+        {showPublishModal && (
+          <PublishModal
+            articleTitle={publishTitle}
+            articleContent={publishContent}
+            onClose={() => setShowPublishModal(false)}
+          />
+        )}
       </div>
     );
   }
