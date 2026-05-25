@@ -7,7 +7,7 @@ import "./ContentPlanner.css";
 // ─── Section type → icon/label/color ────────────────────────────────────────────
 
 const TYPE_CONFIG: Record<string, { label: string; color: string; icon: string }> = {
-  intro:          { label: "Introduction", color: "#16a34a", icon: "→" },
+  intro:          { label: "Introduction", color: "#8b5cf6", icon: "→" },
   body_how_to:    { label: "How-To",       color: "#10b981", icon: "⚙" },
   body_comparison:{ label: "Comparison",    color: "#10b981", icon: "⟷" },
   body_explanation:{ label: "Explanation", color: "#f59e0b", icon: "◈" },
@@ -374,7 +374,7 @@ export function ContentPlannerPanel({ plan, onPublish }: ContentPlannerPanelProp
               style={{
                 fontSize: "12px",
                 padding: "5px 12px",
-                background: "linear-gradient(135deg, #16a34a, #059669)",
+                background: "linear-gradient(135deg, #8b5cf6, #06b6d4)",
                 border: "none",
                 borderRadius: "99px",
                 color: "#fff",
@@ -392,8 +392,8 @@ export function ContentPlannerPanel({ plan, onPublish }: ContentPlannerPanelProp
                 style={{
                   fontSize: "12px",
                   padding: "5px 12px",
-                  background: "rgba(22,163,74,0.1)",
-                  border: "1px solid rgba(22,163,74,0.25)",
+                  background: "rgba(139,92,246,0.1)",
+                  border: "1px solid rgba(139,92,246,0.25)",
                   borderRadius: "99px",
                   color: "var(--primary)",
                   cursor: "pointer",

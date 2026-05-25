@@ -55,14 +55,14 @@ function ratingLabel(rating: string): string {
 
 /** Map rating to hex color */
 function ratingColor(rating: string): string {
-  if (rating === "good") return "#15803d";
+  if (rating === "good") return "#7c3aed";
   if (rating === "needs_improvement") return "#eab308";
   return "#ef4444";
 }
 
 /** Score (0-100) to color */
 function scoreColor(score: number): string {
-  if (score >= 90) return "#15803d";
+  if (score >= 90) return "#7c3aed";
   if (score >= 50) return "#eab308";
   return "#ef4444";
 }

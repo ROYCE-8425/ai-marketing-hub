@@ -30,12 +30,12 @@ interface ScanResult {
 }
 
 const SECTION_META: Record<string, { icon: string; label: string; color: string }> = {
-  meta_tags: { icon: "🏷️", label: "Meta Tags", color: "#16a34a" },
+  meta_tags: { icon: "🏷️", label: "Meta Tags", color: "#8b5cf6" },
   headings: { icon: "📑", label: "Headings", color: "#3b82f6" },
   images: { icon: "🖼️", label: "Hình ảnh", color: "#f59e0b" },
-  mobile: { icon: "📱", label: "Mobile", color: "#15803d" },
+  mobile: { icon: "📱", label: "Mobile", color: "#7c3aed" },
   links: { icon: "🔗", label: "Links", color: "#ec4899" },
-  sitemap_robots: { icon: "🗺️", label: "Sitemap/Robots", color: "#059669" },
+  sitemap_robots: { icon: "🗺️", label: "Sitemap/Robots", color: "#06b6d4" },
   performance: { icon: "⚡", label: "Performance", color: "#eab308" },
   security: { icon: "🔒", label: "Bảo mật", color: "#10b981" },
 };
@@ -62,7 +62,7 @@ export function TechnicalSeo() {
     setLoading(false);
   };
 
-  const gradeColor = (g: string) => ({ A: "#15803d", B: "#3b82f6", C: "#f59e0b", D: "#ef4444", F: "#ef4444" }[g] || "#888");
+  const gradeColor = (g: string) => ({ A: "#7c3aed", B: "#3b82f6", C: "#f59e0b", D: "#ef4444", F: "#ef4444" }[g] || "#888");
   const sevIcon = (s: string) => ({ critical: "🔴", warning: "🟡", info: "🔵" }[s] || "⚪");
 
   return (

@@ -51,7 +51,7 @@ function schemaIcon(type: string): string {
 
 /** Status color */
 function statusColor(status: string): string {
-  if (status === "valid") return "#15803d";
+  if (status === "valid") return "#7c3aed";
   if (status === "warning") return "#eab308";
   return "#ef4444";
 }
@@ -137,7 +137,7 @@ function highlightJson(json: string): string {
 
 const panelStyle: React.CSSProperties = {
   background: "linear-gradient(145deg, rgba(255,255,255,0.85), rgba(255,255,255,0.6))",
-  border: "1px solid rgba(22,163,74,0.1)",
+  border: "1px solid rgba(139,92,246,0.1)",
   borderRadius: "var(--radius)",
   padding: 24,
   boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
@@ -322,7 +322,7 @@ export function SchemaValidator() {
               <span style={{ fontSize: 11, color: "var(--text-dim)", textTransform: "uppercase", letterSpacing: "0.06em", fontWeight: 600 }}>
                 Hợp lệ
               </span>
-              <span style={{ fontSize: 22, fontWeight: 700, color: "#15803d", fontFamily: '"DM Mono", monospace' }}>
+              <span style={{ fontSize: 22, fontWeight: 700, color: "#7c3aed", fontFamily: '"DM Mono", monospace' }}>
                 {result.valid_count}
               </span>
             </div>
@@ -479,10 +479,10 @@ export function SchemaValidator() {
 
       {/* JSON syntax highlight inline styles */}
       <style>{`
-        .json-key   { color: #15803d; }
+        .json-key   { color: #7c3aed; }
         .json-string { color: #10b981; }
         .json-number { color: #f59e0b; }
-        .json-bool   { color: #15803d; }
+        .json-bool   { color: #7c3aed; }
         .json-null   { color: #ef4444; }
       `}</style>
     </div>

@@ -91,7 +91,7 @@ export function AbTesting() {
     await fetchTests();
   };
 
-  const winnerColor = (w: string) => w === "A" ? "#3b82f6" : "#15803d";
+  const winnerColor = (w: string) => w === "A" ? "#3b82f6" : "#7c3aed";
 
   return (
     <div className="geo-optimizer">
@@ -129,7 +129,7 @@ export function AbTesting() {
                 placeholder="Nhập phiên bản A..." />
             </div>
             <div className="input-group" style={{ gridColumn: "1 / -1" }}>
-              <label className="input-label" style={{ color: "#15803d" }}>🅱️ Phiên bản B *</label>
+              <label className="input-label" style={{ color: "#7c3aed" }}>🅱️ Phiên bản B *</label>
               <textarea className="spin-textarea" rows={3} value={form.variant_b} onChange={e => setForm({ ...form, variant_b: e.target.value })}
                 placeholder="Nhập phiên bản B..." />
             </div>
@@ -172,7 +172,7 @@ export function AbTesting() {
                       </div>
                       <div style={{ color: "var(--text-dim)", alignSelf: "center" }}>vs</div>
                       <div>
-                        <div style={{ fontSize: 20, fontWeight: 800, color: test.winner === "B" ? "#15803d" : "var(--text-dim)" }}>{test.score_b}</div>
+                        <div style={{ fontSize: 20, fontWeight: 800, color: test.winner === "B" ? "#7c3aed" : "var(--text-dim)" }}>{test.score_b}</div>
                         <div style={{ fontSize: 10, color: "var(--text-dim)" }}>🅱️</div>
                       </div>
                     </div>
@@ -186,7 +186,7 @@ export function AbTesting() {
                     <p style={{ margin: "4px 0 0", color: "var(--text)" }}>{test.variant_a.slice(0, 150)}{test.variant_a.length > 150 ? "..." : ""}</p>
                   </div>
                   <div style={{ padding: "8px 12px", background: "rgba(34,197,94,0.06)", borderRadius: 6, fontSize: 12, border: "1px solid rgba(34,197,94,0.15)" }}>
-                    <span style={{ fontWeight: 700, color: "#15803d", fontSize: 10 }}>🅱️ Phiên bản B</span>
+                    <span style={{ fontWeight: 700, color: "#7c3aed", fontSize: 10 }}>🅱️ Phiên bản B</span>
                     <p style={{ margin: "4px 0 0", color: "var(--text)" }}>{test.variant_b.slice(0, 150)}{test.variant_b.length > 150 ? "..." : ""}</p>
                   </div>
                 </div>
@@ -199,7 +199,7 @@ export function AbTesting() {
                     </button>
                   )}
                   {isEvaluated && (
-                    <button className="rt-btn" style={{ fontSize: 11, background: "rgba(22,163,74,0.12)", color: "#16a34a", border: "1px solid rgba(22,163,74,0.2)" }}
+                    <button className="rt-btn" style={{ fontSize: 11, background: "rgba(139,92,246,0.12)", color: "#8b5cf6", border: "1px solid rgba(139,92,246,0.2)" }}
                       onClick={() => { setSelectedTest(test.id); try { setEvalResult(JSON.parse(test.ai_analysis)); } catch { /* */ } }}>
                       📊 Xem chi tiết
                     </button>
@@ -228,12 +228,12 @@ export function AbTesting() {
                     <span style={{ fontSize: 12 }}>
                       <span style={{ color: "#3b82f6", fontWeight: 700 }}>A:{val.a}</span>
                       {" vs "}
-                      <span style={{ color: "#15803d", fontWeight: 700 }}>B:{val.b}</span>
+                      <span style={{ color: "#7c3aed", fontWeight: 700 }}>B:{val.b}</span>
                     </span>
                   </div>
                   <div style={{ display: "flex", gap: 4, height: 6 }}>
                     <div style={{ flex: val.a, background: "#3b82f6", borderRadius: 3 }} />
-                    <div style={{ flex: val.b, background: "#15803d", borderRadius: 3 }} />
+                    <div style={{ flex: val.b, background: "#7c3aed", borderRadius: 3 }} />
                   </div>
                   {val.note && <p style={{ fontSize: 11, color: "var(--text-dim)", margin: "4px 0 0" }}>{val.note}</p>}
                 </div>

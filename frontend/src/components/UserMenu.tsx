@@ -34,8 +34,8 @@ export default function UserMenu() {
 
   // Role label & color
   const roleMap: Record<string, { label: string; color: string }> = {
-    admin: { label: "Admin", color: "#16a34a" },
-    editor: { label: "Editor", color: "#059669" },
+    admin: { label: "Admin", color: "#8b5cf6" },
+    editor: { label: "Editor", color: "#06b6d4" },
     viewer: { label: "Viewer", color: "#64748b" },
   };
   const role = roleMap[user.role] || roleMap.viewer;

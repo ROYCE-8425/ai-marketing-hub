@@ -209,7 +209,7 @@ export function BrokenLinkChecker() {
             </div>
             <div style={cardStyle}>
               <span style={cardLabel}>Links hoạt động</span>
-              <span style={{ ...cardValue, color: "#15803d" }}>{result.summary.ok_count}</span>
+              <span style={{ ...cardValue, color: "#7c3aed" }}>{result.summary.ok_count}</span>
             </div>
             <div style={cardStyle}>
               <span style={cardLabel}>Links hỏng</span>
@@ -219,7 +219,7 @@ export function BrokenLinkChecker() {
               <span style={cardLabel}>Tỷ lệ hỏng</span>
               <span style={{
                 ...cardValue,
-                color: (result.summary.broken_count / (result.summary.total_checked || 1) * 100) > 5 ? "#ef4444" : "#15803d",
+                color: (result.summary.broken_count / (result.summary.total_checked || 1) * 100) > 5 ? "#ef4444" : "#7c3aed",
               }}>
                 {((result.summary.broken_count / (result.summary.total_checked || 1)) * 100).toFixed(1)}%
               </span>
@@ -302,7 +302,7 @@ export function BrokenLinkChecker() {
           {/* Results table */}
           <div style={{
             background: "linear-gradient(145deg, rgba(255,255,255,0.85), rgba(255,255,255,0.6))",
-            border: "1px solid rgba(22,163,74,0.1)",
+            border: "1px solid rgba(139,92,246,0.1)",
             borderRadius: "var(--radius)",
             padding: 0,
             overflow: "hidden",
@@ -341,7 +341,7 @@ export function BrokenLinkChecker() {
                       <td style={{
                         padding: "10px 14px", maxWidth: 280,
                         overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
-                        borderBottom: "1px solid rgba(22,163,74,0.5)",
+                        borderBottom: "1px solid rgba(139,92,246,0.5)",
                       }}>
                         <a
                           href={link.url} target="_blank" rel="noopener noreferrer"
@@ -352,20 +352,20 @@ export function BrokenLinkChecker() {
                       </td>
                       <td style={{
                         padding: "10px 14px", fontSize: 12, color: "var(--text)",
-                        borderBottom: "1px solid rgba(22,163,74,0.5)",
+                        borderBottom: "1px solid rgba(139,92,246,0.5)",
                       }}>
                         {link.source_tag || "-"}
                       </td>
                       <td style={{
                         padding: "10px 14px", fontSize: 12, color: "var(--text)",
                         maxWidth: 150, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
-                        borderBottom: "1px solid rgba(22,163,74,0.5)",
+                        borderBottom: "1px solid rgba(139,92,246,0.5)",
                       }}>
                         {link.anchor_text || "-"}
                       </td>
                       <td style={{
                         padding: "10px 14px", fontSize: 12,
-                        borderBottom: "1px solid rgba(22,163,74,0.5)",
+                        borderBottom: "1px solid rgba(139,92,246,0.5)",
                       }}>
                         <span style={{
                           display: "inline-block", fontSize: 11, fontWeight: 600,
@@ -379,7 +379,7 @@ export function BrokenLinkChecker() {
                       </td>
                       <td style={{
                         padding: "10px 14px",
-                        borderBottom: "1px solid rgba(22,163,74,0.5)",
+                        borderBottom: "1px solid rgba(139,92,246,0.5)",
                       }}>
                         <span style={{
                           display: "inline-flex", alignItems: "center", gap: 5,

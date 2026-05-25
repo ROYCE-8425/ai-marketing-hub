@@ -4,7 +4,7 @@ import "./CampaignTracker.css";
 // ─── Intent badge colors ───────────────────────────────────────────────────────
 
 const INTENT_COLOR: Record<string, string> = {
-  informational: "#16a34a",
+  informational: "#8b5cf6",
   navigational: "#10b981",
   transactional: "#10b981",
   commercial_investigation: "#f59e0b",
@@ -304,7 +304,7 @@ export function CampaignTrackerPanel({ data }: { data: OpportunitiesResponse }) 
           <InsightList
             title="Content Intent Recommendations"
             items={intent_analysis.recommendations.slice(0, 4)}
-            color="#16a34a"
+            color="#8b5cf6"
           />
         )}
       </div>

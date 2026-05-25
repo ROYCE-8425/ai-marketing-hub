@@ -115,7 +115,7 @@ export function SpinEditor() {
   };
 
   const uniquenessColor = (pct: number) => {
-    if (pct >= 70) return "#15803d";
+    if (pct >= 70) return "#7c3aed";
     if (pct >= 40) return "#f59e0b";
     return "#ef4444";
   };
@@ -158,7 +158,7 @@ export function SpinEditor() {
                 className={`spin-level-btn ${spinMode === m.id ? "active" : ""}`}
                 onClick={() => setSpinMode(m.id)}
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- API response data
-                style={{ "--level-color": "#16a34a" } as any}>
+                style={{ "--level-color": "#8b5cf6" } as any}>
                 <span className="spin-level-name">{m.icon} {m.label}</span>
               </button>
             ))}

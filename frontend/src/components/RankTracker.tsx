@@ -151,7 +151,7 @@ export function RankTracker() {
 
   const posColor = (pos: number | null) => {
     if (pos === null || pos === 0) return "var(--text-dim)";
-    if (pos <= 3) return "#15803d";
+    if (pos <= 3) return "#7c3aed";
     if (pos <= 10) return "#3b82f6";
     if (pos <= 20) return "#f59e0b";
     return "#ef4444";
@@ -159,7 +159,7 @@ export function RankTracker() {
 
   const changeIcon = (change: number | null) => {
     if (change === null) return <span style={{ color: "var(--text-dim)" }}>━</span>;
-    if (change > 0) return <span style={{ color: "#15803d" }}>▲{change}</span>;
+    if (change > 0) return <span style={{ color: "#7c3aed" }}>▲{change}</span>;
     if (change < 0) return <span style={{ color: "#ef4444" }}>▼{Math.abs(change)}</span>;
     return <span style={{ color: "var(--text-dim)" }}>━ 0</span>;
   };
@@ -231,7 +231,7 @@ export function RankTracker() {
           onClick={() => setShowImport(!showImport)}>
           📥 CSV
         </button>
-        <button className="rt-btn" style={{ background: "rgba(34,197,94,0.12)", color: "#15803d", border: "1px solid rgba(34,197,94,0.2)" }}
+        <button className="rt-btn" style={{ background: "rgba(34,197,94,0.12)", color: "#7c3aed", border: "1px solid rgba(34,197,94,0.2)" }}
           onClick={exportCsv} disabled={keywords.length === 0}>
           📤 Export
         </button>
@@ -340,9 +340,9 @@ export function RankTracker() {
                   <Tooltip contentStyle={{ background: "var(--glass)", border: "1px solid var(--border)", borderRadius: 8, fontSize: 12 }}
                     labelStyle={{ color: "var(--text-h)" }} />
                   <ReferenceLine y={10} stroke="rgba(245,158,11,0.3)" strokeDasharray="3 3" label={{ value: "Top 10", fill: "#f59e0b", fontSize: 10 }} />
-                  <ReferenceLine y={3} stroke="rgba(34,197,94,0.3)" strokeDasharray="3 3" label={{ value: "Top 3", fill: "#15803d", fontSize: 10 }} />
-                  <Line type="monotone" dataKey="position" stroke="#16a34a" strokeWidth={2.5}
-                    dot={{ fill: "#16a34a", r: 4 }} activeDot={{ r: 6, fill: "#4ade80" }} />
+                  <ReferenceLine y={3} stroke="rgba(34,197,94,0.3)" strokeDasharray="3 3" label={{ value: "Top 3", fill: "#7c3aed", fontSize: 10 }} />
+                  <Line type="monotone" dataKey="position" stroke="#8b5cf6" strokeWidth={2.5}
+                    dot={{ fill: "#8b5cf6", r: 4 }} activeDot={{ r: 6, fill: "#4ade80" }} />
                 </LineChart>
               </ResponsiveContainer>
             </div>

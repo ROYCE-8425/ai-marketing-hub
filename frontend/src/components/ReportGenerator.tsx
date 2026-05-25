@@ -63,10 +63,10 @@ export function ReportGenerator() {
 <title>SEO Report — ${report.url}</title>
 <style>
   body { font-family: 'Segoe UI', sans-serif; color: #222; max-width: 800px; margin: 0 auto; padding: 40px 30px; }
-  h1 { color: #16a34a; font-size: 22px; border-bottom: 2px solid #16a34a; padding-bottom: 8px; }
+  h1 { color: #8b5cf6; font-size: 22px; border-bottom: 2px solid #8b5cf6; padding-bottom: 8px; }
   h2 { color: #3b82f6; font-size: 16px; margin-top: 24px; }
   .grade { font-size: 48px; font-weight: 800; text-align: center; margin: 20px 0; }
-  .grade-A { color: #15803d; } .grade-B { color: #3b82f6; } .grade-C { color: #f59e0b; } .grade-D { color: #ef4444; }
+  .grade-A { color: #7c3aed; } .grade-B { color: #3b82f6; } .grade-C { color: #f59e0b; } .grade-D { color: #ef4444; }
   table { width: 100%; border-collapse: collapse; margin: 12px 0; }
   th, td { text-align: left; padding: 8px 12px; border-bottom: 1px solid #e5e7eb; font-size: 13px; }
   th { background: #f3f4f6; font-weight: 600; }
@@ -111,7 +111,7 @@ ${report.all_issues.slice(0, 15).map(issue =>
     } catch { /* ignore */ }
   };
 
-  const gradeColor = (g: string) => ({ A: "#15803d", B: "#3b82f6", C: "#f59e0b", D: "#ef4444" }[g] || "#888");
+  const gradeColor = (g: string) => ({ A: "#7c3aed", B: "#3b82f6", C: "#f59e0b", D: "#ef4444" }[g] || "#888");
 
   return (
     <div className="geo-optimizer">
@@ -164,7 +164,7 @@ ${report.all_issues.slice(0, 15).map(issue =>
           </div>
 
           {/* AI Summary */}
-          <div className="geo-recs" style={{ borderLeftColor: "#16a34a" }}>
+          <div className="geo-recs" style={{ borderLeftColor: "#8b5cf6" }}>
             <h3 className="section-title">🤖 AI Tóm tắt</h3>
             <p style={{ color: "var(--text)", lineHeight: 1.8, fontSize: 14, marginTop: 10 }}>{report.ai_summary}</p>
           </div>
@@ -180,12 +180,12 @@ ${report.all_issues.slice(0, 15).map(issue =>
                   <div key={key} className="geo-bar-item">
                     <div className="geo-bar-label">
                       <span>{sec.title}</span>
-                      <span style={{ fontWeight: 700, color: pct >= 70 ? "#15803d" : pct >= 40 ? "#f59e0b" : "#ef4444" }}>
+                      <span style={{ fontWeight: 700, color: pct >= 70 ? "#7c3aed" : pct >= 40 ? "#f59e0b" : "#ef4444" }}>
                         {sec.score}/{sec.max} {sec.grade && `(${sec.grade})`}
                       </span>
                     </div>
                     <div className="geo-bar-track">
-                      <div className="geo-bar-fill" style={{ width: `${pct}%`, background: pct >= 70 ? "#15803d" : pct >= 40 ? "#f59e0b" : "#ef4444" }} />
+                      <div className="geo-bar-fill" style={{ width: `${pct}%`, background: pct >= 70 ? "#7c3aed" : pct >= 40 ? "#f59e0b" : "#ef4444" }} />
                     </div>
                   </div>
                 );

@@ -1,5 +1,5 @@
 """
-SEO A/B Testing — Phase 19
+SEO A/B Testing — Phase 19 (SQLAlchemy)
 
 Create and evaluate A/B tests for SEO elements:
 - Title tag testing
@@ -10,42 +10,22 @@ Create and evaluate A/B tests for SEO elements:
 
 import os
 import json
-import sqlite3
-from datetime import datetime
-from typing import Any, Dict, List, Optional
-
+from datetime import datetime, timezone
+from typing import Any, Dict, List
 import httpx
 
-DB_PATH = os.path.join(os.path.dirname(__file__), "..", "ab_tests.db")
+from core.database import SessionLocal
+from core.models import ManagedSite, AbTest
 
 GROQ_API_KEY = os.getenv("GROQ_API_KEY", "")
 GROQ_URL = "https://api.groq.com/openai/v1/chat/completions"
 
 
-def _get_db() -> sqlite3.Connection:
-    conn = sqlite3.connect(DB_PATH)
-    conn.row_factory = sqlite3.Row
-    conn.execute("""
-        CREATE TABLE IF NOT EXISTS ab_tests (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT NOT NULL,
-            test_type TEXT DEFAULT 'title',
-            url TEXT DEFAULT '',
-            keyword TEXT DEFAULT '',
-            variant_a TEXT NOT NULL,
-            variant_b TEXT NOT NULL,
-            winner TEXT DEFAULT '',
-            ai_analysis TEXT DEFAULT '',
-            score_a REAL DEFAULT 0,
-            score_b REAL DEFAULT 0,
-            status TEXT DEFAULT 'pending',
-            site_url TEXT NOT NULL,
-            created_at TEXT DEFAULT (datetime('now')),
-            evaluated_at TEXT
-        )
-    """)
-    conn.commit()
-    return conn
+def _get_site_id(db, site_url: str) -> int:
+    site = db.query(ManagedSite).filter(ManagedSite.url == site_url).first()
+    if not site:
+        raise ValueError(f"Site {site_url} không tồn tại")
+    return site.id
 
 
 def create_test(
@@ -58,57 +38,93 @@ def create_test(
     keyword: str = "",
 ) -> Dict[str, Any]:
     """Create a new A/B test."""
-    conn = _get_db()
+    db = SessionLocal()
     try:
-        cursor = conn.execute(
-            """INSERT INTO ab_tests (name, test_type, variant_a, variant_b, url, keyword, site_url)
-               VALUES (?, ?, ?, ?, ?, ?, ?)""",
-            (name.strip(), test_type, variant_a.strip(), variant_b.strip(), url, keyword, site_url),
+        site_id = _get_site_id(db, site_url)
+        new_test = AbTest(
+            site_id=site_id,
+            name=name.strip(),
+            test_type=test_type,
+            variant_a=variant_a.strip(),
+            variant_b=variant_b.strip(),
+            url=url,
+            primary_keyword=keyword,
+            status="pending"
         )
-        conn.commit()
-        return {"status": "ok", "id": cursor.lastrowid, "name": name.strip()}
+        db.add(new_test)
+        db.commit()
+        db.refresh(new_test)
+        return {"status": "ok", "id": new_test.id, "name": new_test.name}
+    except ValueError as e:
+        return {"status": "error", "message": str(e)}
     finally:
-        conn.close()
+        db.close()
 
 
 def get_tests(site_url: str, status: str = "") -> List[Dict[str, Any]]:
     """Get all A/B tests."""
-    conn = _get_db()
+    db = SessionLocal()
     try:
-        query = "SELECT * FROM ab_tests WHERE site_url = ?"
-        params: list = [site_url]
+        site_id = _get_site_id(db, site_url)
+        query = db.query(AbTest).filter(AbTest.site_id == site_id)
         if status:
-            query += " AND status = ?"
-            params.append(status)
-        query += " ORDER BY created_at DESC"
-        rows = conn.execute(query, params).fetchall()
-        return [dict(r) for r in rows]
+            query = query.filter(AbTest.status == status)
+            
+        tests = query.order_by(AbTest.created_at.desc()).all()
+        return [{
+            "id": t.id,
+            "name": t.name,
+            "test_type": t.test_type,
+            "url": t.url,
+            "keyword": t.primary_keyword,
+            "variant_a": t.variant_a,
+            "variant_b": t.variant_b,
+            "winner": t.winner,
+            "ai_analysis": t.ai_analysis,
+            "score_a": t.score_a,
+            "score_b": t.score_b,
+            "status": t.status,
+            "created_at": t.created_at.isoformat() if t.created_at else None,
+            "evaluated_at": t.evaluated_at.isoformat() if t.evaluated_at else None
+        } for t in tests]
+    except ValueError:
+        return []
     finally:
-        conn.close()
+        db.close()
 
 
 def delete_test(test_id: int) -> Dict[str, Any]:
     """Delete an A/B test."""
-    conn = _get_db()
+    db = SessionLocal()
     try:
-        conn.execute("DELETE FROM ab_tests WHERE id = ?", (test_id,))
-        conn.commit()
-        return {"status": "ok", "deleted": test_id}
+        test = db.query(AbTest).filter(AbTest.id == test_id).first()
+        if test:
+            db.delete(test)
+            db.commit()
+            return {"status": "ok", "deleted": test_id}
+        return {"status": "error", "message": "Test not found"}
     finally:
-        conn.close()
+        db.close()
 
 
 async def evaluate_test(test_id: int) -> Dict[str, Any]:
     """AI-evaluate an A/B test and determine winner."""
-    conn = _get_db()
+    db = SessionLocal()
     try:
-        row = conn.execute("SELECT * FROM ab_tests WHERE id = ?", (test_id,)).fetchone()
-        if not row:
+        test = db.query(AbTest).filter(AbTest.id == test_id).first()
+        if not test:
             return {"error": "Test không tồn tại"}
 
-        test = dict(row)
+        # Extract info before closing session or just use it
+        test_info = {
+            "test_type": test.test_type,
+            "url": test.url,
+            "keyword": test.primary_keyword,
+            "variant_a": test.variant_a,
+            "variant_b": test.variant_b
+        }
     finally:
-        conn.close()
+        db.close()
 
     if not GROQ_API_KEY:
         return {"error": "Chưa cấu hình GROQ_API_KEY"}
@@ -119,22 +135,22 @@ async def evaluate_test(test_id: int) -> Dict[str, Any]:
         "heading": "Heading (H1/H2)",
         "content": "Nội dung bài viết",
     }
-    type_label = type_labels.get(test["test_type"], test["test_type"])
+    type_label = type_labels.get(test_info["test_type"], test_info["test_type"])
 
     prompt = f"""Bạn là chuyên gia SEO. So sánh 2 phiên bản {type_label} và chọn bản tốt hơn.
 
-URL: {test.get('url', 'N/A')}
-Từ khóa mục tiêu: {test.get('keyword', 'N/A')}
+URL: {test_info.get('url', 'N/A')}
+Từ khóa mục tiêu: {test_info.get('keyword', 'N/A')}
 
 PHIÊN BẢN A:
-{test['variant_a']}
+{test_info['variant_a']}
 
 PHIÊN BẢN B:
-{test['variant_b']}
+{test_info['variant_b']}
 
 Phân tích theo các tiêu chí:
 1. SEO (keyword placement, length, relevance)
-2. CTR (hấp dẫn, gây tò mò, power words)
+2. CTR (hấp dẫn, gây tò tự, power words)
 3. User Intent (phù hợp search intent)
 4. Độ tự nhiên (không spam, đọc tốt)
 
@@ -181,25 +197,19 @@ Chỉ trả về JSON."""
             result = json.loads(match.group())
 
             # Save results
-            conn = _get_db()
+            db2 = SessionLocal()
             try:
-                conn.execute(
-                    """UPDATE ab_tests SET
-                       winner = ?, score_a = ?, score_b = ?,
-                       ai_analysis = ?, status = 'evaluated', evaluated_at = ?
-                       WHERE id = ?""",
-                    (
-                        result.get("winner", ""),
-                        result.get("score_a", 0),
-                        result.get("score_b", 0),
-                        json.dumps(result, ensure_ascii=False),
-                        datetime.utcnow().isoformat(),
-                        test_id,
-                    ),
-                )
-                conn.commit()
+                t = db2.query(AbTest).filter(AbTest.id == test_id).first()
+                if t:
+                    t.winner = result.get("winner", "")
+                    t.score_a = result.get("score_a", 0)
+                    t.score_b = result.get("score_b", 0)
+                    t.ai_analysis = json.dumps(result, ensure_ascii=False)
+                    t.status = 'evaluated'
+                    t.evaluated_at = datetime.now(timezone.utc)
+                    db2.commit()
             finally:
-                conn.close()
+                db2.close()
 
             return {
                 "status": "ok",

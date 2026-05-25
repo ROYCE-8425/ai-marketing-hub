@@ -12,15 +12,15 @@ import "./DashboardOverview.css";
 // ─── Colors ─────────────────────────────────────────────────────────────────
 
 const COLORS = {
-  purple: "#16a34a",
+  purple: "#8b5cf6",
   blue: "#3b82f6",
   green: "#10b981",
   amber: "#f59e0b",
   red: "#ef4444",
-  cyan: "#059669",
+  cyan: "#06b6d4",
   pink: "#ec4899",
 };
-const PIE_COLORS = ["#16a34a", "#3b82f6", "#10b981", "#f59e0b", "#059669", "#ec4899"];
+const PIE_COLORS = ["#8b5cf6", "#3b82f6", "#10b981", "#f59e0b", "#06b6d4", "#ec4899"];
 
 // ─── Stat Card ──────────────────────────────────────────────────────────────
 
@@ -280,10 +280,10 @@ export function DashboardOverview({ onNavigate }: { onNavigate: (tab: string) =>
           const isLive = ga4Data.data_source === 'live_ga4';
           const isPartial = ga4Data.data_source === 'partial_live_ga4';
           const hasError = !isLive && !isPartial;
-          const borderColor = isLive ? 'rgba(22,163,74,0.3)' : isPartial ? 'rgba(245,158,11,0.25)' : 'rgba(239,68,68,0.2)';
-          const bg = isLive ? 'rgba(22,163,74,0.06)' : hasError ? 'rgba(239,68,68,0.05)' : 'rgba(245,158,11,0.05)';
-          const dotColor = isLive ? '#059669' : hasError ? '#ef4444' : '#f59e0b';
-          const textColor = isLive ? '#059669' : hasError ? '#dc2626' : '#d97706';
+          const borderColor = isLive ? 'rgba(139,92,246,0.3)' : isPartial ? 'rgba(245,158,11,0.25)' : 'rgba(239,68,68,0.2)';
+          const bg = isLive ? 'rgba(139,92,246,0.06)' : hasError ? 'rgba(239,68,68,0.05)' : 'rgba(245,158,11,0.05)';
+          const dotColor = isLive ? '#06b6d4' : hasError ? '#ef4444' : '#f59e0b';
+          const textColor = isLive ? '#06b6d4' : hasError ? '#dc2626' : '#d97706';
           const label = isLive
             ? `✅ Dữ liệu thật · ${ga4Data.overview?.sessions || 0} phiên · ${ga4Data.overview?.pageviews || 0} lượt xem`
             : isPartial
@@ -316,7 +316,7 @@ export function DashboardOverview({ onNavigate }: { onNavigate: (tab: string) =>
           <h3 className="chart-title">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" /></svg>
             🌐 SERP Overview — "{serpOverview.keyword}" ({serpOverview.results_count} kết quả)
-            {serpOverview._cached && <span style={{ fontSize: 10, color: '#059669', marginLeft: 8 }}>⚡ cached</span>}
+            {serpOverview._cached && <span style={{ fontSize: 10, color: '#06b6d4', marginLeft: 8 }}>⚡ cached</span>}
           </h3>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '8px' }}>
             {/* eslint-disable-next-line @typescript-eslint/no-explicit-any -- API response */}
@@ -345,7 +345,7 @@ export function DashboardOverview({ onNavigate }: { onNavigate: (tab: string) =>
           {serpOverview.serp_features?.length > 0 && (
             <div style={{ display: 'flex', gap: '6px', marginTop: '8px', flexWrap: 'wrap' }}>
               {serpOverview.serp_features.map((f: string, i: number) => (
-                <span key={i} style={{ fontSize: 10, background: 'rgba(22,163,74,0.15)', color: '#15803d', padding: '2px 8px', borderRadius: '99px', border: '1px solid rgba(22,163,74,0.2)' }}>{f.replace(/_/g, ' ')}</span>
+                <span key={i} style={{ fontSize: 10, background: 'rgba(139,92,246,0.15)', color: '#7c3aed', padding: '2px 8px', borderRadius: '99px', border: '1px solid rgba(139,92,246,0.2)' }}>{f.replace(/_/g, ' ')}</span>
               ))}
             </div>
           )}
@@ -365,7 +365,7 @@ export function DashboardOverview({ onNavigate }: { onNavigate: (tab: string) =>
         <StatCard
           icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17" /><polyline points="16 7 22 7 22 13" /></svg>}
           value={ga4Data?.overview?.sessions || 0} label="Phiên truy cập"
-          accent="linear-gradient(90deg, #059669, #16a34a)"
+          accent="linear-gradient(90deg, #06b6d4, #8b5cf6)"
           subValue={ga4Data?.overview?.new_users ? `${ga4Data.overview.new_users} mới` : undefined}
           subColor={COLORS.cyan}
         />
@@ -377,12 +377,12 @@ export function DashboardOverview({ onNavigate }: { onNavigate: (tab: string) =>
         <StatCard
           icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" /></svg>}
           value={ga4Data?.overview?.pageviews || 0} label="Lượt xem"
-          accent="linear-gradient(90deg, #15803d, #16a34a)"
+          accent="linear-gradient(90deg, #7c3aed, #8b5cf6)"
         />
         <StatCard
           icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" /></svg>}
           value={gscData?.total_clicks || 0} label="Lượt nhấp GSC"
-          accent="linear-gradient(90deg, #10b981, #059669)"
+          accent="linear-gradient(90deg, #10b981, #06b6d4)"
           subValue={`CTR ${avgCtr.toFixed(1)}%`}
           subColor={COLORS.green}
         />
@@ -394,7 +394,7 @@ export function DashboardOverview({ onNavigate }: { onNavigate: (tab: string) =>
         <StatCard
           icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 20V10" /><path d="M18 20V4" /><path d="M6 20v-4" /></svg>}
           value={`${ga4Data?.overview?.engagement_rate?.toFixed(1) || 0}%`} label="Tương tác"
-          accent="linear-gradient(90deg, #059669, #0891b2)"
+          accent="linear-gradient(90deg, #06b6d4, #0891b2)"
         />
       </div>
 
@@ -532,7 +532,7 @@ export function DashboardOverview({ onNavigate }: { onNavigate: (tab: string) =>
                       <td className="page-path" title={p.title || p.path}>{p.title || p.path}</td>
                       <td>{p.pageviews}</td>
                       <td>{p.sessions}</td>
-                      <td style={{ color: p.bounce_rate > 60 ? '#dc2626' : p.bounce_rate > 40 ? '#d97706' : '#059669' }}>{p.bounce_rate}%</td>
+                      <td style={{ color: p.bounce_rate > 60 ? '#dc2626' : p.bounce_rate > 40 ? '#d97706' : '#06b6d4' }}>{p.bounce_rate}%</td>
                     </tr>
                   ))}
                 </tbody>
@@ -614,7 +614,7 @@ export function DashboardOverview({ onNavigate }: { onNavigate: (tab: string) =>
                   <span className="history-time">{timeAgo(entry.timestamp)}</span>
                   {entry.score != null && (
                     <span className="history-score" style={{
-                      color: entry.score >= 80 ? "#059669" : entry.score >= 50 ? "#d97706" : "#dc2626",
+                      color: entry.score >= 80 ? "#06b6d4" : entry.score >= 50 ? "#d97706" : "#dc2626",
                     }}>{entry.score}</span>
                   )}
                   <button className="export-btn" onClick={(e) => { e.stopPropagation(); handleDelete(entry.id); }} title="Xóa" style={{ padding: "0.2rem 0.4rem" }}>✕</button>

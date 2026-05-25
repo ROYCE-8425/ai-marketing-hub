@@ -61,7 +61,7 @@ export function BacklinkAnalyzer() {
     setLoading(false);
   };
 
-  const gradeColor = (g: string) => ({ A: "#15803d", B: "#3b82f6", C: "#f59e0b", D: "#ef4444" }[g] || "#888");
+  const gradeColor = (g: string) => ({ A: "#7c3aed", B: "#3b82f6", C: "#f59e0b", D: "#ef4444" }[g] || "#888");
 
   return (
     <div className="geo-optimizer">
@@ -118,7 +118,7 @@ export function BacklinkAnalyzer() {
             </div>
             <div className="spin-stat">
               <span className="spin-stat-label">Dofollow</span>
-              <span className="spin-stat-value" style={{ color: "#15803d" }}>
+              <span className="spin-stat-value" style={{ color: "#7c3aed" }}>
                 {result.internal_links.quality.dofollow + result.external_links.quality.dofollow}
               </span>
             </div>
@@ -187,7 +187,7 @@ export function BacklinkAnalyzer() {
                     <tr key={i}>
                       <td style={{ fontSize: 13, fontWeight: 600 }}>{d.domain}</td>
                       <td>{d.links}</td>
-                      <td style={{ color: "#15803d" }}>{d.dofollow}</td>
+                      <td style={{ color: "#7c3aed" }}>{d.dofollow}</td>
                       <td style={{ color: "#ef4444" }}>{d.nofollow}</td>
                       <td style={{ fontSize: 11, opacity: 0.7, maxWidth: 200, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{d.anchors.join(", ")}</td>
                     </tr>

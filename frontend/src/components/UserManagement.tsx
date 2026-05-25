@@ -102,8 +102,8 @@ export default function UserManagement() {
   // Role badge styles
   const roleBadge = (role: string) => {
     const map: Record<string, { bg: string; color: string; label: string }> = {
-      admin: { bg: "rgba(22,163,74,0.15)", color: "#16a34a", label: "Admin" },
-      editor: { bg: "rgba(6,182,212,0.15)", color: "#059669", label: "Editor" },
+      admin: { bg: "rgba(139,92,246,0.15)", color: "#8b5cf6", label: "Admin" },
+      editor: { bg: "rgba(6,182,212,0.15)", color: "#06b6d4", label: "Editor" },
       viewer: { bg: "rgba(100,116,139,0.15)", color: "#94a3b8", label: "Viewer" },
     };
     const r = map[role] || map.viewer;

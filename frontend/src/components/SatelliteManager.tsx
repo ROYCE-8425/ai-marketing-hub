@@ -418,8 +418,8 @@ export function SatelliteManager() {
                     <label key={site.id} style={{
                       display: "flex", alignItems: "center", gap: 4,
                       padding: "4px 10px", borderRadius: 8,
-                      background: selectedSites.includes(site.id) ? "rgba(22,163,74,0.15)" : "rgba(0,0,0,0.03)",
-                      border: `1px solid ${selectedSites.includes(site.id) ? "rgba(22,163,74,0.3)" : "rgba(0,0,0,0.06)"}`,
+                      background: selectedSites.includes(site.id) ? "rgba(139,92,246,0.15)" : "rgba(0,0,0,0.03)",
+                      border: `1px solid ${selectedSites.includes(site.id) ? "rgba(139,92,246,0.3)" : "rgba(0,0,0,0.06)"}`,
                       cursor: "pointer", fontSize: 12, color: "rgba(255,255,255,0.7)",
                     }}>
                       <input type="checkbox" checked={selectedSites.includes(site.id)}

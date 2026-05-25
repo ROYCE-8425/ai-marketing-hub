@@ -40,9 +40,9 @@ interface FaqResult {
 }
 
 const CATEGORY_META: Record<string, { icon: string; label: string; color: string }> = {
-  schema: { icon: "🏗️", label: "Schema & Dữ liệu cấu trúc", color: "#16a34a" },
+  schema: { icon: "🏗️", label: "Schema & Dữ liệu cấu trúc", color: "#8b5cf6" },
   structure: { icon: "📐", label: "Cấu trúc nội dung", color: "#3b82f6" },
-  eeat: { icon: "🛡️", label: "E-E-A-T (Uy tín)", color: "#15803d" },
+  eeat: { icon: "🛡️", label: "E-E-A-T (Uy tín)", color: "#7c3aed" },
   multimodal: { icon: "🖼️", label: "Đa phương tiện", color: "#f59e0b" },
   ai_visibility: { icon: "🤖", label: "AI Visibility", color: "#ec4899" },
 };
@@ -210,7 +210,7 @@ export function GeoOptimizer() {
 
   const gradeColor = (grade: string) => {
     switch (grade) {
-      case "A": return "#15803d";
+      case "A": return "#7c3aed";
       case "B": return "#3b82f6";
       case "C": return "#f59e0b";
       case "D": return "#ef4444";

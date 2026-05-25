@@ -108,7 +108,7 @@ export default function UsageHistory() {
           onChange={(e) => setFilter(e.target.value)}
           style={{ flex: 1, padding: "8px 12px", background: "rgba(255,255,255,0.03)", border: "1px solid rgba(0,0,0,0.08)", borderRadius: 8, color: "#fff", fontSize: 12 }}
         />
-        <button onClick={fetchData} style={{ padding: "8px 16px", background: "rgba(22,163,74,0.1)", border: "1px solid rgba(22,163,74,0.2)", color: "#4ade80", borderRadius: 8, cursor: "pointer", fontSize: 12, fontWeight: 600 }}>
+        <button onClick={fetchData} style={{ padding: "8px 16px", background: "rgba(139,92,246,0.1)", border: "1px solid rgba(139,92,246,0.2)", color: "#4ade80", borderRadius: 8, cursor: "pointer", fontSize: 12, fontWeight: 600 }}>
           🔄 Refresh
         </button>
         <button onClick={handleClear} style={{ padding: "8px 16px", background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.15)", color: "#f87171", borderRadius: 8, cursor: "pointer", fontSize: 12 }}>

@@ -43,7 +43,7 @@ function RiskAlertBadge({ alert }: { alert: SalesRiskAlert }) {
 
 function GlassCard({ children, title, accent }: { children: React.ReactNode; title: string; accent?: string }) {
   return (
-    <div className="glass-card" style={{ "--accent": accent ?? "#16a34a" } as React.CSSProperties}>
+    <div className="glass-card" style={{ "--accent": accent ?? "#8b5cf6" } as React.CSSProperties}>
       <h3 className="glass-card-title">{title}</h3>
       {children}
     </div>

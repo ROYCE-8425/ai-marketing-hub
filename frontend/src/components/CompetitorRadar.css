@@ -38,7 +38,7 @@
 }
 .gap-table td {
   padding: 10px 12px;
-  border-bottom: 1px solid rgba(22,163,74, 0.5);
+  border-bottom: 1px solid rgba(139,92,246, 0.5);
   color: var(--text);
   vertical-align: top;
 }

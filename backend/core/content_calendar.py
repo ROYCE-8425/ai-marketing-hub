@@ -1,5 +1,5 @@
 """
-Content Calendar — Phase 15
+Content Calendar — Phase 15 (SQLAlchemy)
 
 Manage content publishing schedule with:
 - Calendar view (monthly/weekly)
@@ -10,41 +10,22 @@ Manage content publishing schedule with:
 
 import os
 import json
-import sqlite3
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional
-
 import httpx
 
-DB_PATH = os.path.join(os.path.dirname(__file__), "..", "content_calendar.db")
+from core.database import SessionLocal
+from core.models import ManagedSite, ContentItem
 
 GROQ_API_KEY = os.getenv("GROQ_API_KEY", "")
 GROQ_URL = "https://api.groq.com/openai/v1/chat/completions"
 
 
-def _get_db() -> sqlite3.Connection:
-    conn = sqlite3.connect(DB_PATH)
-    conn.row_factory = sqlite3.Row
-    conn.execute("""
-        CREATE TABLE IF NOT EXISTS calendar_items (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            title TEXT NOT NULL,
-            description TEXT DEFAULT '',
-            content_type TEXT DEFAULT 'blog',
-            status TEXT DEFAULT 'draft',
-            scheduled_date TEXT,
-            published_date TEXT,
-            author TEXT DEFAULT '',
-            keywords TEXT DEFAULT '',
-            site_url TEXT NOT NULL,
-            notes TEXT DEFAULT '',
-            priority TEXT DEFAULT 'medium',
-            created_at TEXT DEFAULT (datetime('now')),
-            updated_at TEXT DEFAULT (datetime('now'))
-        )
-    """)
-    conn.commit()
-    return conn
+def _get_site_id(db, site_url: str) -> int:
+    site = db.query(ManagedSite).filter(ManagedSite.url == site_url).first()
+    if not site:
+        raise ValueError(f"Site {site_url} không tồn tại")
+    return site.id
 
 
 def add_item(
@@ -55,53 +36,87 @@ def add_item(
     scheduled_date: str = "",
     author: str = "",
     keywords: str = "",
-    priority: str = "medium",
+    priority: str = "medium",  # Note: Priority is kept in notes or we can just ignore it for now as it's not in the model, actually I will add it to notes
 ) -> Dict[str, Any]:
     """Add a content calendar item."""
-    conn = _get_db()
+    db = SessionLocal()
     try:
-        cursor = conn.execute(
-            """INSERT INTO calendar_items
-               (title, description, content_type, scheduled_date, author, keywords, site_url, priority)
-               VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
-            (title.strip(), description.strip(), content_type, scheduled_date, author, keywords, site_url, priority),
+        site_id = _get_site_id(db, site_url)
+        
+        # We store description and priority in 'notes' as JSON or simple string, 
+        # but the old schema had description and priority. 
+        # The new SQLAlchemy model has 'meta_description', 'notes', 'primary_keyword'.
+        # We will map keywords -> primary_keyword, description/priority -> notes
+        
+        item = ContentItem(
+            site_id=site_id,
+            title=title.strip(),
+            content_type=content_type,
+            status="draft",
+            scheduled_date=scheduled_date,
+            primary_keyword=keywords,
+            meta_description=description.strip(),
+            author=author,
+            notes=f"Priority: {priority}"
         )
-        conn.commit()
-        return {"status": "ok", "id": cursor.lastrowid, "title": title.strip()}
+        db.add(item)
+        db.commit()
+        db.refresh(item)
+        return {"status": "ok", "id": item.id, "title": item.title}
+    except ValueError as e:
+        return {"status": "error", "message": str(e)}
     finally:
-        conn.close()
+        db.close()
 
 
 def update_item(item_id: int, **kwargs) -> Dict[str, Any]:
     """Update a calendar item."""
-    conn = _get_db()
+    db = SessionLocal()
     try:
-        allowed = {"title", "description", "content_type", "status", "scheduled_date",
-                    "published_date", "author", "keywords", "notes", "priority"}
-        updates = {k: v for k, v in kwargs.items() if k in allowed and v is not None}
-        if not updates:
+        item = db.query(ContentItem).filter(ContentItem.id == item_id).first()
+        if not item:
+            return {"status": "error", "message": "Item not found"}
+
+        # Map kwargs to model fields
+        mapping = {
+            "title": "title",
+            "description": "meta_description",
+            "content_type": "content_type",
+            "status": "status",
+            "scheduled_date": "scheduled_date",
+            "published_date": "published_date",
+            "author": "author",
+            "keywords": "primary_keyword",
+            "notes": "notes"
+        }
+        
+        updated_fields = []
+        for k, v in kwargs.items():
+            if k in mapping and v is not None:
+                setattr(item, mapping[k], v)
+                updated_fields.append(k)
+        
+        if not updated_fields:
             return {"status": "error", "message": "Không có gì để cập nhật"}
 
-        updates["updated_at"] = datetime.utcnow().isoformat()
-        set_clause = ", ".join(f"{k} = ?" for k in updates)
-        values = list(updates.values()) + [item_id]
-
-        conn.execute(f"UPDATE calendar_items SET {set_clause} WHERE id = ?", values)
-        conn.commit()
-        return {"status": "ok", "id": item_id, "updated": list(updates.keys())}
+        db.commit()
+        return {"status": "ok", "id": item_id, "updated": updated_fields}
     finally:
-        conn.close()
+        db.close()
 
 
 def delete_item(item_id: int) -> Dict[str, Any]:
     """Delete a calendar item."""
-    conn = _get_db()
+    db = SessionLocal()
     try:
-        conn.execute("DELETE FROM calendar_items WHERE id = ?", (item_id,))
-        conn.commit()
-        return {"status": "ok", "deleted": item_id}
+        item = db.query(ContentItem).filter(ContentItem.id == item_id).first()
+        if item:
+            db.delete(item)
+            db.commit()
+            return {"status": "ok", "deleted": item_id}
+        return {"status": "error", "message": "Item not found"}
     finally:
-        conn.close()
+        db.close()
 
 
 def get_items(
@@ -111,59 +126,81 @@ def get_items(
     content_type: str = "",
 ) -> List[Dict[str, Any]]:
     """Get calendar items with optional filters."""
-    conn = _get_db()
+    db = SessionLocal()
     try:
-        query = "SELECT * FROM calendar_items WHERE site_url = ?"
-        params: list = [site_url]
+        site_id = _get_site_id(db, site_url)
+        query = db.query(ContentItem).filter(ContentItem.site_id == site_id)
 
         if month:
-            query += " AND scheduled_date LIKE ?"
-            params.append(f"{month}%")
-
+            query = query.filter(ContentItem.scheduled_date.like(f"{month}%"))
         if status:
-            query += " AND status = ?"
-            params.append(status)
-
+            query = query.filter(ContentItem.status == status)
         if content_type:
-            query += " AND content_type = ?"
-            params.append(content_type)
+            query = query.filter(ContentItem.content_type == content_type)
 
-        query += " ORDER BY scheduled_date ASC, priority DESC"
-        rows = conn.execute(query, params).fetchall()
-        return [dict(r) for r in rows]
+        # Basic order by scheduled_date
+        items = query.order_by(ContentItem.scheduled_date.asc()).all()
+        
+        return [{
+            "id": i.id,
+            "title": i.title,
+            "description": i.meta_description,
+            "content_type": i.content_type,
+            "status": i.status,
+            "scheduled_date": i.scheduled_date,
+            "published_date": i.published_date,
+            "author": i.author,
+            "keywords": i.primary_keyword,
+            "notes": i.notes,
+            "created_at": i.created_at.isoformat() if i.created_at else None,
+            "updated_at": i.updated_at.isoformat() if i.updated_at else None
+        } for i in items]
+    except ValueError:
+        return []
     finally:
-        conn.close()
+        db.close()
 
 
 def get_stats(site_url: str) -> Dict[str, Any]:
     """Get calendar statistics."""
-    conn = _get_db()
+    db = SessionLocal()
     try:
-        total = conn.execute("SELECT COUNT(*) FROM calendar_items WHERE site_url = ?", (site_url,)).fetchone()[0]
-        draft = conn.execute("SELECT COUNT(*) FROM calendar_items WHERE site_url = ? AND status = 'draft'", (site_url,)).fetchone()[0]
-        review = conn.execute("SELECT COUNT(*) FROM calendar_items WHERE site_url = ? AND status = 'review'", (site_url,)).fetchone()[0]
-        published = conn.execute("SELECT COUNT(*) FROM calendar_items WHERE site_url = ? AND status = 'published'", (site_url,)).fetchone()[0]
+        site_id = _get_site_id(db, site_url)
+        
+        total = db.query(ContentItem).filter(ContentItem.site_id == site_id).count()
+        draft = db.query(ContentItem).filter(ContentItem.site_id == site_id, ContentItem.status == 'draft').count()
+        review = db.query(ContentItem).filter(ContentItem.site_id == site_id, ContentItem.status == 'review').count()
+        published = db.query(ContentItem).filter(ContentItem.site_id == site_id, ContentItem.status == 'published').count()
 
         # Upcoming deadlines (next 7 days)
-        today = datetime.utcnow().strftime("%Y-%m-%d")
-        week_later = (datetime.utcnow() + timedelta(days=7)).strftime("%Y-%m-%d")
-        upcoming = conn.execute(
-            "SELECT COUNT(*) FROM calendar_items WHERE site_url = ? AND scheduled_date BETWEEN ? AND ? AND status != 'published'",
-            (site_url, today, week_later),
-        ).fetchone()[0]
+        today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+        week_later = (datetime.now(timezone.utc) + timedelta(days=7)).strftime("%Y-%m-%d")
+        
+        upcoming = db.query(ContentItem).filter(
+            ContentItem.site_id == site_id,
+            ContentItem.scheduled_date >= today,
+            ContentItem.scheduled_date <= week_later,
+            ContentItem.status != 'published'
+        ).count()
 
         # Overdue
-        overdue = conn.execute(
-            "SELECT COUNT(*) FROM calendar_items WHERE site_url = ? AND scheduled_date < ? AND status != 'published'",
-            (site_url, today),
-        ).fetchone()[0]
+        overdue = db.query(ContentItem).filter(
+            ContentItem.site_id == site_id,
+            ContentItem.scheduled_date < today,
+            ContentItem.status != 'published'
+        ).count()
 
         return {
             "total": total, "draft": draft, "review": review,
             "published": published, "upcoming": upcoming, "overdue": overdue,
         }
+    except ValueError:
+        return {
+            "total": 0, "draft": 0, "review": 0,
+            "published": 0, "upcoming": 0, "overdue": 0,
+        }
     finally:
-        conn.close()
+        db.close()
 
 
 async def suggest_topics(site_url: str, niche: str = "ô tô", count: int = 5) -> Dict[str, Any]:

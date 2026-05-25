@@ -32,9 +32,9 @@ const KEYS: KeyInfo[] = [
 
 const GROUPS: Record<string, { label: string; color: string }> = {
   ai: { label: "AI Engine", color: "#8b5cf6" },
-  google: { label: "Google APIs", color: "#16a34a" },
+  google: { label: "Google APIs", color: "#8b5cf6" },
   serp: { label: "SERP & Backlinks", color: "#f59e0b" },
-  auth: { label: "Bảo mật", color: "#059669" },
+  auth: { label: "Bảo mật", color: "#06b6d4" },
 };
 
 export default function GoogleSetup() {

@@ -285,7 +285,7 @@ details[open] .outline-summary svg { transform: rotate(90deg); }
   align-items: center;
   gap: 7px;
   padding: 9px 18px;
-  background: linear-gradient(135deg, #16a34a, #059669);
+  background: linear-gradient(135deg, #8b5cf6, #06b6d4);
   color: #fff;
   border: none;
   border-radius: 99px;
@@ -364,7 +364,7 @@ details[open] .outline-summary svg { transform: rotate(90deg); }
 }
 .polish-metric-chip.readability {
   background: rgba(22, 163, 74, 0.1);
-  color: #16a34a;
+  color: #8b5cf6;
   border: 1px solid rgba(22, 163, 74, 0.2);
 }
 .polish-metric-chip.flesch {
@@ -402,7 +402,7 @@ details[open] .outline-summary svg { transform: rotate(90deg); }
 }
 .btn-publish {
   background: linear-gradient(135deg, rgba(22, 163, 74, 0.15), rgba(16, 185, 129, 0.1));
-  color: #16a34a;
+  color: #8b5cf6;
   border-color: rgba(22, 163, 74, 0.3);
 }
 .btn-dismiss {

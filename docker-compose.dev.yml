@@ -27,6 +27,21 @@ services:
     networks:
       - amh-network
 
+  # ── Database (PostgreSQL) ────────────────────────────────────────────────
+  postgres:
+    image: postgres:15-alpine
+    container_name: amh-postgres-dev
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: amh_user
+      POSTGRES_PASSWORD: amh_password
+      POSTGRES_DB: aimarketinghub
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-dev-data:/var/lib/postgresql/data
+    networks:
+      - amh-network
   # ── Frontend (Vite dev server with HMR) ───────────────────────────────────
   frontend:
     build:
@@ -48,6 +63,8 @@ services:
 
 volumes:
   backend-dev-data:
+    driver: local
+  postgres-dev-data:
     driver: local
 
 networks:

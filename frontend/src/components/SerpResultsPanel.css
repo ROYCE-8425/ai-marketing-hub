@@ -15,7 +15,7 @@
   gap: 1rem;
   flex-wrap: wrap;
   padding: 0.75rem 1rem;
-  background: rgba(22,163,74,0.04);
+  background: rgba(139,92,246,0.04);
   border-radius: 0.75rem;
   border: 1px solid rgba(0,0,0,0.06);
 }
@@ -27,8 +27,8 @@
   padding: 0.3rem 0.7rem;
   font-size: 0.78rem;
   border-radius: 999px;
-  background: rgba(22,163,74,0.12);
-  color: #15803d;
+  background: rgba(139,92,246,0.12);
+  color: #7c3aed;
   font-weight: 500;
 }
 
@@ -48,7 +48,7 @@
 
 .serp-source-badge.src-scraper {
   background: rgba(16,185,129,0.15);
-  color: #059669;
+  color: #06b6d4;
 }
 
 .serp-source-badge.src-dataforseo {
@@ -58,7 +58,7 @@
 
 .serp-source-badge.src-custom-search {
   background: rgba(16,185,129,0.15);
-  color: #059669;
+  color: #06b6d4;
 }
 
 .serp-source-badge.src-error {
@@ -93,16 +93,16 @@
 }
 
 .serp-feature-badge:hover {
-  background: rgba(22,163,74,0.12);
-  border-color: rgba(22,163,74,0.3);
-  color: #15803d;
+  background: rgba(139,92,246,0.12);
+  border-color: rgba(139,92,246,0.3);
+  color: #7c3aed;
 }
 
 .serp-feature-dot {
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: #16a34a;
+  background: #8b5cf6;
 }
 
 /* ── Ranking table ──────────────────────────────────────────────────────────── */
@@ -136,7 +136,7 @@
 }
 
 .serp-row:hover {
-  background: rgba(22,163,74,0.08);
+  background: rgba(139,92,246,0.08);
   transform: translateX(4px);
 }
 
@@ -183,7 +183,7 @@
 
 .serp-domain {
   font-size: 0.76rem;
-  color: #16a34a;
+  color: #8b5cf6;
   font-weight: 500;
 }
 
@@ -207,7 +207,7 @@
 }
 
 .serp-row:hover .serp-link-icon {
-  color: #16a34a;
+  color: #8b5cf6;
 }
 
 /* ── Deep Analyze section ───────────────────────────────────────────────────── */
@@ -243,14 +243,14 @@
   border: none;
   border-radius: 0.6rem;
   cursor: pointer;
-  background: linear-gradient(135deg, #16a34a, #16a34a);
+  background: linear-gradient(135deg, #8b5cf6, #8b5cf6);
   color: #fff;
   transition: all 0.3s;
 }
 
 .deep-analyze-btn:hover:not(:disabled) {
   transform: translateY(-1px);
-  box-shadow: 0 4px 15px rgba(22,163,74,0.4);
+  box-shadow: 0 4px 15px rgba(139,92,246,0.4);
 }
 
 .deep-analyze-btn:disabled {
@@ -324,7 +324,7 @@
   flex: 1;
   min-width: 100px;
   padding: 0.6rem 0.8rem;
-  background: rgba(22,163,74,0.04);
+  background: rgba(139,92,246,0.04);
   border-radius: 0.5rem;
   border: 1px solid rgba(0,0,0,0.06);
   text-align: center;
@@ -340,7 +340,7 @@
 .deep-stat-value {
   font-size: 1.15rem;
   font-weight: 700;
-  color: #15803d;
+  color: #7c3aed;
   margin-top: 0.15rem;
 }
 
@@ -355,7 +355,7 @@
 .deep-recommendation.status-optimal {
   background: rgba(16,185,129,0.08);
   border-color: #10b981;
-  color: #059669;
+  color: #06b6d4;
 }
 
 .deep-recommendation.status-good {
@@ -372,9 +372,9 @@
 }
 
 .deep-recommendation.status-long {
-  background: rgba(22,163,74,0.08);
-  border-color: #16a34a;
-  color: #15803d;
+  background: rgba(139,92,246,0.08);
+  border-color: #8b5cf6;
+  color: #7c3aed;
 }
 
 .deep-rec-title {

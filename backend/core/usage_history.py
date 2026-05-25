@@ -1,5 +1,6 @@
 """
 Usage History Logger — Middleware ghi lại toàn bộ input/output API calls
+(Upgraded to SQLAlchemy)
 
 Tự động log:
 - Endpoint called
@@ -10,48 +11,26 @@ Tự động log:
 - Errors
 """
 
-import os
 import json
-import time
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Dict, List
 
-HISTORY_FILE = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data", "usage_history.json")
-MAX_HISTORY = 500  # Keep last 500 entries
+from core.database import SessionLocal
+from core.models import UsageLog
 
-
-def _ensure_dir():
-    os.makedirs(os.path.dirname(HISTORY_FILE), exist_ok=True)
-
-
-def _load_history() -> List[Dict[str, Any]]:
-    _ensure_dir()
-    if os.path.exists(HISTORY_FILE):
-        try:
-            with open(HISTORY_FILE, "r", encoding="utf-8") as f:
-                return json.load(f)
-        except (json.JSONDecodeError, IOError):
-            return []
-    return []
-
-
-def _save_history(history: List[Dict[str, Any]]):
-    _ensure_dir()
-    # Keep only last MAX_HISTORY entries
-    history = history[-MAX_HISTORY:]
-    with open(HISTORY_FILE, "w", encoding="utf-8") as f:
-        json.dump(history, f, ensure_ascii=False, indent=2)
-
-
-def _truncate(obj: Any, max_len: int = 500) -> Any:
-    """Truncate large values for storage."""
+def _truncate(obj: Any, max_len: int = 500) -> str:
+    """Truncate large values for storage and convert to string."""
     if isinstance(obj, str):
         return obj[:max_len] + "..." if len(obj) > max_len else obj
-    if isinstance(obj, dict):
-        return {k: _truncate(v, max_len) for k, v in list(obj.items())[:20]}
-    if isinstance(obj, list):
-        return [_truncate(v, max_len) for v in obj[:10]]
-    return obj
+    if isinstance(obj, (dict, list)):
+        try:
+            s = json.dumps(obj, ensure_ascii=False)
+            return s[:max_len] + "..." if len(s) > max_len else s
+        except Exception:
+            s = str(obj)
+            return s[:max_len] + "..." if len(s) > max_len else s
+    s = str(obj)
+    return s[:max_len] + "..." if len(s) > max_len else s
 
 
 def log_usage(
@@ -64,71 +43,119 @@ def log_usage(
     error: str = None,
 ):
     """Log a single API usage entry."""
-    history = _load_history()
-    entry = {
-        "id": len(history) + 1,
-        "timestamp": datetime.now().isoformat(),
-        "endpoint": endpoint,
-        "method": method,
-        "input": _truncate(input_data),
-        "output": _truncate(output_data),
-        "status_code": status_code,
-        "duration_ms": round(duration_ms, 1),
-        "error": error,
-        "success": status_code < 400 and not error,
-    }
-    history.append(entry)
-    _save_history(history)
-    return entry
+    db = SessionLocal()
+    try:
+        log_entry = UsageLog(
+            endpoint=endpoint,
+            method=method,
+            input_data=_truncate(input_data),
+            output_data=_truncate(output_data),
+            status_code=status_code,
+            duration_ms=round(duration_ms, 1),
+            error=error
+        )
+        db.add(log_entry)
+        db.commit()
+        db.refresh(log_entry)
+        
+        return {
+            "id": log_entry.id,
+            "timestamp": log_entry.created_at.isoformat() if log_entry.created_at else None,
+            "endpoint": log_entry.endpoint,
+            "method": log_entry.method,
+            "input": log_entry.input_data,
+            "output": log_entry.output_data,
+            "status_code": log_entry.status_code,
+            "duration_ms": log_entry.duration_ms,
+            "error": log_entry.error,
+            "success": status_code < 400 and not error,
+        }
+    finally:
+        db.close()
 
 
 def get_usage_history(limit: int = 50, endpoint_filter: str = None) -> List[Dict[str, Any]]:
     """Get usage history, optionally filtered by endpoint."""
-    history = _load_history()
-    if endpoint_filter:
-        history = [h for h in history if endpoint_filter in h.get("endpoint", "")]
-    return list(reversed(history[-limit:]))
+    db = SessionLocal()
+    try:
+        query = db.query(UsageLog)
+        if endpoint_filter:
+            query = query.filter(UsageLog.endpoint.like(f"%{endpoint_filter}%"))
+            
+        logs = query.order_by(UsageLog.created_at.desc()).limit(limit).all()
+        return [{
+            "id": l.id,
+            "timestamp": l.created_at.isoformat() if l.created_at else None,
+            "endpoint": l.endpoint,
+            "method": l.method,
+            "input": l.input_data,
+            "output": l.output_data,
+            "status_code": l.status_code,
+            "duration_ms": l.duration_ms,
+            "error": l.error,
+            "success": l.status_code < 400 and not l.error,
+        } for l in logs]
+    finally:
+        db.close()
 
 
 def get_usage_stats() -> Dict[str, Any]:
     """Get usage statistics summary."""
-    history = _load_history()
-    if not history:
-        return {"total_calls": 0, "success_rate": 0, "endpoints": {}}
+    db = SessionLocal()
+    try:
+        total = db.query(UsageLog).count()
+        if total == 0:
+            return {"total_calls": 0, "success_rate": 0, "endpoints": {}}
 
-    total = len(history)
-    success = sum(1 for h in history if h.get("success"))
-    errors = total - success
+        # For SQLite/PostgreSQL compatibility, we do aggregation in Python or simple queries
+        logs = db.query(UsageLog).all()
+        success = 0
+        endpoints = {}
+        last_call = None
+        
+        for l in logs:
+            if l.status_code < 400 and not l.error:
+                success += 1
+                
+            ep = l.endpoint
+            if ep not in endpoints:
+                endpoints[ep] = {"calls": 0, "success": 0, "errors": 0, "avg_ms": 0.0}
+                
+            endpoints[ep]["calls"] += 1
+            if l.status_code < 400 and not l.error:
+                endpoints[ep]["success"] += 1
+            else:
+                endpoints[ep]["errors"] += 1
+                
+            endpoints[ep]["avg_ms"] = (
+                endpoints[ep]["avg_ms"] * (endpoints[ep]["calls"] - 1) + l.duration_ms
+            ) / endpoints[ep]["calls"]
+            
+            if not last_call or (l.created_at and last_call < l.created_at):
+                last_call = l.created_at
+                
+        errors = total - success
 
-    # Group by endpoint
-    endpoints = {}
-    for h in history:
-        ep = h.get("endpoint", "unknown")
-        if ep not in endpoints:
-            endpoints[ep] = {"calls": 0, "success": 0, "errors": 0, "avg_ms": 0}
-        endpoints[ep]["calls"] += 1
-        if h.get("success"):
-            endpoints[ep]["success"] += 1
-        else:
-            endpoints[ep]["errors"] += 1
-        endpoints[ep]["avg_ms"] = (
-            endpoints[ep]["avg_ms"] * (endpoints[ep]["calls"] - 1) + h.get("duration_ms", 0)
-        ) / endpoints[ep]["calls"]
+        for ep in endpoints:
+            endpoints[ep]["avg_ms"] = round(endpoints[ep]["avg_ms"], 1)
 
-    # Round avg_ms
-    for ep in endpoints:
-        endpoints[ep]["avg_ms"] = round(endpoints[ep]["avg_ms"], 1)
-
-    return {
-        "total_calls": total,
-        "success": success,
-        "errors": errors,
-        "success_rate": round(success / max(total, 1) * 100, 1),
-        "endpoints": endpoints,
-        "last_call": history[-1].get("timestamp") if history else None,
-    }
+        return {
+            "total_calls": total,
+            "success": success,
+            "errors": errors,
+            "success_rate": round(success / max(total, 1) * 100, 1),
+            "endpoints": endpoints,
+            "last_call": last_call.isoformat() if last_call else None,
+        }
+    finally:
+        db.close()
 
 
 def clear_history():
     """Clear all usage history."""
-    _save_history([])
+    db = SessionLocal()
+    try:
+        db.query(UsageLog).delete()
+        db.commit()
+    finally:
+        db.close()

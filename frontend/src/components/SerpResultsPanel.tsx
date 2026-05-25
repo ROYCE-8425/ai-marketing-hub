@@ -278,13 +278,13 @@ function DeepAnalyzePanel({
 
           {data.recommendation.recommended_optimal != null && (
             <div className="deep-stats-row" style={{ marginTop: "0.5rem" }}>
-              <div className="deep-stat-card" style={{ borderColor: "rgba(22,163,74,0.3)", borderWidth: "1px", borderStyle: "solid" }}>
+              <div className="deep-stat-card" style={{ borderColor: "rgba(139,92,246,0.3)", borderWidth: "1px", borderStyle: "solid" }}>
                 <div className="deep-stat-label">Đề xuất tối thiểu</div>
                 <div className="deep-stat-value">{data.recommendation.recommended_min?.toLocaleString()}</div>
               </div>
               <div className="deep-stat-card" style={{ borderColor: "rgba(16,185,129,0.4)", borderWidth: "1px", borderStyle: "solid" }}>
                 <div className="deep-stat-label">✨ Mục tiêu tối ưu</div>
-                <div className="deep-stat-value" style={{ color: "#059669" }}>
+                <div className="deep-stat-value" style={{ color: "#06b6d4" }}>
                   {data.recommendation.recommended_optimal?.toLocaleString()}
                 </div>
               </div>

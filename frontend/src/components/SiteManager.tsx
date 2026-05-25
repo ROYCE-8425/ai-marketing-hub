@@ -75,7 +75,7 @@ export function SiteManager() {
   };
 
   const scoreColor = (s: number) => {
-    if (s >= 80) return "#15803d";
+    if (s >= 80) return "#7c3aed";
     if (s >= 60) return "#3b82f6";
     if (s >= 40) return "#f59e0b";
     return "#ef4444";
@@ -121,14 +121,14 @@ export function SiteManager() {
         <div className="site-cards" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: 12, marginTop: 16 }}>
           {sites.map(site => (
             <div key={site.id} className="geo-faq-item" style={{
-              borderLeft: site.is_active ? "3px solid #16a34a" : "3px solid var(--border)",
+              borderLeft: site.is_active ? "3px solid #8b5cf6" : "3px solid var(--border)",
               position: "relative",
             }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
                 <div>
                   <div style={{ fontWeight: 700, color: "var(--text-h)", fontSize: 15, display: "flex", alignItems: "center", gap: 6 }}>
                     {site.name}
-                    {site.is_active === 1 && <span style={{ fontSize: 10, background: "#16a34a", color: "#fff", padding: "1px 6px", borderRadius: 4, fontWeight: 700 }}>ACTIVE</span>}
+                    {site.is_active === 1 && <span style={{ fontSize: 10, background: "#8b5cf6", color: "#fff", padding: "1px 6px", borderRadius: 4, fontWeight: 700 }}>ACTIVE</span>}
                   </div>
                   <a href={site.url} target="_blank" rel="noopener noreferrer" style={{ color: "#3b82f6", fontSize: 12, textDecoration: "none" }}>{site.url}</a>
                   {site.description && <p style={{ fontSize: 12, color: "var(--text-dim)", margin: "4px 0 0" }}>{site.description}</p>}
@@ -143,10 +143,10 @@ export function SiteManager() {
               </div>
               <div style={{ display: "flex", gap: 6, marginTop: 10 }}>
                 {site.is_active !== 1 && (
-                  <button className="rt-btn" style={{ fontSize: 11, padding: "4px 10px", background: "rgba(22,163,74,0.12)", color: "#16a34a", border: "1px solid rgba(22,163,74,0.2)" }}
+                  <button className="rt-btn" style={{ fontSize: 11, padding: "4px 10px", background: "rgba(139,92,246,0.12)", color: "#8b5cf6", border: "1px solid rgba(139,92,246,0.2)" }}
                     onClick={() => handleSetActive(site.id)}>⭐ Set Active</button>
                 )}
-                <button className="rt-btn" style={{ fontSize: 11, padding: "4px 10px", background: "rgba(34,197,94,0.12)", color: "#15803d", border: "1px solid rgba(34,197,94,0.2)" }}
+                <button className="rt-btn" style={{ fontSize: 11, padding: "4px 10px", background: "rgba(34,197,94,0.12)", color: "#7c3aed", border: "1px solid rgba(34,197,94,0.2)" }}
                   onClick={() => handleQuickScan(site)} disabled={scanning === site.id}>
                   {scanning === site.id ? "⏳ Scanning..." : "🔍 Quick Scan"}
                 </button>

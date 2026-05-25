@@ -133,8 +133,8 @@ export default function AuthPage() {
             <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="url(#auth-lg)" strokeWidth="2.5">
               <defs>
                 <linearGradient id="auth-lg" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#16a34a" />
-                  <stop offset="100%" stopColor="#059669" />
+                  <stop offset="0%" stopColor="#8b5cf6" />
+                  <stop offset="100%" stopColor="#06b6d4" />
                 </linearGradient>
               </defs>
               <circle cx="12" cy="12" r="10" />

@@ -10,7 +10,7 @@
 .sat-tabs {
   display: flex;
   gap: 4px;
-  background: rgba(22,163,74,0.04);
+  background: rgba(139,92,246,0.04);
   border-radius: 12px;
   padding: 4px;
   border: 1px solid rgba(0,0,0,0.06);
@@ -40,12 +40,12 @@
 
 .sat-tab.active {
   color: #4ade80;
-  background: rgba(22,163,74,0.12);
-  box-shadow: 0 0 12px rgba(22,163,74,0.1);
+  background: rgba(139,92,246,0.12);
+  box-shadow: 0 0 12px rgba(139,92,246,0.1);
 }
 
 .sat-tab .sat-badge {
-  background: rgba(22,163,74,0.2);
+  background: rgba(139,92,246,0.2);
   color: #4ade80;
   font-size: 11px;
   padding: 1px 7px;
@@ -85,7 +85,7 @@
 }
 
 .sat-site-item {
-  background: rgba(22,163,74,0.04);
+  background: rgba(139,92,246,0.04);
   border: 1px solid rgba(255,255,255,0.07);
   border-radius: 12px;
   padding: 1rem;
@@ -93,8 +93,8 @@
 }
 
 .sat-site-item:hover {
-  border-color: rgba(22,163,74,0.3);
-  background: rgba(22,163,74,0.04);
+  border-color: rgba(139,92,246,0.3);
+  background: rgba(139,92,246,0.04);
 }
 
 .sat-site-name {
@@ -153,7 +153,7 @@
   flex: 1;
   padding: 6px 10px;
   border: 1px solid rgba(0,0,0,0.06);
-  background: rgba(22,163,74,0.04);
+  background: rgba(139,92,246,0.04);
   color: rgba(255,255,255,0.6);
   border-radius: 8px;
   font-size: 12px;
@@ -162,9 +162,9 @@
 }
 
 .sat-site-actions button:hover {
-  background: rgba(22,163,74,0.1);
+  background: rgba(139,92,246,0.1);
   color: #4ade80;
-  border-color: rgba(22,163,74,0.25);
+  border-color: rgba(139,92,246,0.25);
 }
 
 .sat-site-actions .delete-btn:hover {
@@ -208,7 +208,7 @@
 
 .sat-form-group input:focus,
 .sat-form-group select:focus {
-  border-color: rgba(22,163,74,0.4);
+  border-color: rgba(139,92,246,0.4);
 }
 
 .sat-form-group select {
@@ -226,7 +226,7 @@
   width: 100%;
   min-height: 200px;
   padding: 12px;
-  background: rgba(22,163,74,0.04);
+  background: rgba(139,92,246,0.04);
   border: 1px solid rgba(0,0,0,0.06);
   border-radius: 10px;
   color: rgba(255,255,255,0.9);
@@ -238,7 +238,7 @@
 }
 
 .sat-textarea:focus {
-  border-color: rgba(22,163,74,0.4);
+  border-color: rgba(139,92,246,0.4);
 }
 
 .sat-options-row {
@@ -266,7 +266,7 @@
   align-items: center;
   gap: 12px;
   padding: 12px;
-  background: rgba(22,163,74,0.04);
+  background: rgba(139,92,246,0.04);
   border: 1px solid rgba(0,0,0,0.06);
   border-radius: 10px;
 }
@@ -392,13 +392,13 @@
 }
 
 .sat-btn-primary {
-  background: linear-gradient(135deg, #16a34a, #059669);
+  background: linear-gradient(135deg, #8b5cf6, #06b6d4);
   color: #fff;
-  box-shadow: 0 2px 12px rgba(22,163,74,0.25);
+  box-shadow: 0 2px 12px rgba(139,92,246,0.25);
 }
 
 .sat-btn-primary:hover {
-  box-shadow: 0 4px 20px rgba(22,163,74,0.35);
+  box-shadow: 0 4px 20px rgba(139,92,246,0.35);
   transform: translateY(-1px);
 }
 
@@ -491,7 +491,7 @@
 
 /* Preview */
 .sat-preview {
-  background: rgba(22,163,74,0.04);
+  background: rgba(139,92,246,0.04);
   border: 1px solid rgba(0,0,0,0.06);
   border-radius: 10px;
   padding: 1rem;
@@ -524,7 +524,7 @@
 }
 
 .sat-version-tab.active {
-  background: rgba(22,163,74,0.15);
+  background: rgba(139,92,246,0.15);
   color: #4ade80;
-  border-color: rgba(22,163,74,0.3);
+  border-color: rgba(139,92,246,0.3);
 }
