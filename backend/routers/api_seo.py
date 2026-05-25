@@ -239,12 +239,16 @@ async def audit_url(body: AuditUrlRequest):
     """
     Phase 3 — Full marketing audit from a live URL.
 
-    1. Fetches HTML via httpx (async I/O, non-blocking).
-    2. Extracts <title> and visible text via BeautifulSoup.
-    3. Offloads CPU-heavy SEO + CRO analysis to a thread pool
-       (asyncio.to_thread) so the async event loop is never blocked.
-    4. Returns combined JSON: seo_quality + keyword_analysis + cro_analysis.
+    v2: Uses DOM-based PageFeatures for accurate scoring.
+    1. Fetches HTML via httpx.
+    2. Parses DOM → PageFeatures (measured facts).
+    3. Scores SEO from DOM facts (page-type-aware).
+    4. Runs CRO analysis on visible text.
+    5. Returns combined JSON with data_sources metadata.
     """
+    from core.html_page_parser import parse_html_page
+    from core.seo_quality_rater import rate_page_seo
+
     try:
         headers = {
             "User-Agent": (
@@ -260,40 +264,53 @@ async def audit_url(body: AuditUrlRequest):
             response = await client.get(str(body.url))
             response.raise_for_status()
 
-        soup = BeautifulSoup(response.text, "lxml")
+        raw_html = response.text
 
-        # Extract <title>
-        meta_title = (
-            soup.title.string.strip() if soup.title and soup.title.string else ""
+        # ── Phase 1: DOM-based feature extraction ──────────────────────────
+        features = await asyncio.to_thread(
+            parse_html_page, raw_html, str(body.url)
         )
 
-        # Strip noise tags
-        for tag in soup(["nav", "script", "style", "footer", "header", "noscript"]):
-            tag.decompose()
-
-        # Collect visible text
-        content = soup.get_text(separator="\n", strip=True)
-        content = re.sub(r"\n{3,}", "\n\n", content)
-
-        if not content.strip():
+        if not features.visible_text.strip():
             raise HTTPException(
                 status_code=422,
                 detail="No readable content found on the page.",
             )
 
-        # ── Phase 1: SEO analysis in threadpool ────────────────────────────
+        # ── Phase 2: DOM-based SEO scoring ─────────────────────────────────
         seo_result = await asyncio.to_thread(
-            _run_seo_analysis,
-            content,
-            meta_title,
-            body.primary_keyword,
+            rate_page_seo, features, body.primary_keyword
         )
 
-        # ── Phase 3: CRO + Trust analysis in threadpool ─────────────────────
-        cro_result = await asyncio.to_thread(_run_cro_analysis, content)
+        # ── Phase 2b: Keyword analysis (uses visible text + DOM headings) ──
+        analyzer = KeywordAnalyzer()
+        keyword_result = await asyncio.to_thread(
+            analyzer.analyze,
+            features.visible_text,
+            body.primary_keyword,
+            None,  # secondary_keywords
+            1.5,   # target_density
+        )
 
-        # Merge
-        return {**seo_result, "cro_analysis": cro_result}
+        # ── Phase 3: CRO + Trust analysis (text-based, correct for this) ──
+        cro_result = await asyncio.to_thread(
+            _run_cro_analysis, features.visible_text
+        )
+
+        # ── Build response ─────────────────────────────────────────────────
+        return {
+            "primary_keyword": body.primary_keyword,
+            "keyword_analysis": {
+                "word_count": keyword_result["word_count"],
+                "primary_keyword": keyword_result["primary_keyword"],
+                "keyword_stuffing": keyword_result["keyword_stuffing"],
+                "distribution_heatmap": keyword_result["distribution_heatmap"],
+                "lsi_keywords": keyword_result["lsi_keywords"],
+                "recommendations": keyword_result["recommendations"],
+            },
+            "seo_quality": seo_result,
+            "cro_analysis": cro_result,
+        }
 
     except httpx.TimeoutException:
         raise HTTPException(status_code=504, detail="Request to target URL timed out.") from None

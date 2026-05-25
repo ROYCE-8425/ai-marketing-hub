@@ -206,47 +206,57 @@ def _check_multimodal(soup: BeautifulSoup) -> Dict[str, Any]:
             "recommendations": recommendations}
 
 
-def _check_ai_visibility(keyword: str, url: str) -> Dict[str, Any]:
-    """Estimate AI visibility based on content quality signals."""
-    # Note: Actually querying ChatGPT/Gemini would require their APIs
-    # This provides a heuristic score based on known ranking factors
+def _check_ai_citation_readiness(soup: BeautifulSoup) -> Dict[str, Any]:
+    """
+    Estimate answer extraction readiness (heuristic).
+
+    Checks if content is structured in ways that AI systems
+    can easily extract answers from.
+    """
     score = 0
     recommendations = []
+    text = soup.get_text().lower()
 
-    # Domain authority signals (heuristic)
-    domain = urlparse(url).netloc
-    if domain:
-        score += 5  # Has a real domain
-
-    # Check if keyword is in domain
-    keyword_parts = keyword.lower().split()
-    domain_lower = domain.lower()
-    if any(part in domain_lower for part in keyword_parts if len(part) > 3):
-        score += 5
-        recommendations.append("✅ Keyword có trong tên miền — AI nhận diện liên quan cao")
+    # Direct Q&A format — highly extractable by AI
+    qa_patterns = ["hỏi:", "đáp:", "câu hỏi", "trả lời", "faq", "q:", "a:"]
+    qa_count = sum(1 for p in qa_patterns if p in text)
+    if qa_count >= 3:
+        score += 8
+    elif qa_count >= 1:
+        score += 4
     else:
-        recommendations.append("Cân nhắc EMD (Exact Match Domain) cho từ khóa chính")
+        recommendations.append("Thêm nội dung dạng Hỏi-Đáp (Q&A) — AI trích dẫn trực tiếp dạng này")
 
-    # HTTPS
-    if url.startswith("https"):
-        score += 3
+    # Definition patterns — AI loves clear definitions
+    definition_patterns = [" là ", " được định nghĩa ", " có nghĩa là ", " bao gồm "]
+    def_count = sum(1 for p in definition_patterns if p in text)
+    if def_count >= 2:
+        score += 4
+    elif def_count >= 1:
+        score += 2
+
+    # Step-by-step / numbered content
+    ol_tags = soup.find_all("ol")
+    if ol_tags:
+        score += 4
     else:
-        recommendations.append("Chuyển sang HTTPS — AI ưu tiên nguồn bảo mật")
+        recommendations.append("Thêm nội dung dạng bước-bước (ordered list) — AI dễ trích xuất quy trình")
 
-    # Estimate based on other scores (will be filled by caller)
-    score += 7  # Base score for having a website
+    # Concise paragraphs (AI prefers 2-3 sentence answers)
+    paragraphs = [p.get_text(strip=True) for p in soup.find_all("p") if len(p.get_text(strip=True)) > 20]
+    short_paragraphs = [p for p in paragraphs if 20 < len(p.split()) < 60]
+    if len(short_paragraphs) >= 3:
+        score += 4
 
-    recommendations.append("Đăng ký Google Business Profile — giúp AI nhận diện doanh nghiệp địa phương")
-    recommendations.append("Tạo nội dung dạng Q&A trên website — AI trích dẫn trực tiếp")
-
-    return {"score": min(20, score), "recommendations": recommendations}
+    return {"score": min(20, score), "type": "heuristic", "recommendations": recommendations}
 
 
 async def analyze_geo(url: str, keyword: str = "") -> Dict[str, Any]:
     """
-    Full GEO analysis for a URL.
+    AI Search Readiness analysis for a URL.
 
-    Returns GEO score (0-100) with breakdown and recommendations.
+    Returns readiness_score (0-100) with breakdown.
+    Each category is labeled as deterministic, heuristic, or mixed.
     """
     try:
         async with httpx.AsyncClient(timeout=15, follow_redirects=True) as client:
@@ -259,62 +269,98 @@ async def analyze_geo(url: str, keyword: str = "") -> Dict[str, Any]:
 
     soup = BeautifulSoup(html, "html.parser")
 
-    schema_result = _check_schema(soup)
-    structure_result = _check_content_structure(soup)
-    eeat_result = _check_eeat(soup)
-    multimodal_result = _check_multimodal(soup)
-    visibility_result = _check_ai_visibility(keyword, url)
+    # ── Deterministic checks ──────────────────────────────────────────────
+    schema_result = _check_schema(soup)          # max 20 → scale to 25
+    structure_result = _check_content_structure(soup)  # max 20
+    multimodal_result = _check_multimodal(soup)  # max 20 → scale to 15
 
-    total_score = (
-        schema_result["score"] +
-        structure_result["score"] +
-        eeat_result["score"] +
-        multimodal_result["score"] +
-        visibility_result["score"]
-    )
+    # ── Mixed checks ──────────────────────────────────────────────────────
+    eeat_result = _check_eeat(soup)              # max 20
 
-    # Collect all recommendations sorted by impact
+    # ── Heuristic checks ──────────────────────────────────────────────────
+    citation_result = _check_ai_citation_readiness(soup)  # max 20
+
+    # ── Scale scores to new weights ───────────────────────────────────────
+    # Structured Data Quality: 25 pts
+    structured_data_score = min(25, round(schema_result["score"] * 25 / 20))
+    # Content Structure for AI: 20 pts
+    content_structure_score = min(20, structure_result["score"])
+    # E-E-A-T Clarity: 20 pts
+    eeat_score = min(20, eeat_result["score"])
+    # Answer Extraction Readiness: 20 pts
+    citation_score = min(20, citation_result["score"])
+    # Media & Corroboration: 15 pts
+    media_score = min(15, round(multimodal_result["score"] * 15 / 20))
+
+    total_score = structured_data_score + content_structure_score + eeat_score + citation_score + media_score
+
+    # ── Context signals (NOT scored, just noted) ──────────────────────────
+    domain = urlparse(url).netloc
+    keyword_parts = keyword.lower().split() if keyword else []
+    context_signals = {
+        "is_https": url.startswith("https"),
+        "has_real_domain": bool(domain),
+        "keyword_in_domain": any(
+            part in domain.lower() for part in keyword_parts if len(part) > 3
+        ) if keyword_parts else False,
+    }
+
+    # Collect all recommendations
     all_recommendations = []
     for category, result in [
-        ("Schema & Dữ liệu có cấu trúc", schema_result),
-        ("Cấu trúc nội dung", structure_result),
+        ("Dữ liệu có cấu trúc", schema_result),
+        ("Cấu trúc nội dung cho AI", structure_result),
         ("E-E-A-T (Uy tín)", eeat_result),
+        ("Khả năng AI trích dẫn", citation_result),
         ("Đa phương tiện", multimodal_result),
-        ("AI Visibility", visibility_result),
     ]:
-        for rec in result["recommendations"]:
+        for rec in result.get("recommendations", []):
             all_recommendations.append({"category": category, "recommendation": rec})
 
     # Grade
-    if total_score >= 80:
-        grade = "A"
-        grade_label = "Xuất sắc"
-    elif total_score >= 60:
-        grade = "B"
-        grade_label = "Tốt"
-    elif total_score >= 40:
-        grade = "C"
-        grade_label = "Trung bình"
-    elif total_score >= 20:
-        grade = "D"
-        grade_label = "Cần cải thiện"
-    else:
-        grade = "F"
-        grade_label = "Yếu"
+    if total_score >= 80: grade, grade_label = "A", "Xuất sắc"
+    elif total_score >= 60: grade, grade_label = "B", "Tốt"
+    elif total_score >= 40: grade, grade_label = "C", "Trung bình"
+    elif total_score >= 20: grade, grade_label = "D", "Cần cải thiện"
+    else: grade, grade_label = "F", "Yếu"
 
     return {
         "url": url,
         "keyword": keyword,
-        "geo_score": total_score,
+        "readiness_score": total_score,
+        "score_type": "heuristic_readiness",
         "grade": grade,
         "grade_label": grade_label,
+        # Backward compat — frontend may still read geo_score
+        "geo_score": total_score,
         "breakdown": {
-            "schema": {"score": schema_result["score"], "max": 20, "details": schema_result},
-            "structure": {"score": structure_result["score"], "max": 20, "details": structure_result},
-            "eeat": {"score": eeat_result["score"], "max": 20, "details": eeat_result},
-            "multimodal": {"score": multimodal_result["score"], "max": 20, "details": multimodal_result},
-            "ai_visibility": {"score": visibility_result["score"], "max": 20, "details": visibility_result},
+            "structured_data_quality": {
+                "score": structured_data_score, "max": 25,
+                "type": "deterministic",
+                "details": schema_result,
+            },
+            "content_structure_for_ai": {
+                "score": content_structure_score, "max": 20,
+                "type": "deterministic",
+                "details": structure_result,
+            },
+            "eeat_clarity": {
+                "score": eeat_score, "max": 20,
+                "type": "mixed",
+                "details": eeat_result,
+            },
+            "answer_extraction_readiness": {
+                "score": citation_score, "max": 20,
+                "type": "heuristic",
+                "details": citation_result,
+            },
+            "media_corroboration": {
+                "score": media_score, "max": 15,
+                "type": "deterministic",
+                "details": multimodal_result,
+            },
         },
+        "context_signals": context_signals,
         "recommendations": all_recommendations,
         "total_recommendations": len(all_recommendations),
     }

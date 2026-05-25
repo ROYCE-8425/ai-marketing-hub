@@ -548,7 +548,365 @@ class SEOQualityRater:
             return "F (Yếu)"
 
 
-# Convenience function
+# ── Page-type-aware SEO scorer (DOM-based) ───────────────────────────────────
+
+# Guidelines vary by page type — a homepage doesn't need 2000 words
+GUIDELINES_BY_PAGE_TYPE: Dict[str, Dict[str, Any]] = {
+    "homepage": {
+        "min_word_count": 150, "optimal_word_count": 500,
+        "min_h2": 1, "optimal_h2": 3,
+        "min_internal_links": 5, "min_external_links": 0,
+        "meta_title_min": 30, "meta_title_max": 65,
+        "meta_desc_min": 80, "meta_desc_max": 165,
+    },
+    "article": {
+        "min_word_count": 1200, "optimal_word_count": 2500,
+        "min_h2": 3, "optimal_h2": 6,
+        "min_internal_links": 3, "min_external_links": 1,
+        "meta_title_min": 40, "meta_title_max": 65,
+        "meta_desc_min": 120, "meta_desc_max": 165,
+    },
+    "product": {
+        "min_word_count": 200, "optimal_word_count": 800,
+        "min_h2": 1, "optimal_h2": 4,
+        "min_internal_links": 2, "min_external_links": 0,
+        "meta_title_min": 30, "meta_title_max": 65,
+        "meta_desc_min": 80, "meta_desc_max": 165,
+    },
+    "service": {
+        "min_word_count": 400, "optimal_word_count": 1200,
+        "min_h2": 2, "optimal_h2": 5,
+        "min_internal_links": 3, "min_external_links": 1,
+        "meta_title_min": 35, "meta_title_max": 65,
+        "meta_desc_min": 100, "meta_desc_max": 165,
+    },
+    "listing": {
+        "min_word_count": 50, "optimal_word_count": 300,
+        "min_h2": 0, "optimal_h2": 2,
+        "min_internal_links": 5, "min_external_links": 0,
+        "meta_title_min": 30, "meta_title_max": 65,
+        "meta_desc_min": 80, "meta_desc_max": 165,
+    },
+    "other": {
+        "min_word_count": 300, "optimal_word_count": 1000,
+        "min_h2": 2, "optimal_h2": 4,
+        "min_internal_links": 2, "min_external_links": 1,
+        "meta_title_min": 35, "meta_title_max": 65,
+        "meta_desc_min": 100, "meta_desc_max": 165,
+    },
+}
+
+
+def _grade(score: float) -> str:
+    """Convert numeric score to Vietnamese letter grade."""
+    if score >= 90: return "A (Xuất sắc)"
+    if score >= 80: return "B (Tốt)"
+    if score >= 70: return "C (Trung bình)"
+    if score >= 60: return "D (Cần cải thiện)"
+    return "F (Yếu)"
+
+
+def rate_page_seo(
+    features: Any,  # PageFeatures from html_page_parser
+    primary_keyword: str = "",
+) -> Dict[str, Any]:
+    """
+    Score a live page using DOM-measured PageFeatures.
+
+    8 categories, 100 total points.
+    Each category is labeled as 'measured' or 'rule_based'.
+
+    Args:
+        features: PageFeatures instance from html_page_parser
+        primary_keyword: Target keyword for on-page analysis
+
+    Returns:
+        Dict with score, grade, breakdown, issues, and data_sources
+    """
+    g = GUIDELINES_BY_PAGE_TYPE.get(features.page_type, GUIDELINES_BY_PAGE_TYPE["other"])
+
+    critical_issues: List[str] = []
+    warnings: List[str] = []
+    suggestions: List[str] = []
+
+    # ── 1. Indexability & Crawlability (20 pts) ── type: measured ─────────
+    idx_score = 20
+    idx_details: Dict[str, Any] = {}
+
+    if features.has_noindex:
+        idx_score -= 20
+        critical_issues.append("Trang có meta robots noindex — Google sẽ KHÔNG index trang này")
+    idx_details["has_noindex"] = features.has_noindex
+
+    if not features.canonical_url:
+        idx_score -= 5
+        warnings.append("Thiếu canonical URL — có thể gây duplicate content")
+    idx_details["canonical_url"] = features.canonical_url
+
+    if not features.is_https:
+        idx_score -= 5
+        critical_issues.append("Trang không dùng HTTPS — Google ưu tiên HTTPS")
+    idx_details["is_https"] = features.is_https
+
+    idx_score = max(0, idx_score)
+
+    # ── 2. Metadata (15 pts) ── type: rule_based ─────────────────────────
+    meta_score = 15
+    meta_details: Dict[str, Any] = {}
+
+    if not features.meta_title:
+        meta_score -= 8
+        critical_issues.append("Thiếu thẻ <title>")
+    else:
+        if features.meta_title_length < g["meta_title_min"]:
+            meta_score -= 3
+            warnings.append(f"Title quá ngắn ({features.meta_title_length} ký tự). Nên {g['meta_title_min']}-{g['meta_title_max']} ký tự.")
+        elif features.meta_title_length > g["meta_title_max"] + 10:
+            meta_score -= 2
+            warnings.append(f"Title quá dài ({features.meta_title_length} ký tự). Nên dưới {g['meta_title_max']} ký tự.")
+
+        if primary_keyword and primary_keyword.lower() not in features.meta_title.lower():
+            meta_score -= 3
+            warnings.append(f'Từ khóa chính "{primary_keyword}" chưa có trong title')
+
+    meta_details["title"] = features.meta_title
+    meta_details["title_length"] = features.meta_title_length
+
+    if not features.meta_description:
+        meta_score -= 5
+        critical_issues.append("Thiếu meta description")
+    else:
+        if features.meta_description_length < g["meta_desc_min"]:
+            meta_score -= 2
+            warnings.append(f"Meta description quá ngắn ({features.meta_description_length} ký tự). Nên {g['meta_desc_min']}-{g['meta_desc_max']} ký tự.")
+        elif features.meta_description_length > g["meta_desc_max"] + 10:
+            meta_score -= 1
+            warnings.append(f"Meta description quá dài ({features.meta_description_length} ký tự). Nên dưới {g['meta_desc_max']} ký tự.")
+
+        if primary_keyword and primary_keyword.lower() not in features.meta_description.lower():
+            meta_score -= 1
+            suggestions.append(f'Từ khóa chính "{primary_keyword}" chưa có trong meta description')
+
+    meta_details["description"] = features.meta_description[:100]
+    meta_details["description_length"] = features.meta_description_length
+
+    meta_score = max(0, meta_score)
+
+    # ── 3. Heading & Content Structure (15 pts) ── type: measured ────────
+    heading_score = 15
+    heading_details: Dict[str, Any] = {}
+
+    if features.h1_count == 0:
+        heading_score -= 8
+        critical_issues.append("Thiếu thẻ H1")
+    elif features.h1_count > 1:
+        heading_score -= 4
+        warnings.append(f"Có {features.h1_count} thẻ H1 (nên chỉ có 1)")
+
+    heading_details["h1_count"] = features.h1_count
+    heading_details["h1_texts"] = features.h1_texts[:3]
+
+    if features.h2_count < g["min_h2"]:
+        heading_score -= 4
+        warnings.append(f"Quá ít H2 ({features.h2_count}). Nên có ít nhất {g['min_h2']}.")
+    elif features.h2_count < g["optimal_h2"]:
+        heading_score -= 1
+        suggestions.append(f"Nên thêm H2 ({features.h2_count} hiện tại). Khuyến nghị {g['optimal_h2']}.")
+
+    heading_details["h2_count"] = features.h2_count
+    heading_details["h3_count"] = features.h3_count
+
+    heading_score = max(0, heading_score)
+
+    # ── 4. Content Quality On-page (15 pts) ── type: rule_based ──────────
+    content_score = 15
+    content_details: Dict[str, Any] = {}
+
+    if features.word_count < g["min_word_count"]:
+        content_score -= 8
+        critical_issues.append(f"Nội dung quá ngắn ({features.word_count} từ). Tối thiểu {g['min_word_count']} từ cho {features.page_type} page.")
+    elif features.word_count < g["optimal_word_count"]:
+        content_score -= 3
+        suggestions.append(f"Nội dung nên dài hơn ({features.word_count} từ). Khuyến nghị {g['optimal_word_count']}+ cho {features.page_type} page.")
+
+    content_details["word_count"] = features.word_count
+    content_details["paragraph_count"] = features.paragraph_count
+    content_details["has_lists"] = features.has_lists
+    content_details["has_tables"] = features.has_tables
+
+    if not features.has_lists and features.page_type in ("article", "service", "product"):
+        content_score -= 2
+        suggestions.append("Chưa có danh sách (bullet/numbered). Nên sử dụng để cải thiện khả năng đọc.")
+
+    content_score = max(0, content_score)
+
+    # ── 5. Keyword Targeting (10 pts) ── type: rule_based ────────────────
+    kw_score = 10
+    kw_details: Dict[str, Any] = {}
+
+    if not primary_keyword:
+        kw_score = 5  # Neutral if no keyword provided
+        kw_details["note"] = "Chưa chỉ định từ khóa chính"
+    else:
+        kw_lower = primary_keyword.lower()
+
+        # Keyword in H1
+        kw_in_h1 = any(kw_lower in h.lower() for h in features.h1_texts)
+        if not kw_in_h1 and features.h1_count > 0:
+            kw_score -= 3
+            warnings.append(f'Từ khóa "{primary_keyword}" chưa xuất hiện trong H1')
+        kw_details["in_h1"] = kw_in_h1
+
+        # Keyword in first 100 words
+        first_100 = " ".join(features.visible_text.split()[:100]).lower()
+        kw_in_first_100 = kw_lower in first_100
+        if not kw_in_first_100:
+            kw_score -= 3
+            warnings.append(f'Từ khóa "{primary_keyword}" chưa xuất hiện trong 100 từ đầu')
+        kw_details["in_first_100_words"] = kw_in_first_100
+
+        # Keyword in H2 (secondary signal)
+        h2_with_kw = sum(1 for h in features.h2_texts if kw_lower in h.lower())
+        if features.h2_count > 0 and h2_with_kw == 0:
+            kw_score -= 2
+            suggestions.append(f'Nên thêm từ khóa "{primary_keyword}" vào 1-2 tiêu đề H2')
+        kw_details["in_h2_count"] = h2_with_kw
+        kw_details["h2_total"] = features.h2_count
+
+        # Density (secondary signal, light weight)
+        if features.word_count > 0:
+            kw_count = features.visible_text.lower().count(kw_lower)
+            density = round(kw_count / features.word_count * 100, 2)
+            kw_details["density"] = density
+            kw_details["occurrences"] = kw_count
+            if density > 3.0:
+                kw_score -= 2
+                warnings.append(f"Keyword density quá cao ({density}%). Có nguy cơ nhồi từ khóa.")
+        else:
+            kw_details["density"] = 0
+
+    kw_score = max(0, kw_score)
+
+    # ── 6. Internal/External Linking (10 pts) ── type: measured ──────────
+    link_score = 10
+    link_details: Dict[str, Any] = {}
+
+    if features.internal_links < g["min_internal_links"]:
+        link_score -= 5
+        warnings.append(f"Internal links ít ({features.internal_links}). Nên có ít nhất {g['min_internal_links']}.")
+
+    if features.page_type in ("article", "service", "other"):
+        if features.external_links < g["min_external_links"]:
+            link_score -= 3
+            suggestions.append(f"Nên thêm external links đến nguồn uy tín ({features.external_links} hiện tại).")
+
+    link_details["internal"] = features.internal_links
+    link_details["external"] = features.external_links
+    link_details["nofollow"] = features.nofollow_links
+
+    link_score = max(0, link_score)
+
+    # ── 7. Media & Accessibility (5 pts) ── type: measured ───────────────
+    media_score = 5
+    media_details: Dict[str, Any] = {}
+
+    if features.images_total > 0:
+        alt_ratio = features.images_with_alt / features.images_total
+        if alt_ratio < 0.5:
+            media_score -= 3
+            warnings.append(f"{features.images_missing_alt}/{features.images_total} hình thiếu alt text")
+        elif alt_ratio < 0.8:
+            media_score -= 1
+            suggestions.append(f"{features.images_missing_alt} hình thiếu alt text")
+    elif features.page_type in ("article", "product"):
+        media_score -= 2
+        suggestions.append("Nên thêm hình ảnh minh họa")
+
+    media_details["images_total"] = features.images_total
+    media_details["images_with_alt"] = features.images_with_alt
+    media_details["has_video"] = features.has_video
+
+    media_score = max(0, media_score)
+
+    # ── 8. Technical UX Signals (10 pts) ── type: measured ───────────────
+    tech_score = 10
+    tech_details: Dict[str, Any] = {}
+
+    if not features.has_viewport:
+        tech_score -= 5
+        critical_issues.append("Thiếu meta viewport — trang không responsive")
+    tech_details["has_viewport"] = features.has_viewport
+
+    if not features.lang_attribute:
+        tech_score -= 2
+        suggestions.append("Thiếu thuộc tính lang trên <html> — ảnh hưởng accessibility")
+    tech_details["lang"] = features.lang_attribute
+
+    og_count = len(features.og_tags)
+    if og_count < 3:
+        tech_score -= 2
+        suggestions.append(f"Thiếu Open Graph tags ({og_count}/3). Ảnh hưởng chia sẻ mạng xã hội.")
+    tech_details["og_tags_count"] = og_count
+
+    tech_score = max(0, tech_score)
+
+    # ── Overall ──────────────────────────────────────────────────────────
+    overall = idx_score + meta_score + heading_score + content_score + kw_score + link_score + media_score + tech_score
+
+    return {
+        "overall_score": round(overall, 1),
+        "grade": _grade(overall),
+        "page_type": features.page_type,
+        "page_type_confidence": features.page_type_confidence,
+        "confidence": "high" if features.page_type_confidence != "low" else "medium",
+        "publishing_ready": overall >= 75 and len(critical_issues) == 0,
+        "category_scores": {
+            "indexability": idx_score,
+            "metadata": meta_score,
+            "headings_structure": heading_score,
+            "content_quality": content_score,
+            "keyword_targeting": kw_score,
+            "linking": link_score,
+            "media_accessibility": media_score,
+            "technical_ux": tech_score,
+        },
+        "category_max": {
+            "indexability": 20,
+            "metadata": 15,
+            "headings_structure": 15,
+            "content_quality": 15,
+            "keyword_targeting": 10,
+            "linking": 10,
+            "media_accessibility": 5,
+            "technical_ux": 10,
+        },
+        "data_sources": {
+            "indexability": "measured",
+            "metadata": "rule_based",
+            "headings_structure": "measured",
+            "content_quality": "rule_based",
+            "keyword_targeting": "rule_based",
+            "linking": "measured",
+            "media_accessibility": "measured",
+            "technical_ux": "measured",
+        },
+        "critical_issues": critical_issues,
+        "warnings": warnings,
+        "suggestions": suggestions,
+        "details": {
+            "indexability": idx_details,
+            "metadata": meta_details,
+            "headings": heading_details,
+            "content": content_details,
+            "keyword": kw_details,
+            "links": link_details,
+            "media": media_details,
+            "technical": tech_details,
+        },
+    }
+
+
+# ── Legacy convenience function (kept for audit-seo raw text endpoint) ───────
 def rate_seo_quality(
     content: str,
     meta_title: Optional[str] = None,
@@ -561,21 +919,10 @@ def rate_seo_quality(
     custom_guidelines: Optional[Dict[str, Any]] = None
 ) -> Dict[str, Any]:
     """
-    Rate SEO quality of content
+    Rate SEO quality of raw text content (for pre-publish article audit).
 
-    Args:
-        content: Article content
-        meta_title: Meta title
-        meta_description: Meta description
-        primary_keyword: Target keyword
-        secondary_keywords: Secondary keywords
-        keyword_density: Pre-calculated density
-        internal_link_count: Number of internal links
-        external_link_count: Number of external links
-        custom_guidelines: Custom SEO guidelines
-
-    Returns:
-        SEO quality rating with score and recommendations
+    This is the LEGACY function for audit-seo endpoint.
+    For live page scoring, use rate_page_seo() with PageFeatures instead.
     """
     rater = SEOQualityRater(custom_guidelines)
     return rater.rate(
@@ -589,64 +936,3 @@ def rate_seo_quality(
         external_link_count
     )
 
-
-# Example usage
-if __name__ == "__main__":
-    sample_content = """
-# How to Start a Podcast
-
-Starting a podcast is easier than you think. This complete guide shows you how to start a podcast from scratch.
-
-## Choose Your Topic
-
-Pick a topic you're passionate about. Your podcast topic should resonate with your target audience.
-
-## Get Equipment
-
-You'll need a microphone, headphones, and recording software.
-
-## Record Your First Episode
-
-Start recording! Don't worry about perfection on your first try.
-
-## Publish Your Podcast
-
-Upload to a podcast hosting platform and distribute to directories.
-
-Ready to start your podcast? Begin today with these simple steps.
-    """
-
-    result = rate_seo_quality(
-        content=sample_content,
-        meta_title="How to Start a Podcast: Complete Guide for 2024",
-        meta_description="Learn how to start a podcast from scratch with this step-by-step guide. Everything you need to know about podcast equipment, recording, and publishing.",
-        primary_keyword="start a podcast",
-        secondary_keywords=["podcast hosting", "recording software"],
-        keyword_density=1.8,
-        internal_link_count=4,
-        external_link_count=2
-    )
-
-    print("=== SEO Quality Report ===")
-    print(f"\nOverall Score: {result['overall_score']}/100")
-    print(f"Grade: {result['grade']}")
-    print(f"Publishing Ready: {result['publishing_ready']}")
-
-    print(f"\nCategory Scores:")
-    for category, score in result['category_scores'].items():
-        print(f"  {category}: {score}/100")
-
-    if result['critical_issues']:
-        print(f"\nCritical Issues:")
-        for issue in result['critical_issues']:
-            print(f"  ❌ {issue}")
-
-    if result['warnings']:
-        print(f"\nWarnings:")
-        for warning in result['warnings']:
-            print(f"  ⚠️  {warning}")
-
-    if result['suggestions']:
-        print(f"\nSuggestions:")
-        for suggestion in result['suggestions'][:3]:
-            print(f"  💡 {suggestion}")

@@ -39,6 +39,12 @@ export interface SeoQuality {
   warnings: string[];
   suggestions: string[];
   details: Record<string, unknown>;
+  // v2 fields (from DOM-based scorer)
+  page_type?: string;
+  page_type_confidence?: string;
+  confidence?: string;
+  category_max?: Record<string, number>;
+  data_sources?: Record<string, string>;
 }
 
 // ─── CRO/Trust types (Phase 3) ──────────────────────────────────────────────
