@@ -15,19 +15,15 @@ import { CampaignTrackerPanel } from "./components/CampaignTracker";
 import { SerpResultsPanel } from "./components/SerpResultsPanel";
 import { DashboardOverview } from "./components/DashboardOverview";
 import { PublishModal } from "./components/PublishModal";
-import { RankTracker } from "./components/RankTracker";
-import { SpinEditor } from "./components/SpinEditor";
-import { GeoOptimizer } from "./components/GeoOptimizer";
-import { TechnicalSeo } from "./components/TechnicalSeo";
 import { ReportGenerator } from "./components/ReportGenerator";
-import { BacklinkAnalyzer } from "./components/BacklinkAnalyzer";
-import { CoreWebVitals } from "./components/CoreWebVitals";
-import { BrokenLinkChecker } from "./components/BrokenLinkChecker";
-import { SchemaValidator } from "./components/SchemaValidator";
 import { ContentCalendar } from "./components/ContentCalendarPanel";
 import { SiteManager } from "./components/SiteManager";
 import { AbTesting } from "./components/AbTesting";
 import FileConverter from "./components/FileConverter";
+import { SeoWorkspace } from "./components/SeoWorkspace";
+import { KeywordHub } from "./components/KeywordHub";
+import { ContentStudio } from "./components/ContentStudio";
+import { SchemaGeo } from "./components/SchemaGeo";
 import GoogleSetup from "./components/GoogleSetup";
 import AuthPage from "./components/AuthPage";
 import UserMenu from "./components/UserMenu";
@@ -98,7 +94,7 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 
 // ─── Tab types ─────────────────────────────────────────────────────────────────
 
-export type TabId = "dashboard" | "seo" | "cro" | "competitor" | "planner" | "tracker" | "serp" | "aikeys" | "ranktracker" | "spineditor" | "geo" | "techseo" | "report" | "backlinks" | "calendar" | "sites" | "abtest" | "fileconvert" | "googlesetup" | "cwv" | "brokenlinks" | "schemavalidator";
+export type TabId = "dashboard" | "seo" | "cro" | "competitor" | "planner" | "tracker" | "serp" | "aikeys" | "ranktracker" | "spineditor" | "geo" | "techseo" | "report" | "backlinks" | "calendar" | "sites" | "abtest" | "fileconvert" | "googlesetup" | "cwv" | "brokenlinks" | "schemavalidator" | "seoworkspace" | "keywordhub" | "contentstudio" | "schemageo";
 
 interface NavItem { id: TabId; label: string; icon: string }
 interface NavGroup { group: string; icon: string; items: NavItem[] }
@@ -145,36 +141,28 @@ const NAV_GROUPS: NavGroup[] = [
   { group: "Tổng quan", icon: "", items: [
     { id: "dashboard", label: "Dashboard", icon: "dashboard" },
   ]},
-  { group: "Phân tích SEO", icon: "", items: [
+  { group: "SEO", icon: "", items: [
     { id: "seo", label: "Kiểm tra SEO", icon: "seo" },
-    { id: "techseo", label: "Technical SEO", icon: "techseo" },
-    { id: "cwv", label: "Core Web Vitals", icon: "cwv" },
-    { id: "cro", label: "CRO & Uy tín", icon: "cro" },
-    { id: "serp", label: "SERP trực tiếp", icon: "serp" },
-    { id: "backlinks", label: "Backlinks", icon: "backlinks" },
-    { id: "brokenlinks", label: "Kiểm tra link hỏng", icon: "brokenlinks" },
-    { id: "schemavalidator", label: "Xác thực Schema", icon: "schemavalidator" },
+    { id: "seoworkspace", label: "SEO Workspace", icon: "techseo" },
   ]},
   { group: "Từ khóa", icon: "", items: [
-    { id: "ranktracker", label: "Theo dõi Keyword", icon: "ranktracker" },
-    { id: "aikeys", label: "AI Keyword Analysis", icon: "aikeys" },
-    { id: "competitor", label: "Phân tích đối thủ", icon: "competitor" },
+    { id: "keywordhub", label: "Keyword Intelligence", icon: "aikeys" },
   ]},
-  { group: "Nội dung", icon: "", items: [
-    { id: "planner", label: "Viết nội dung AI", icon: "planner" },
-    { id: "spineditor", label: "Spin Editor", icon: "spineditor" },
-    { id: "geo", label: "Tối ưu GEO", icon: "geo" },
+  { group: "Nội dung AI", icon: "", items: [
+    { id: "contentstudio", label: "Content Studio", icon: "planner" },
+  ]},
+  { group: "Schema & GEO", icon: "", items: [
+    { id: "schemageo", label: "Schema & GEO", icon: "geo" },
+  ]},
+  { group: "Vận hành", icon: "", items: [
     { id: "calendar", label: "Lịch nội dung", icon: "calendar" },
-  ]},
-  { group: "Công cụ", icon: "", items: [
     { id: "abtest", label: "A/B Testing", icon: "abtest" },
     { id: "report", label: "Báo cáo AI", icon: "report" },
-    { id: "tracker", label: "Chiến dịch", icon: "tracker" },
     { id: "fileconvert", label: "File Converter", icon: "fileconvert" },
   ]},
-  { group: "Quản lý", icon: "", items: [
-    { id: "sites", label: "Multi-site", icon: "sites" },
-    { id: "googlesetup", label: "Cấu hình Google", icon: "googlesetup" },
+  { group: "Cài đặt", icon: "", items: [
+    { id: "sites", label: "Quản lý site", icon: "sites" },
+    { id: "googlesetup", label: "Kết nối & API", icon: "googlesetup" },
   ]},
 ];
 
@@ -192,6 +180,10 @@ const NAV_INDEX: NavIndexItem[] = NAV_GROUPS.flatMap((group) =>
 const PAGE_DESCRIPTIONS: Record<string, string> = {
   dashboard: "Tổng quan hiệu suất SEO, lượt truy cập và các chỉ số quan trọng.",
   seo: "Phân tích on-page SEO chi tiết cho bất kỳ URL nào.",
+  seoworkspace: "Bộ công cụ SEO toàn diện — Technical SEO, CRO, Backlinks, Core Web Vitals, Link hỏng, Schema.",
+  keywordhub: "Nghiên cứu từ khóa, phân tích đối thủ, SERP trực tiếp và theo dõi thứ hạng.",
+  contentstudio: "Lập kế hoạch → Viết bài AI → Polish → Spin — workflow nội dung hoàn chỉnh.",
+  schemageo: "Tạo và kiểm tra Schema.org markup cho Local SEO và Rich Snippets.",
   techseo: "Kiểm tra 8 tiêu chí kỹ thuật: tốc độ, mobile, indexing, bảo mật...",
   cwv: "Đo Core Web Vitals (LCP, FID, CLS) qua PageSpeed Insights API.",
   cro: "Phân tích Conversion Rate Optimization và tín hiệu uy tín.",
@@ -211,7 +203,7 @@ const PAGE_DESCRIPTIONS: Record<string, string> = {
   tracker: "Theo dõi chiến dịch marketing, đo lường ROI và hiệu quả.",
   fileconvert: "Chuyển đổi file PDF, Word, Excel, PPT sang Markdown.",
   sites: "Quản lý nhiều website — chuyển đổi nhanh giữa các dự án.",
-  googlesetup: "Cấu hình Google Search Console và Google Analytics API.",
+  googlesetup: "Cấu hình kết nối API — Groq, Google, DataForSEO, PageSpeed.",
 };
 
 // ─── Page header component ──────────────────────────────────────────────────
@@ -1475,49 +1467,35 @@ export default function App() {
           </>
         } />
 
-        {/* Rank Tracker Tab */}
-        <Route path="/rank-tracker" element={<RankTracker />} />
+        {/* ── NEW Workspace Routes ── */}
+        <Route path="/seo-workspace" element={<SeoWorkspace />} />
+        <Route path="/keyword-hub" element={<KeywordHub />} />
+        <Route path="/content-studio" element={<ContentStudio />} />
+        <Route path="/schema-geo" element={<SchemaGeo />} />
 
-        {/* Spin Editor Tab */}
-        <Route path="/spin-editor" element={<SpinEditor />} />
+        {/* ── Legacy routes (backward compat) ── */}
+        <Route path="/rank-tracker" element={<KeywordHub initialTab="tracker" />} />
+        <Route path="/spin-editor" element={<ContentStudio initialTab="spin" />} />
+        <Route path="/geo-optimizer" element={<SchemaGeo initialTab="generate" />} />
+        <Route path="/technical-seo" element={<SeoWorkspace initialTab="techseo" />} />
+        <Route path="/backlinks" element={<SeoWorkspace initialTab="backlinks" />} />
+        <Route path="/core-web-vitals" element={<SeoWorkspace initialTab="cwv" />} />
+        <Route path="/broken-links" element={<SeoWorkspace initialTab="brokenlinks" />} />
+        <Route path="/schema-validator" element={<SchemaGeo initialTab="validate" />} />
+        <Route path="/keywords" element={<KeywordHub initialTab="research" />} />
+        <Route path="/competitor" element={<KeywordHub initialTab="competitor" />} />
+        <Route path="/serp" element={<KeywordHub initialTab="serp" />} />
+        <Route path="/campaign" element={<KeywordHub initialTab="campaign" />} />
 
-        {/* GEO Optimizer Tab */}
-        <Route path="/geo-optimizer" element={<GeoOptimizer />} />
-
-        {/* Technical SEO Tab */}
-        <Route path="/technical-seo" element={<TechnicalSeo />} />
-
-        {/* Backlink Analyzer Tab */}
-        <Route path="/backlinks" element={<BacklinkAnalyzer />} />
-
-        {/* Core Web Vitals Tab */}
-        <Route path="/core-web-vitals" element={<CoreWebVitals />} />
-
-        {/* Broken Link Checker Tab */}
-        <Route path="/broken-links" element={<BrokenLinkChecker />} />
-
-        {/* Schema Validator Tab */}
-        <Route path="/schema-validator" element={<SchemaValidator />} />
-
-        {/* AI Report Generator Tab */}
+        {/* ── Operations routes ── */}
         <Route path="/report" element={<ReportGenerator />} />
-
-        {/* Content Calendar Tab */}
         <Route path="/content-calendar" element={<ContentCalendar />} />
-
-        {/* Multi-site Manager Tab */}
         <Route path="/sites" element={<SiteManager />} />
-
-        {/* SEO A/B Testing Tab */}
         <Route path="/ab-testing" element={<AbTesting />} />
-
-        {/* File Converter Tab */}
         <Route path="/file-converter" element={<FileConverter />} />
-
-        {/* Google Setup Tab */}
         <Route path="/google-setup" element={<GoogleSetup />} />
 
-        {/* Catch-all: redirect unknown routes to dashboard */}
+        {/* Catch-all */}
         <Route path="*" element={<DashboardOverview onNavigate={(tab) => navigate(getPathFromTabId(tab))} />} />
 
         </Routes>

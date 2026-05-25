@@ -127,6 +127,26 @@ export const SEO_CONFIG: Record<string, PageSEO> = {
     description: 'Quản lý tài khoản người dùng — thay đổi vai trò, vô hiệu hóa tài khoản (admin).',
     path: '/admin/users',
   },
+  seoworkspace: {
+    title: 'SEO Workspace',
+    description: 'Bộ công cụ SEO toàn diện — Technical SEO, CRO, Backlinks, Core Web Vitals, Link hỏng, Schema.',
+    path: '/seo-workspace',
+  },
+  keywordhub: {
+    title: 'Keyword Intelligence',
+    description: 'Nghiên cứu từ khóa, phân tích đối thủ, SERP trực tiếp và theo dõi thứ hạng.',
+    path: '/keyword-hub',
+  },
+  contentstudio: {
+    title: 'Content Studio',
+    description: 'Lập kế hoạch → Viết bài AI → Polish → Spin — workflow nội dung hoàn chỉnh.',
+    path: '/content-studio',
+  },
+  schemageo: {
+    title: 'Schema & GEO',
+    description: 'Tạo và kiểm tra Schema.org markup cho Local SEO và Rich Snippets.',
+    path: '/schema-geo',
+  },
 };
 
 // Reverse lookup: URL path -> tab ID

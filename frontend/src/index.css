@@ -361,6 +361,92 @@ body {
   margin: 0;
 }
 
+/* ── Workspace Containers ────────────────────────────────────────────────── */
+.workspace-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+.workspace-tabs {
+  display: flex;
+  gap: 4px;
+  padding: 6px;
+  background: rgba(255,255,255,0.7);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(139,92,246,0.08);
+  border-radius: 14px;
+  margin-bottom: 20px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.workspace-tabs::-webkit-scrollbar { display: none; }
+.workspace-tab {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 500;
+  font-family: "DM Sans", sans-serif;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.workspace-tab:hover {
+  background: rgba(139,92,246,0.06);
+  color: var(--purple);
+}
+.workspace-tab-active {
+  background: linear-gradient(135deg, var(--purple), var(--cyan));
+  color: #ffffff;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(139,92,246,0.25);
+}
+.workspace-tab-active:hover {
+  background: linear-gradient(135deg, var(--purple), var(--cyan));
+  color: #ffffff;
+}
+.workspace-tab-icon {
+  font-size: 15px;
+  line-height: 1;
+}
+.workspace-tab-label {
+  font-size: 13px;
+}
+.workspace-content {
+  min-height: 400px;
+}
+.workspace-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+  color: var(--text);
+  font-size: 14px;
+  background: rgba(255,255,255,0.5);
+  border: 1px dashed rgba(139,92,246,0.15);
+  border-radius: 12px;
+  padding: 40px;
+  text-align: center;
+}
+
+@media (max-width: 768px) {
+  .workspace-tabs {
+    gap: 2px;
+    padding: 4px;
+  }
+  .workspace-tab {
+    padding: 8px 12px;
+    font-size: 12px;
+  }
+  .workspace-tab-icon { font-size: 14px; }
+}
+
 /* ── Main Content ────────────────────────────────────────────────────────── */
 .main-content {
   position: relative;
