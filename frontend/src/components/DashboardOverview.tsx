@@ -336,8 +336,8 @@ export function DashboardOverview({ onNavigate }: { onNavigate: (tab: string) =>
               >
                 <span style={{ fontSize: 18, fontWeight: 800, color: i === 0 ? '#10b981' : i < 3 ? '#3b82f6' : '#8892b0', fontFamily: 'DM Mono, monospace', flexShrink: 0, width: 28 }}>#{r.position}</span>
                 <div style={{ minWidth: 0, flex: 1 }}>
-                  <div style={{ fontSize: 12, color: '#1f2937', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{r.title}</div>
-                  <div style={{ fontSize: 10, color: '#4a5578' }}>{r.domain}</div>
+                  <div style={{ fontSize: 12, color: 'var(--text-h, #e2e8f0)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{r.title}</div>
+                  <div style={{ fontSize: 10, color: 'var(--text-dim, #94a3b8)' }}>{r.domain}</div>
                 </div>
               </a>
             ))}
@@ -409,9 +409,9 @@ export function DashboardOverview({ onNavigate }: { onNavigate: (tab: string) =>
           {topByImpressions.length > 0 ? (
             <ResponsiveContainer width="100%" height={220}>
               <BarChart data={topByImpressions} margin={{ top: 5, right: 10, left: -15, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.06)" />
-                <XAxis dataKey="keyword" tick={{ fontSize: 10, fill: "#9ca3af" }} interval={0} angle={-25} textAnchor="end" height={60} />
-                <YAxis tick={{ fontSize: 10, fill: "#9ca3af" }} />
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(139,92,246,0.1)" />
+                <XAxis dataKey="keyword" tick={{ fontSize: 10, fill: "#94a3b8" }} interval={0} angle={-25} textAnchor="end" height={60} />
+                <YAxis tick={{ fontSize: 10, fill: "#94a3b8" }} />
                 <Tooltip content={<ChartTooltip />} />
                 <Bar dataKey="impressions" name="Hiển thị" fill={COLORS.purple} radius={[4, 4, 0, 0]} />
                 <Bar dataKey="clicks" name="Clicks" fill={COLORS.cyan} radius={[4, 4, 0, 0]} />
@@ -456,9 +456,9 @@ export function DashboardOverview({ onNavigate }: { onNavigate: (tab: string) =>
           {(ga4Data?.daily_sessions?.length || 0) > 0 ? (
             <ResponsiveContainer width="100%" height={200}>
               <AreaChart data={ga4Data.daily_sessions} margin={{ top: 5, right: 10, left: -15, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.06)" />
-                <XAxis dataKey="date" tick={{ fontSize: 9, fill: "#9ca3af" }} interval={Math.max(0, Math.floor((ga4Data.daily_sessions.length - 1) / 8))} />
-                <YAxis tick={{ fontSize: 10, fill: "#9ca3af" }} />
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(139,92,246,0.1)" />
+                <XAxis dataKey="date" tick={{ fontSize: 9, fill: "#94a3b8" }} interval={Math.max(0, Math.floor((ga4Data.daily_sessions.length - 1) / 8))} />
+                <YAxis tick={{ fontSize: 10, fill: "#94a3b8" }} />
                 <Tooltip content={<ChartTooltip />} />
                 <defs>
                   <linearGradient id="sessGrad" x1="0" y1="0" x2="0" y2="1">
@@ -551,8 +551,8 @@ export function DashboardOverview({ onNavigate }: { onNavigate: (tab: string) =>
           </h3>
           <ResponsiveContainer width="100%" height={220}>
             <RadarChart data={radarData}>
-              <PolarGrid stroke="rgba(0,0,0,0.08)" />
-              <PolarAngleAxis dataKey="subject" tick={{ fontSize: 10, fill: "#6b7280" }} />
+              <PolarGrid stroke="rgba(139,92,246,0.15)" />
+              <PolarAngleAxis dataKey="subject" tick={{ fontSize: 10, fill: "#94a3b8" }} />
               <Radar name="Score" dataKey="value" stroke={COLORS.cyan} fill={COLORS.cyan} fillOpacity={0.2} strokeWidth={2} />
             </RadarChart>
           </ResponsiveContainer>

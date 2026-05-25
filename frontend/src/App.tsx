@@ -56,18 +56,18 @@ class ErrorBoundary extends React.Component<
     if (this.state.hasError) {
       return (
         <div style={{
-          padding: "40px", textAlign: "center", color: "#ef4444",
-          background: "rgba(239,68,68,0.06)", borderRadius: "12px",
+          padding: "40px", textAlign: "center", color: "#f87171",
+          background: "rgba(220, 38, 38, 0.1)", borderRadius: "12px",
           margin: "40px auto", maxWidth: "600px",
-          border: "1px solid rgba(239,68,68,0.2)",
+          border: "1px solid rgba(220, 38, 38, 0.2)",
         }}>
           <h2 style={{ marginBottom: "8px" }}>⚠️ Render Error</h2>
-          <p style={{ fontSize: "14px", color: "#ccc" }}>{this.state.error}</p>
+          <p style={{ fontSize: "14px", color: "#94a3b8" }}>{this.state.error}</p>
           <button
             onClick={() => this.setState({ hasError: false, error: "" })}
             style={{
               marginTop: "16px", padding: "8px 24px",
-              background: "#ef4444", color: "#fff", border: "none",
+              background: "#dc2626", color: "#fff", border: "none",
               borderRadius: "8px", cursor: "pointer", fontSize: "14px",
             }}
           >
