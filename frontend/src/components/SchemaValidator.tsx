@@ -201,7 +201,26 @@ export function SchemaValidator() {
       if (!r.ok || d.error) {
         setError(d.error || d.detail || `HTTP ${r.status}`);
       } else {
-        setResult(d);
+        // Transform backend response (blocks/errors/warnings)
+        // to frontend ValidationResult (schemas/valid_count/etc.)
+        const blocks: { type?: string; valid?: boolean; errors?: string[]; warnings?: string[]; properties?: string[] }[] = d.blocks || [];
+        const schemas: SchemaItem[] = blocks.map(b => ({
+          type: b.type || "Unknown",
+          status: (b.errors?.length ?? 0) > 0 ? "error"
+            : (b.warnings?.length ?? 0) > 0 ? "warning"
+            : "valid",
+          errors: b.errors || [],
+          warnings: b.warnings || [],
+          raw: b as Record<string, unknown>,
+        }));
+        setResult({
+          url: d.url,
+          schemas,
+          total_schemas: d.schemas_found ?? schemas.length,
+          valid_count: schemas.filter(s => s.status === "valid").length,
+          warning_count: schemas.filter(s => s.status === "warning").length,
+          error_count: schemas.filter(s => s.status === "error").length,
+        });
       }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any -- API response data
     } catch (err: any) {
