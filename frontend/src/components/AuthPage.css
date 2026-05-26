@@ -163,22 +163,32 @@
 }
 .auth-input {
   width: 100%;
-  background: var(--surface2);
-  border: 1px solid var(--border);
+  background: #f4f5fa;
+  border: 1px solid #d8dce8;
   border-radius: var(--radius-sm);
-  color: var(--text-h);
+  color: #1a1d2e;
   font-family: "DM Sans", sans-serif;
   font-size: 14px;
   padding: 12px 14px;
   outline: none;
   transition: border-color 0.2s, box-shadow 0.2s;
+  -webkit-text-fill-color: #1a1d2e;
 }
 .auth-input::placeholder {
-  color: var(--text-dim);
+  color: #8b92a5;
+  -webkit-text-fill-color: #8b92a5;
 }
 .auth-input:focus {
-  border-color: rgba(22, 163, 74, 0.6);
-  box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.1);
+  border-color: rgba(139, 92, 246, 0.6);
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+}
+/* Fix browser autofill override */
+.auth-input:-webkit-autofill,
+.auth-input:-webkit-autofill:hover,
+.auth-input:-webkit-autofill:focus {
+  -webkit-text-fill-color: #1a1d2e !important;
+  -webkit-box-shadow: 0 0 0 40px #f4f5fa inset !important;
+  font-size: 14px;
 }
 
 /* ── Submit button ───────────────────────────────────────────────────── */
