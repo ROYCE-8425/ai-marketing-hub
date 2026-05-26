@@ -135,14 +135,16 @@ export default function FileConverter() {
           className={`submit-btn ${mode === "file" ? "" : "secondary"}`}
           onClick={() => { setMode("file"); setResult(null); setError(""); }}
           style={mode !== "file" ? {
-            background: "rgba(0,0,0,0.06)", border: "1px solid rgba(0,0,0,0.08)"
+            background: "rgba(0,0,0,0.06)", border: "1px solid rgba(0,0,0,0.08)",
+            color: "var(--text-h)"
           } : {}}
         >📁 Upload File</button>
         <button
           className={`submit-btn ${mode === "url" ? "" : "secondary"}`}
           onClick={() => { setMode("url"); setResult(null); setError(""); }}
           style={mode !== "url" ? {
-            background: "rgba(0,0,0,0.06)", border: "1px solid rgba(0,0,0,0.08)"
+            background: "rgba(0,0,0,0.06)", border: "1px solid rgba(0,0,0,0.08)",
+            color: "var(--text-h)"
           } : {}}
         >🌐 Từ URL</button>
       </div>
@@ -226,8 +228,8 @@ export default function FileConverter() {
               placeholder="https://example.com/article"
               style={{
                 flex: 1, padding: "12px 16px", borderRadius: 10,
-                background: "rgba(0,0,0,0.06)",
-                border: "1px solid rgba(0,0,0,0.08)",
+                background: "var(--surface2)",
+                border: "1px solid var(--border)",
                 color: "var(--text-h)", fontSize: 14, outline: "none",
               }}
               onKeyDown={(e) => e.key === "Enter" && convertUrl()}
