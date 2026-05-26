@@ -78,13 +78,22 @@ export function ContentCalendar() {
   const handleAdd = async () => {
     if (!form.title.trim()) return;
     setLoading(true);
-    await fetch(`${API_BASE}/calendar/add`, {
-      method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
-    });
-    setForm({ title: "", description: "", content_type: "blog", scheduled_date: "", author: "", keywords: "", priority: "medium" });
-    setShowForm(false);
-    await fetchItems(); await fetchStats();
+    try {
+      const r = await fetch(`${API_BASE}/calendar/add`, {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+      const d = await r.json();
+      if (d.error || d.status === "error") {
+        alert(`❌ ${d.error || d.message || "Không thể thêm bài viết"}`);
+      } else {
+        setForm({ title: "", description: "", content_type: "blog", scheduled_date: "", author: "", keywords: "", priority: "medium" });
+        setShowForm(false);
+        await fetchItems(); await fetchStats();
+      }
+    } catch (err) {
+      alert("Lỗi kết nối server");
+    }
     setLoading(false);
   };
 
@@ -112,18 +121,31 @@ export function ContentCalendar() {
         body: JSON.stringify({ niche: "ô tô", count: 5 }),
       });
       const d = await r.json();
-      setSuggestions(d.topics || []);
+      if (d.error) {
+        alert(`❌ ${d.error}`);
+      } else {
+        setSuggestions(d.topics || []);
+      }
     } catch { /* ignore */ }
     setSuggestLoading(false);
   };
 
   const addSuggestion = async (s: TopicSuggestion) => {
-    await fetch(`${API_BASE}/calendar/add`, {
-      method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...s, scheduled_date: "" }),
-    });
-    setSuggestions(suggestions.filter(x => x.title !== s.title));
-    await fetchItems(); await fetchStats();
+    try {
+      const r = await fetch(`${API_BASE}/calendar/add`, {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...s, scheduled_date: "" }),
+      });
+      const d = await r.json();
+      if (d.error || d.status === "error" || !r.ok) {
+        alert(`❌ ${d.error || d.message || "Không thể thêm"}`);
+        return;
+      }
+      setSuggestions(prev => prev.filter(x => x.title !== s.title));
+      await fetchItems(); await fetchStats();
+    } catch {
+      alert("Lỗi kết nối server");
+    }
   };
 
   return (
