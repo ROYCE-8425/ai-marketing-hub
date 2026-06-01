@@ -20,7 +20,7 @@ from typing import Optional
 
 import httpx
 from dotenv import load_dotenv
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Query, Request
 from fastapi.responses import HTMLResponse
 
 # Load .env from backend root
@@ -39,9 +39,17 @@ OAUTH_SCOPES = [
 _DEFAULT_REDIRECT_URI = "http://localhost:8000/auth/google/callback"
 
 
-def _get_redirect_uri() -> str:
-    """Get redirect URI from env or use default."""
-    return os.getenv("GOOGLE_OAUTH_REDIRECT_URI", _DEFAULT_REDIRECT_URI)
+def _get_redirect_uri(request: Request) -> str:
+    """Get redirect URI dynamically from request context or env override."""
+    env_override = os.getenv("GOOGLE_OAUTH_REDIRECT_URI")
+    if env_override:
+        return env_override
+        
+    host = request.headers.get("x-forwarded-host") or request.headers.get("host") or "localhost:8000"
+    proto = request.headers.get("x-forwarded-proto") or "http"
+    if "localhost" not in host and "127.0.0.1" not in host:
+        proto = "https"
+    return f"{proto}://{host}/auth/google/callback"
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -49,7 +57,7 @@ def _get_redirect_uri() -> str:
 # ─────────────────────────────────────────────────────────────────────────────
 
 @router.get("/auth/google/setup")
-async def google_auth_setup():
+async def google_auth_setup(request: Request):
     """
     Generate Google OAuth2 authorization URL.
 
@@ -74,7 +82,7 @@ async def google_auth_setup():
             ),
         }
 
-    redirect_uri = _get_redirect_uri()
+    redirect_uri = _get_redirect_uri(request)
     params = {
         "client_id": client_id,
         "redirect_uri": redirect_uri,
@@ -97,7 +105,7 @@ async def google_auth_setup():
 # ─────────────────────────────────────────────────────────────────────────────
 
 @router.get("/auth/google/callback")
-async def google_auth_callback(code: str = Query(None), error: str = Query(None)):
+async def google_auth_callback(request: Request, code: str = Query(None), error: str = Query(None)):
     """
     OAuth2 callback: exchange authorization code for refresh_token.
 
@@ -106,6 +114,11 @@ async def google_auth_callback(code: str = Query(None), error: str = Query(None)
     - Reloads env vars in current process
     - Returns success HTML page
     """
+    host = request.headers.get("x-forwarded-host") or request.headers.get("host") or "localhost:8000"
+    if "localhost" in host or "127.0.0.1" in host:
+        base_frontend = "http://localhost:5173"
+    else:
+        base_frontend = f"https://{host}"
     if error:
         return HTMLResponse(f"""
         <html><head><title>OAuth Error</title></head>
@@ -113,7 +126,7 @@ async def google_auth_callback(code: str = Query(None), error: str = Query(None)
         <div style="text-align:center;max-width:500px">
             <h1 style="color:#fca5a5">❌ Lỗi xác thực</h1>
             <p>{error}</p>
-            <a href="http://localhost:5173/" style="color:#c4b5fd;text-decoration:underline">← Quay về Dashboard</a>
+            <a href="{base_frontend}/" style="color:#c4b5fd;text-decoration:underline">← Quay về Dashboard</a>
         </div>
         </body></html>
         """, status_code=400)
@@ -125,7 +138,7 @@ async def google_auth_callback(code: str = Query(None), error: str = Query(None)
         <div style="text-align:center;max-width:500px">
             <h1 style="color:#fca5a5">❌ Không nhận được mã xác thực</h1>
             <p>Google không trả về authorization code.</p>
-            <a href="http://localhost:5173/" style="color:#c4b5fd;text-decoration:underline">← Quay về Dashboard</a>
+            <a href="{base_frontend}/" style="color:#c4b5fd;text-decoration:underline">← Quay về Dashboard</a>
         </div>
         </body></html>
         """, status_code=400)
@@ -141,13 +154,13 @@ async def google_auth_callback(code: str = Query(None), error: str = Query(None)
         <div style="text-align:center;max-width:500px">
             <h1 style="color:#fca5a5">❌ Thiếu Client ID / Secret</h1>
             <p>Cần cấu hình GOOGLE_SEARCH_CONSOLE_CLIENT_ID và GOOGLE_SEARCH_CONSOLE_CLIENT_SECRET trong .env</p>
-            <a href="http://localhost:5173/" style="color:#c4b5fd;text-decoration:underline">← Quay về Dashboard</a>
+            <a href="{base_frontend}/" style="color:#c4b5fd;text-decoration:underline">← Quay về Dashboard</a>
         </div>
         </body></html>
         """, status_code=500)
 
     # Exchange authorization code for tokens
-    redirect_uri = _get_redirect_uri()
+    redirect_uri = _get_redirect_uri(request)
     try:
         token_resp = httpx.post("https://oauth2.googleapis.com/token", data={
             "code": code,
@@ -164,7 +177,7 @@ async def google_auth_callback(code: str = Query(None), error: str = Query(None)
         <div style="text-align:center;max-width:500px">
             <h1 style="color:#fca5a5">❌ Lỗi trao đổi token</h1>
             <p>{str(exc)[:200]}</p>
-            <a href="http://localhost:5173/" style="color:#c4b5fd;text-decoration:underline">← Quay về Dashboard</a>
+            <a href="{base_frontend}/" style="color:#c4b5fd;text-decoration:underline">← Quay về Dashboard</a>
         </div>
         </body></html>
         """, status_code=500)
@@ -181,7 +194,7 @@ async def google_auth_callback(code: str = Query(None), error: str = Query(None)
             <p style="color:#94a3b8;font-size:13px">Thử xóa quyền truy cập tại
             <a href="https://myaccount.google.com/permissions" target="_blank" style="color:#a5b4fc">myaccount.google.com/permissions</a>
             rồi thử lại.</p>
-            <a href="http://localhost:5173/" style="color:#c4b5fd;text-decoration:underline">← Quay về Dashboard</a>
+            <a href="{base_frontend}/" style="color:#c4b5fd;text-decoration:underline">← Quay về Dashboard</a>
         </div>
         </body></html>
         """, status_code=400)
@@ -217,7 +230,7 @@ async def google_auth_callback(code: str = Query(None), error: str = Query(None)
         </div>
         <p style="color:#94a3b8;font-size:13px">Token: <code style="color:#a5b4fc">{token_preview}</code></p>
         <p style="color:#cbd5e1">Refresh token đã được lưu vào .env.<br>GA4 và GSC đã sẵn sàng.</p>
-        <a href="http://localhost:5173/"
+        <a href="{base_frontend}/"
            style="display:inline-block;margin-top:16px;padding:10px 24px;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;border-radius:8px;text-decoration:none;font-weight:500">
             ← Quay về Dashboard
         </a>
