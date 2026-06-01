@@ -151,6 +151,28 @@ async def fetch_broken_links(site_url: str) -> Tuple[str, Optional[Dict[str, Any
         return "error", {"error": str(e)}
 
 
+async def fetch_rank_tracking(site_url: str) -> Tuple[str, Optional[Dict[str, Any]]]:
+    """Fetch tracked keywords and ranking alerts from local database."""
+    try:
+        keywords = await asyncio.to_thread(get_tracked_keywords, site_url)
+        alerts = await asyncio.to_thread(check_ranking_alerts, site_url)
+        return "ok", {
+            "keywords": keywords,
+            "alerts": alerts
+        }
+    except Exception as e:
+        return "error", {"error": str(e)}
+
+
+async def fetch_usage_history() -> Tuple[str, Optional[Dict[str, Any]]]:
+    """Fetch usage log stats from local database."""
+    try:
+        stats = await asyncio.to_thread(get_usage_stats)
+        return "ok", stats
+    except Exception as e:
+        return "error", {"error": str(e)}
+
+
 # ─────────────────────────────────────────────────────────────────────────────
 # Deterministic Normalization and Rules Logic
 # ─────────────────────────────────────────────────────────────────────────────
