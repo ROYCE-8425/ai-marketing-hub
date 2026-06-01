@@ -49,3 +49,6 @@ seomachine/
 
 # Cache
 backend/.cache/
+.codegraph/
+.codex/
+*.log

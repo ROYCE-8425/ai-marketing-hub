@@ -21,6 +21,7 @@ import { SiteManager } from "./components/SiteManager";
 import { AbTesting } from "./components/AbTesting";
 import FileConverter from "./components/FileConverter";
 import { SeoWorkspace } from "./components/SeoWorkspace";
+import { AiAdvisor } from "./components/AiAdvisor";
 import { KeywordHub } from "./components/KeywordHub";
 import { ContentStudio } from "./components/ContentStudio";
 import { SchemaGeo } from "./components/SchemaGeo";
@@ -95,7 +96,7 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 
 // ─── Tab types ─────────────────────────────────────────────────────────────────
 
-export type TabId = "dashboard" | "seo" | "cro" | "competitor" | "planner" | "tracker" | "serp" | "aikeys" | "ranktracker" | "spineditor" | "geo" | "techseo" | "report" | "backlinks" | "calendar" | "sites" | "abtest" | "fileconvert" | "googlesetup" | "cwv" | "brokenlinks" | "schemavalidator" | "seoworkspace" | "keywordhub" | "contentstudio" | "schemageo";
+export type TabId = "dashboard" | "seo" | "cro" | "competitor" | "planner" | "tracker" | "serp" | "aikeys" | "ranktracker" | "spineditor" | "geo" | "techseo" | "report" | "backlinks" | "calendar" | "sites" | "abtest" | "fileconvert" | "googlesetup" | "cwv" | "brokenlinks" | "schemavalidator" | "seoworkspace" | "keywordhub" | "contentstudio" | "schemageo" | "aiadvisor";
 
 interface NavItem { id: TabId; label: string; icon: string }
 interface NavGroup { group: string; icon: string; items: NavItem[] }
@@ -207,6 +208,9 @@ const NAV_ICONS: Record<string, string[]> = {
     "M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z",
     "M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z",
   ],
+  aiadvisor: [
+    "M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8z",
+  ],
 };
 
 /** Render a monochrome SVG icon */
@@ -223,6 +227,7 @@ function NavIcon({ name, size = 18 }: { name: string; size?: number }) {
 const NAV_GROUPS: NavGroup[] = [
   { group: "Tổng quan", icon: "", items: [
     { id: "dashboard", label: "Dashboard", icon: "dashboard" },
+    { id: "aiadvisor", label: "AI Cố vấn", icon: "aiadvisor" },
   ]},
   { group: "SEO", icon: "", items: [
     { id: "seo", label: "Kiểm tra SEO", icon: "seo" },
@@ -262,6 +267,7 @@ const NAV_INDEX: NavIndexItem[] = NAV_GROUPS.flatMap((group) =>
 
 const PAGE_DESCRIPTIONS: Record<string, string> = {
   dashboard: "Tổng quan hiệu suất SEO, lượt truy cập và các chỉ số quan trọng.",
+  aiadvisor: "Tổng hợp toàn diện dữ liệu GSC, GA4, SEO Technical để cố vấn tối ưu website bằng AI.",
   seo: "Phân tích on-page SEO chi tiết cho bất kỳ URL nào.",
   seoworkspace: "Bộ công cụ SEO toàn diện — Technical SEO, CRO, Backlinks, Core Web Vitals, Link hỏng, Schema.",
   keywordhub: "Nghiên cứu từ khóa, phân tích đối thủ, SERP trực tiếp và theo dõi thứ hạng.",
@@ -827,6 +833,13 @@ export default function App() {
         <Route path="/" element={
           <ProtectedRoute>
             <DashboardOverview onNavigate={(tab) => navigate(getPathFromTabId(tab))} />
+          </ProtectedRoute>
+        } />
+
+        {/* ── AI Advisor Tab ── */}
+        <Route path="/ai-advisor" element={
+          <ProtectedRoute>
+            <AiAdvisor />
           </ProtectedRoute>
         } />
 

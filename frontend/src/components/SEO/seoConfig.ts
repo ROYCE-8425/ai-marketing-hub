@@ -147,6 +147,11 @@ export const SEO_CONFIG: Record<string, PageSEO> = {
     description: 'Tạo và kiểm tra Schema.org markup cho Local SEO và Rich Snippets.',
     path: '/schema-geo',
   },
+  aiadvisor: {
+    title: 'AI Cố vấn website',
+    description: 'AI Cố vấn tối ưu hóa website toàn diện — tổng hợp số liệu GSC, GA4, SEO Technical để đưa ra hành động có thứ tự ưu tiên.',
+    path: '/ai-advisor',
+  },
 };
 
 // Reverse lookup: URL path -> tab ID
