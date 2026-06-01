@@ -9,8 +9,9 @@ from __future__ import annotations
 
 import os
 from typing import Optional
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from pydantic import BaseModel, Field
+from core.auth import get_current_user
 
 router = APIRouter(prefix="/api/advisor", tags=["Phase 21 — AI Website Advisor"])
 
@@ -39,7 +40,7 @@ class SiteAdvisorRequest(BaseModel):
 # ─────────────────────────────────────────────────────────────────────────────
 
 @router.post("/analyze")
-async def analyze_site_api(body: SiteAdvisorRequest):
+async def analyze_site_api(body: SiteAdvisorRequest, user: dict = Depends(get_current_user)):
     """
     Phân tích toàn diện và đưa ra đề xuất cố vấn tối ưu hóa website.
     Gom dữ liệu từ GSC, GA4, Technical SEO, v.v., tính deterministic insights,

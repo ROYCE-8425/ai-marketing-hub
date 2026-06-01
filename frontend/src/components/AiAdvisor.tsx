@@ -51,6 +51,155 @@ interface SourceStatus {
   usage: string;
 }
 
+interface GscQueryItem {
+  keyword: string;
+  clicks: number;
+  impressions: number;
+  ctr: number;
+  position: number;
+}
+
+interface GscQuickWinItem {
+  keyword: string;
+  clicks: number;
+  impressions: number;
+  ctr: number;
+  position: number;
+}
+
+interface GscSnapshot {
+  clicks: number;
+  impressions: number;
+  ctr: number;
+  avg_position: number;
+  top_queries: GscQueryItem[];
+  quick_wins: GscQuickWinItem[];
+}
+
+interface Ga4PageItem {
+  path: string;
+  pageviews: number;
+  sessions?: number;
+  engagement_rate?: number;
+  bounce_rate?: number;
+}
+
+interface Ga4ChannelItem {
+  source: string;
+  sessions: number;
+  conversions: number;
+}
+
+interface Ga4Snapshot {
+  total_sessions: number;
+  total_pageviews: number;
+  engagement_rate: number;
+  bounce_rate: number;
+  top_pages: Ga4PageItem[];
+  top_channels: Ga4ChannelItem[];
+}
+
+interface TechnicalIssueItem {
+  category: string;
+  message: string;
+  fix: string;
+}
+
+interface CwvOpportunityItem {
+  title: string;
+  description: string;
+  score: number;
+  displayValue: string;
+}
+
+interface CwvSnapshot {
+  overall_status?: string;
+  error?: string;
+  lighthouse_scores?: {
+    performance?: number;
+    accessibility?: number;
+    best_practices?: number;
+    seo?: number;
+  };
+  metrics?: Record<string, {
+    value: number;
+    unit: string;
+    rating: string;
+  }>;
+  opportunities?: CwvOpportunityItem[];
+}
+
+interface SchemaSnapshot {
+  schemas_found?: number;
+  valid: boolean;
+  types_found?: string[];
+  errors?: string[];
+  warnings?: string[];
+}
+
+interface TechnicalSnapshot {
+  seo_score: number;
+  grade: string;
+  load_time: number;
+  broken_links_count: number;
+  critical_issues: TechnicalIssueItem[];
+  warnings: TechnicalIssueItem[];
+  cwv: CwvSnapshot;
+  schema: SchemaSnapshot;
+}
+
+interface TrackedKeywordItem {
+  id?: number;
+  keyword: string;
+  site_url: string;
+  tag?: string;
+  created_at?: string;
+}
+
+interface RankAlertItem {
+  keyword: string;
+  severity: "critical" | "warning";
+  drop: number;
+  current_position: number;
+}
+
+interface RankTrackingSnapshot {
+  tracked_keywords: TrackedKeywordItem[];
+  alerts: RankAlertItem[];
+}
+
+interface UsageHistorySnapshot {
+  total_calls: number;
+  success_rate: number;
+  error_count: number;
+  anomalies: string[];
+}
+
+interface SerpOrganicResultItem {
+  position: number;
+  title: string;
+  url: string;
+  domain: string;
+}
+
+interface SerpSnapshot {
+  keyword: string;
+  organic_results: SerpOrganicResultItem[];
+  search_intent?: {
+    primary: string;
+    content_recommendations?: string[];
+  };
+}
+
+interface DataSnapshot {
+  gsc: GscSnapshot;
+  ga4: Ga4Snapshot;
+  technical: TechnicalSnapshot;
+  rank_tracking: RankTrackingSnapshot;
+  usage_history: UsageHistorySnapshot;
+  serp: SerpSnapshot | null;
+}
+
 interface AdvisorResponse {
   site_url: string;
   analyzed_at: string;
@@ -65,8 +214,7 @@ interface AdvisorResponse {
   action_plan_30d: ActionPlanItem[];
   source_status: SourceStatus;
   ai_provider: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  data_snapshot: any;
+  data_snapshot: DataSnapshot;
 }
 
 export function AiAdvisor() {
