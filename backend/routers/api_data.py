@@ -21,7 +21,7 @@ from dotenv import load_dotenv
 # Load .env from backend root
 load_dotenv(os.path.join(os.path.dirname(os.path.dirname(__file__)), ".env"))
 
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Query, Request
 from pydantic import BaseModel, Field
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -133,8 +133,15 @@ OAUTH_SCOPES = [
     "https://www.googleapis.com/auth/analytics.readonly",
 ]
 
+def get_redirect_uri(request: Request) -> str:
+    host = request.headers.get("x-forwarded-host") or request.headers.get("host") or "localhost:8000"
+    proto = request.headers.get("x-forwarded-proto") or "http"
+    if "localhost" not in host and "127.0.0.1" not in host:
+        proto = "https"
+    return f"{proto}://{host}/api/oauth/callback"
+
 @router.get("/oauth/authorize")
-async def oauth_authorize():
+async def oauth_authorize(request: Request):
     """Generate OAuth2 authorization URL to get GSC+GA4 scopes."""
     client_id = os.getenv("GOOGLE_SEARCH_CONSOLE_CLIENT_ID", "")
     if not client_id:
@@ -143,7 +150,7 @@ async def oauth_authorize():
     import urllib.parse
     params = {
         "client_id": client_id,
-        "redirect_uri": "http://localhost:8000/api/oauth/callback",
+        "redirect_uri": get_redirect_uri(request),
         "response_type": "code",
         "scope": " ".join(OAUTH_SCOPES),
         "access_type": "offline",
@@ -154,7 +161,7 @@ async def oauth_authorize():
 
 
 @router.get("/oauth/callback")
-async def oauth_callback(code: str = Query(None), error: str = Query(None)):
+async def oauth_callback(request: Request, code: str = Query(None), error: str = Query(None)):
     """Exchange OAuth2 code for refresh token, save to .env, return HTML."""
     if error:
         return {"error": error}
@@ -169,7 +176,7 @@ async def oauth_callback(code: str = Query(None), error: str = Query(None)):
         "code": code,
         "client_id": client_id,
         "client_secret": client_secret,
-        "redirect_uri": "http://localhost:8000/api/oauth/callback",
+        "redirect_uri": get_redirect_uri(request),
         "grant_type": "authorization_code",
     }, timeout=10.0)
     token_data = token_resp.json()
