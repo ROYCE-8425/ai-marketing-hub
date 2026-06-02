@@ -134,6 +134,12 @@ OAUTH_SCOPES = [
 ]
 
 def get_redirect_uri(request: Request) -> str:
+    env_override = os.getenv("GOOGLE_OAUTH_REDIRECT_URI")
+    if env_override:
+        if env_override.endswith("/auth/google/callback"):
+            return env_override.replace("/auth/google/callback", "/api/oauth/callback")
+        return env_override
+        
     host = request.headers.get("x-forwarded-host") or request.headers.get("host") or "localhost:8000"
     proto = request.headers.get("x-forwarded-proto") or "http"
     if "localhost" not in host and "127.0.0.1" not in host:

@@ -13,6 +13,9 @@ from fastapi import APIRouter, Depends
 from pydantic import BaseModel, Field
 from core.auth import get_current_user
 
+from sqlalchemy.orm import Session
+from core.database import get_db
+
 router = APIRouter(prefix="/api/advisor", tags=["Phase 21 — AI Website Advisor"])
 
 
@@ -40,7 +43,11 @@ class SiteAdvisorRequest(BaseModel):
 # ─────────────────────────────────────────────────────────────────────────────
 
 @router.post("/analyze")
-async def analyze_site_api(body: SiteAdvisorRequest, user: dict = Depends(get_current_user)):
+async def analyze_site_api(
+    body: SiteAdvisorRequest, 
+    user: dict = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
     """
     Phân tích toàn diện và đưa ra đề xuất cố vấn tối ưu hóa website.
     Gom dữ liệu từ GSC, GA4, Technical SEO, v.v., tính deterministic insights,
@@ -60,7 +67,8 @@ async def analyze_site_api(body: SiteAdvisorRequest, user: dict = Depends(get_cu
         include_technical=body.include_technical,
         include_cwv=body.include_cwv,
         include_schema=body.include_schema,
-        include_usage_history=body.include_usage_history
+        include_usage_history=body.include_usage_history,
+        db=db
     )
     
     return result

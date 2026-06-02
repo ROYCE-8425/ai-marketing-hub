@@ -68,6 +68,14 @@ class ManagedSite(Base):
     content_items = relationship("ContentItem", back_populates="site", cascade="all, delete-orphan")
     ab_tests = relationship("AbTest", back_populates="site", cascade="all, delete-orphan")
 
+    # ── SEO Intelligence Data Layer Relationships ──
+    raw_snapshots = relationship("SEORawSnapshot", back_populates="site", cascade="all, delete-orphan")
+    normalized_pages = relationship("SEONormalizedPage", back_populates="site", cascade="all, delete-orphan")
+    normalized_issues = relationship("SEONormalizedIssue", back_populates="site", cascade="all, delete-orphan")
+    advisor_runs = relationship("SEOAdvisorRun", back_populates="site", cascade="all, delete-orphan")
+    derived_signals = relationship("SEODerivedSignal", back_populates="site", cascade="all, delete-orphan")
+    recommendation_memories = relationship("SEORecommendationMemory", back_populates="site", cascade="all, delete-orphan")
+
 
 # ═══════════════════════════════════════════════════════════════
 # 3. RANK TRACKER
@@ -182,3 +190,101 @@ class UsageLog(Base):
 
     # Relationships
     user = relationship("User", back_populates="usage_logs")
+
+
+# ═══════════════════════════════════════════════════════════════
+# 7. SEO INTELLIGENCE DATA LAYER
+# ═══════════════════════════════════════════════════════════════
+
+class SEORawSnapshot(Base):
+    __tablename__ = "seo_raw_snapshots"
+
+    id = Column(Integer, primary_key=True, index=True)
+    site_id = Column(Integer, ForeignKey("managed_sites.id", ondelete="CASCADE"), nullable=False, index=True)
+    source = Column(String, nullable=False)  # gsc, ga4, technical_scan, cwv, schema, broken_links, serp
+    raw_data = Column(Text, nullable=False)  # JSON string
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    # Relationships
+    site = relationship("ManagedSite", back_populates="raw_snapshots")
+
+
+class SEONormalizedPage(Base):
+    __tablename__ = "seo_normalized_pages"
+
+    id = Column(Integer, primary_key=True, index=True)
+    site_id = Column(Integer, ForeignKey("managed_sites.id", ondelete="CASCADE"), nullable=False, index=True)
+    url = Column(String, nullable=False, index=True)
+    title = Column(String, nullable=True)
+    meta_description = Column(Text, nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+    # Relationships
+    site = relationship("ManagedSite", back_populates="normalized_pages")
+
+
+class SEONormalizedIssue(Base):
+    __tablename__ = "seo_normalized_issues"
+
+    id = Column(Integer, primary_key=True, index=True)
+    site_id = Column(Integer, ForeignKey("managed_sites.id", ondelete="CASCADE"), nullable=False, index=True)
+    page_url = Column(String, nullable=True)
+    category = Column(String, nullable=False)  # Technical, Speed, Links, Schema, Content
+    severity = Column(String, nullable=False)  # critical, warning, notice
+    message = Column(Text, nullable=False)
+    fix_action = Column(Text, nullable=True)
+    is_resolved = Column(Boolean, default=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    resolved_at = Column(DateTime(timezone=True), nullable=True)
+
+    # Relationships
+    site = relationship("ManagedSite", back_populates="normalized_issues")
+
+
+class SEOAdvisorRun(Base):
+    __tablename__ = "seo_advisor_runs"
+
+    id = Column(Integer, primary_key=True, index=True)
+    site_id = Column(Integer, ForeignKey("managed_sites.id", ondelete="CASCADE"), nullable=False, index=True)
+    analyzed_at = Column(DateTime(timezone=True), server_default=func.now())
+    days = Column(Integer, nullable=False)
+    target_keyword = Column(String, nullable=True)
+    confidence_score = Column(Float, nullable=False)
+    summary = Column(Text, nullable=False)
+    action_plan_7d = Column(Text, nullable=False)   # JSON string
+    action_plan_30d = Column(Text, nullable=False)  # JSON string
+    ai_provider = Column(String, nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    # Relationships
+    site = relationship("ManagedSite", back_populates="advisor_runs")
+
+
+class SEODerivedSignal(Base):
+    __tablename__ = "seo_derived_signals"
+
+    id = Column(Integer, primary_key=True, index=True)
+    site_id = Column(Integer, ForeignKey("managed_sites.id", ondelete="CASCADE"), nullable=False, index=True)
+    signal_type = Column(String, nullable=False)  # quick_wins, ctr_opportunity, rank_drops, technical_blockers, schema_gaps, cwv_risks, content_gaps, geo_readiness
+    entity_identifier = Column(String, nullable=False, index=True)  # query/keyword text or page URL
+    signal_data = Column(Text, nullable=False)  # JSON string
+    calculated_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    # Relationships
+    site = relationship("ManagedSite", back_populates="derived_signals")
+
+
+class SEORecommendationMemory(Base):
+    __tablename__ = "seo_rec_memory"
+
+    id = Column(Integer, primary_key=True, index=True)
+    site_id = Column(Integer, ForeignKey("managed_sites.id", ondelete="CASCADE"), nullable=False, index=True)
+    rule_name = Column(String, nullable=False, index=True)
+    recommendation_text = Column(Text, nullable=False)
+    outcome = Column(String, default="pending")  # pending, applied, rejected
+    feedback = Column(Text, nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    # Relationships
+    site = relationship("ManagedSite", back_populates="recommendation_memories")

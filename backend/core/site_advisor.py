@@ -14,6 +14,7 @@ import re
 import json
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Tuple
+from sqlalchemy.orm import Session
 
 import httpx
 from dotenv import load_dotenv
@@ -639,6 +640,7 @@ async def analyze_site(
     include_cwv: bool = True,
     include_schema: bool = True,
     include_usage_history: bool = True,
+    db: Optional[Session] = None,
 ) -> Dict[str, Any]:
     """
     Consolidates data sources concurrently, builds clean DTO, computes
@@ -819,6 +821,66 @@ async def analyze_site(
         summary = fallback["summary"]
         action_7d = fallback["action_plan_7d"]
         action_30d = fallback["action_plan_30d"]
+
+    if db is not None:
+        try:
+            from core.seo_intelligence import (
+                ingest_raw_snapshot,
+                normalize_site_page,
+                ingest_normalized_issue,
+                ingest_advisor_run,
+                ingest_derived_signal
+            )
+            # 1. Save Raw Snapshots
+            for src_name, src_tuple in results_map.items():
+                if src_tuple[0] == "ok" and src_tuple[1]:
+                    ingest_raw_snapshot(db, url, src_name, src_tuple[1])
+
+            # 2. Save Normalized Pages
+            for page in snapshot["ga4"].get("top_pages", []):
+                normalize_site_page(db, url, page.get("path", ""))
+
+            # 3. Save Normalized Issues
+            for issue in snapshot["technical"].get("critical_issues", []):
+                ingest_normalized_issue(
+                    db, url, 
+                    page_url=issue.get("page_url") if "page_url" in issue else None, 
+                    category=issue.get("category", "Technical"),
+                    severity="critical",
+                    message=issue.get("message", ""),
+                    fix_action=issue.get("fix")
+                )
+            for issue in snapshot["technical"].get("warnings", []):
+                ingest_normalized_issue(
+                    db, url, 
+                    page_url=issue.get("page_url") if "page_url" in issue else None, 
+                    category=issue.get("category", "Technical"),
+                    severity="warning",
+                    message=issue.get("message", ""),
+                    fix_action=issue.get("fix")
+                )
+
+            # 4. Save Derived Signals
+            for qw in quick_wins:
+                ingest_derived_signal(db, url, "quick_wins", qw["keyword"], qw)
+            for issue in top_issues:
+                if "CTR" in issue.get("message", ""):
+                    ingest_derived_signal(db, url, "ctr_opportunity", issue["message"], issue)
+            for blocker in tech_blockers:
+                ingest_derived_signal(db, url, "technical_blockers", blocker["message"], blocker)
+
+            # 5. Save Advisor Run History
+            run_result = {
+                "confidence_score": confidence,
+                "summary": summary,
+                "action_plan_7d": action_7d,
+                "action_plan_30d": action_30d,
+                "ai_provider": ai_provider
+            }
+            ingest_advisor_run(db, url, days, target_keyword, run_result)
+
+        except Exception:
+            pass
 
     return {
         "site_url": url,
