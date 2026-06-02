@@ -19,6 +19,7 @@ from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List
 import httpx
 
+from dotenv import load_dotenv
 from core.database import SessionLocal
 from core.models import ManagedSite, TrackedKeyword, RankingHistory
 
@@ -367,6 +368,7 @@ def save_ranking(keyword: str, site_url: str, position: float,
 
 async def sync_rankings_from_gsc(site_url: str) -> Dict[str, Any]:
     """Fetch current rankings from Google Search Console and save to DB."""
+    load_dotenv(os.path.join(os.path.dirname(os.path.dirname(__file__)), ".env"), override=True)
     client_id = os.getenv("GOOGLE_SEARCH_CONSOLE_CLIENT_ID", "")
     client_secret = os.getenv("GOOGLE_SEARCH_CONSOLE_CLIENT_SECRET", "")
     refresh_token = os.getenv("GOOGLE_SEARCH_CONSOLE_REFRESH_TOKEN", "")

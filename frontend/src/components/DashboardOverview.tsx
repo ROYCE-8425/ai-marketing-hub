@@ -197,7 +197,11 @@ export function DashboardOverview({ onNavigate }: { onNavigate: (tab: string) =>
       const res = await fetch(`${API_BASE.replace('/api', '')}/auth/google/setup`);
       const data = await res.json();
       if (data.auth_url) {
-        window.open(data.auth_url, "_blank", "width=600,height=700,scrollbars=yes");
+        const popup = window.open(data.auth_url, "_blank", "width=600,height=700,scrollbars=yes");
+        if (!popup || popup.closed || typeof popup.closed === "undefined") {
+          // If popup is blocked, redirect current tab
+          window.location.href = data.auth_url;
+        }
       } else if (data.error) {
         alert(data.error);
       }

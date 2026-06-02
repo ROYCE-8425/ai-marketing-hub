@@ -13,6 +13,8 @@ from urllib.parse import quote
 import httpx
 
 
+from dotenv import load_dotenv
+
 GSC_API = "https://www.googleapis.com/webmasters/v3"
 
 
@@ -20,6 +22,7 @@ class GoogleSearchConsole:
     """Google Search Console data fetcher using httpx + OAuth2."""
 
     def __init__(self, site_url: Optional[str] = None):
+        load_dotenv(os.path.join(os.path.dirname(os.path.dirname(__file__)), ".env"), override=True)
         self.site_url = site_url or os.getenv("GSC_SITE_URL", "")
         self._client_id = os.getenv("GOOGLE_SEARCH_CONSOLE_CLIENT_ID", "")
         self._client_secret = os.getenv("GOOGLE_SEARCH_CONSOLE_CLIENT_SECRET", "")

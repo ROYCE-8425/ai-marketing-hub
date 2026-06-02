@@ -25,6 +25,7 @@ GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini
 
 def _get_gsc_keywords(days: int = 30, limit: int = 200) -> List[Dict[str, Any]]:
     """Fetch all keywords from Google Search Console."""
+    load_dotenv(os.path.join(os.path.dirname(os.path.dirname(__file__)), ".env"), override=True)
     client_id = os.getenv("GOOGLE_SEARCH_CONSOLE_CLIENT_ID", "")
     secret = os.getenv("GOOGLE_SEARCH_CONSOLE_CLIENT_SECRET", "")
     refresh = os.getenv("GOOGLE_SEARCH_CONSOLE_REFRESH_TOKEN", "")
