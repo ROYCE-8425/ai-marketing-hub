@@ -31,28 +31,42 @@ def _get_gsc_keywords(days: int = 30, limit: int = 200) -> List[Dict[str, Any]]:
     site_url = os.getenv("GSC_SITE_URL", "")
 
     if not all([client_id, secret, refresh, site_url]):
-        return []
+        missing = []
+        if not client_id: missing.append("GOOGLE_SEARCH_CONSOLE_CLIENT_ID")
+        if not secret: missing.append("GOOGLE_SEARCH_CONSOLE_CLIENT_SECRET")
+        if not refresh: missing.append("GOOGLE_SEARCH_CONSOLE_REFRESH_TOKEN")
+        if not site_url: missing.append("GSC_SITE_URL")
+        raise ValueError(f"Thiếu cấu hình Google Search Console trong .env ({', '.join(missing)})")
 
+    # Get access token
     try:
-        # Get access token
         token_resp = httpx.post("https://oauth2.googleapis.com/token", data={
             "client_id": client_id,
             "client_secret": secret,
             "refresh_token": refresh,
             "grant_type": "refresh_token",
         }, timeout=10.0)
-        access_token = token_resp.json().get("access_token", "")
-        if not access_token:
-            return []
+    except Exception as exc:
+        raise ValueError(f"Không thể kết nối đến máy chủ Google: {exc}")
 
-        # Query GSC
-        import urllib.parse
-        encoded_site = urllib.parse.quote(site_url, safe="")
-        api_url = f"https://www.googleapis.com/webmasters/v3/sites/{encoded_site}/searchAnalytics/query"
+    token_data = token_resp.json()
+    if "access_token" not in token_data:
+        error_desc = token_data.get("error_description", token_data.get("error", "Unknown error"))
+        if token_data.get("error") == "invalid_grant":
+            raise ValueError("Mã Refresh Token GSC đã hết hạn hoặc bị Google thu hồi (invalid_grant). Vui lòng nhấp vào nút 'Kết nối Google' trên giao diện để cấp lại token mới.")
+        raise ValueError(f"GSC OAuth error {token_resp.status_code}: {error_desc}")
 
-        end_date = datetime.now().date() - timedelta(days=3)
-        start_date = end_date - timedelta(days=days)
+    access_token = token_data["access_token"]
 
+    # Query GSC
+    import urllib.parse
+    encoded_site = urllib.parse.quote(site_url, safe="")
+    api_url = f"https://www.googleapis.com/webmasters/v3/sites/{encoded_site}/searchAnalytics/query"
+
+    end_date = datetime.now().date() - timedelta(days=3)
+    start_date = end_date - timedelta(days=days)
+
+    try:
         resp = httpx.post(api_url, headers={
             "Authorization": f"Bearer {access_token}",
             "Content-Type": "application/json",
@@ -62,23 +76,25 @@ def _get_gsc_keywords(days: int = 30, limit: int = 200) -> List[Dict[str, Any]]:
             "dimensions": ["query"],
             "rowLimit": limit,
         }, timeout=15.0)
+    except Exception as exc:
+        raise ValueError(f"Lỗi kết nối GSC Query API: {exc}")
 
-        if resp.status_code != 200:
-            return []
+    if resp.status_code != 200:
+        if resp.status_code == 403:
+            raise ValueError(f"Tài khoản Google không có quyền truy cập vào GSC Property '{site_url}'. Vui lòng kiểm tra lại quyền sở hữu trang web trên Google Search Console.")
+        raise ValueError(f"GSC API error {resp.status_code}: {resp.text[:200]}")
 
-        rows = resp.json().get("rows", [])
-        return [
-            {
-                "keyword": row["keys"][0],
-                "clicks": int(row["clicks"]),
-                "impressions": int(row["impressions"]),
-                "ctr": round(row["ctr"], 4),
-                "position": round(row["position"], 1),
-            }
-            for row in rows
-        ]
-    except Exception:
-        return []
+    rows = resp.json().get("rows", [])
+    return [
+        {
+            "keyword": row["keys"][0],
+            "clicks": int(row["clicks"]),
+            "impressions": int(row["impressions"]),
+            "ctr": round(row["ctr"], 4),
+            "position": round(row["position"], 1),
+        }
+        for row in rows
+    ]
 
 
 # ── AI Providers ─────────────────────────────────────────────────────────────
@@ -304,13 +320,24 @@ def analyze_keywords_with_ai(target_keyword: Optional[str] = None) -> Dict[str, 
     }
 
     # Step 1: Fetch GSC keywords
-    gsc_keywords = _get_gsc_keywords(days=30, limit=200)
+    try:
+        gsc_keywords = _get_gsc_keywords(days=30, limit=200)
+    except Exception as exc:
+        result["error"] = str(exc)
+        result["summary"] = f"Lỗi Google Search Console: {exc}"
+        result["data_source"] = "error"
+        return result
 
-    if gsc_keywords:
-        result["gsc_keywords"] = gsc_keywords
-        result["total_clicks"] = sum(kw["clicks"] for kw in gsc_keywords)
-        result["total_impressions"] = sum(kw["impressions"] for kw in gsc_keywords)
-        result["data_source"] = "live_gsc"
+    if not gsc_keywords:
+        result["error"] = "Không tìm thấy dữ liệu từ khóa nào trong Google Search Console của bạn."
+        result["summary"] = "Website chưa có từ khóa nào hiển thị trên Google Search Console."
+        result["data_source"] = "no_data"
+        return result
+
+    result["gsc_keywords"] = gsc_keywords
+    result["total_clicks"] = sum(kw["clicks"] for kw in gsc_keywords)
+    result["total_impressions"] = sum(kw["impressions"] for kw in gsc_keywords)
+    result["data_source"] = "live_gsc"
 
     # Step 2: Build AI prompt
     system_prompt = """Bạn là chuyên gia SEO hàng đầu Việt Nam. Nhiệm vụ:
@@ -336,19 +363,18 @@ Trả về kết quả dưới dạng JSON (chỉ JSON, không có text khác):
   "quick_wins": [{"keyword": "...", "current_position": 0, "action": "..."}]
 }"""
 
-    if gsc_keywords:
-        sorted_kw = sorted(gsc_keywords, key=lambda x: x["impressions"], reverse=True)
-        top_20 = sorted_kw[:20]
+    sorted_kw = sorted(gsc_keywords, key=lambda x: x["impressions"], reverse=True)
+    top_20 = sorted_kw[:20]
 
-        kw_table = "\n".join([
-            f"- {kw['keyword']}: clicks={kw['clicks']}, imp={kw['impressions']}, ctr={kw['ctr']}, pos={kw['position']}"
-            for kw in top_20
-        ])
+    kw_table = "\n".join([
+        f"- {kw['keyword']}: clicks={kw['clicks']}, imp={kw['impressions']}, ctr={kw['ctr']}, pos={kw['position']}"
+        for kw in top_20
+    ])
 
-        target_info = f"\nTừ khóa mục tiêu: {target_keyword}" if target_keyword else ""
-        site = os.getenv("GSC_SITE_URL", "")
+    target_info = f"\nTừ khóa mục tiêu: {target_keyword}" if target_keyword else ""
+    site = os.getenv("GSC_SITE_URL", "")
 
-        prompt = f"""Website: {site}{target_info}
+    prompt = f"""Website: {site}{target_info}
 
 Dữ liệu GSC 30 ngày: {result['total_clicks']} clicks, {result['total_impressions']} impressions, {len(gsc_keywords)} từ khóa
 
@@ -358,11 +384,6 @@ Top 20 từ khóa:
 Tất cả từ khóa: {json.dumps([kw['keyword'] for kw in gsc_keywords], ensure_ascii=False)}
 
 Phân tích và đề xuất 10-15 từ khóa MỚI + topic clusters + chiến lược nội dung + quick wins."""
-    else:
-        # No GSC data available — return error state, do not fabricate AI recommendations
-        result["error"] = "Chưa có dữ liệu GSC. Cấu hình Google Search Console để phân tích từ khóa thật."
-        result["summary"] = "Cần kết nối Google Search Console để lấy dữ liệu từ khóa thật trước khi phân tích."
-        return result
 
     # Step 3: Try AI, fallback to built-in
     try:
@@ -371,7 +392,6 @@ Phân tích và đề xuất 10-15 từ khóa MỚI + topic clusters + chiến l
         result["ai_provider"] = "ai"
 
         # Parse JSON from response
-        # Try to find JSON block (may be wrapped in ```json ... ```)
         clean = ai_response.strip()
         # Remove markdown code fences
         clean = re.sub(r'^```json?\s*', '', clean, flags=re.MULTILINE)

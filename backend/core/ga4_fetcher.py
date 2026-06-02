@@ -22,7 +22,7 @@ load_dotenv(os.path.join(os.path.dirname(os.path.dirname(__file__)), ".env"))
 GA4_API_URL = "https://analyticsdata.googleapis.com/v1beta"
 
 
-async def _get_access_token_async() -> Optional[str]:
+async def _get_access_token_async() -> str:
     """Get OAuth2 access token using the same credentials as GSC."""
     load_dotenv(os.path.join(os.path.dirname(os.path.dirname(__file__)), ".env"), override=True)
     client_id = os.getenv("GOOGLE_SEARCH_CONSOLE_CLIENT_ID", "")
@@ -30,19 +30,31 @@ async def _get_access_token_async() -> Optional[str]:
     refresh = os.getenv("GA4_REFRESH_TOKEN", "") or os.getenv("GOOGLE_SEARCH_CONSOLE_REFRESH_TOKEN", "")
 
     if not all([client_id, secret, refresh]):
-        return None
+        missing = []
+        if not client_id: missing.append("GOOGLE_SEARCH_CONSOLE_CLIENT_ID")
+        if not secret: missing.append("GOOGLE_SEARCH_CONSOLE_CLIENT_SECRET")
+        if not refresh: missing.append("GOOGLE_SEARCH_CONSOLE_REFRESH_TOKEN / GA4_REFRESH_TOKEN")
+        raise ValueError(f"Thiếu cấu hình Google OAuth2 trong .env ({', '.join(missing)})")
 
-    try:
-        async with httpx.AsyncClient(timeout=10.0) as client:
+    async with httpx.AsyncClient(timeout=10.0) as client:
+        try:
             resp = await client.post("https://oauth2.googleapis.com/token", data={
                 "client_id": client_id,
                 "client_secret": secret,
                 "refresh_token": refresh,
                 "grant_type": "refresh_token",
             })
-            return resp.json().get("access_token")
-    except Exception:
-        return None
+        except Exception as exc:
+            raise ValueError(f"Không thể kết nối đến máy chủ Google: {exc}")
+            
+        data = resp.json()
+        if "access_token" not in data:
+            error_desc = data.get("error_description", data.get("error", "Unknown error"))
+            if data.get("error") == "invalid_grant":
+                raise ValueError("Mã Refresh Token đã hết hạn hoặc bị Google thu hồi (invalid_grant). Vui lòng nhấp vào nút 'Kết nối Google' trên giao diện để cấp lại token mới.")
+            raise ValueError(f"Google OAuth error {resp.status_code}: {error_desc}")
+            
+        return data["access_token"]
 
 
 async def _run_report_async(property_id: str, access_token: str, body: Dict) -> Dict:
@@ -83,9 +95,10 @@ async def get_ga4_overview(days: int = 30) -> Dict[str, Any]:
         result["error"] = "GA4_PROPERTY_ID chưa được cấu hình. Vào Google Analytics → Admin → Property Details để lấy Property ID."
         return result
 
-    access_token = await _get_access_token_async()
-    if not access_token:
-        result["error"] = "Không lấy được access token. Kiểm tra OAuth2 credentials (Client ID, Secret, Refresh Token)."
+    try:
+        access_token = await _get_access_token_async()
+    except Exception as exc:
+        result["error"] = str(exc)
         return result
 
     errors = []

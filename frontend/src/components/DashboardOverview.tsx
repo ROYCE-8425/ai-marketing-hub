@@ -100,6 +100,7 @@ export function DashboardOverview({ onNavigate }: { onNavigate: (tab: string) =>
     total_clicks: number;
     total_impressions: number;
     data_source: string;
+    error?: string;
   } | null>(null);
   const [gscLoading, setGscLoading] = useState(false);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any -- API response data
@@ -263,19 +264,28 @@ export function DashboardOverview({ onNavigate }: { onNavigate: (tab: string) =>
             <span>GSC: {gscKeywords.length} từ khóa · {gscData.total_clicks} lượt nhấp · {gscData.total_impressions} hiển thị</span>
           </div>
         )}
-        {gscData && gscData.data_source !== "live_gsc" && (
-          <div className="gsc-live-banner" style={{ borderColor: 'rgba(245,158,11,0.2)', background: 'rgba(245,158,11,0.05)' }}>
-            <div className="gsc-live-dot" style={{ background: '#f59e0b' }} />
-            <span style={{ color: '#d97706' }}>GSC: 🟡 Chưa kết nối — Cấu hình OAuth2 credentials để xem dữ liệu thật</span>
-            <button
-              className="dash-connect-btn"
-              onClick={handleConnectGoogle}
-              disabled={oauthLoading}
-            >
-              {oauthLoading ? "⏳" : "🔗"} Kết nối Google
-            </button>
-          </div>
-        )}
+        {gscData && gscData.data_source !== "live_gsc" && (() => {
+          const hasError = gscData.data_source === "error";
+          const borderColor = hasError ? 'rgba(239,68,68,0.25)' : 'rgba(245,158,11,0.2)';
+          const bg = hasError ? 'rgba(239,68,68,0.05)' : 'rgba(245,158,11,0.05)';
+          const dotColor = hasError ? '#ef4444' : '#f59e0b';
+          const textColor = hasError ? '#dc2626' : '#d97706';
+          return (
+            <div className="gsc-live-banner" style={{ borderColor, background: bg }}>
+              <div className="gsc-live-dot" style={{ background: dotColor }} />
+              <span style={{ color: textColor }}>
+                GSC: 🟡 Chưa kết nối {gscData.error ? `— ${gscData.error}` : "— Cấu hình OAuth2 credentials để xem dữ liệu thật"}
+              </span>
+              <button
+                className="dash-connect-btn"
+                onClick={handleConnectGoogle}
+                disabled={oauthLoading}
+              >
+                {oauthLoading ? "⏳" : "🔗"} Kết nối Google
+              </button>
+            </div>
+          );
+        })()}
         {ga4Data && (() => {
           const isLive = ga4Data.data_source === 'live_ga4';
           const isPartial = ga4Data.data_source === 'partial_live_ga4';
