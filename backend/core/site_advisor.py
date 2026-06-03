@@ -1013,6 +1013,7 @@ async def analyze_site(
     # 1. Resolve active or default site URL
     url = normalize_site_url(site_url)
     analyzed_at = datetime.now().isoformat()
+    advisor_run_id = None
 
     # Define tasks to gather concurrently
     tasks = []
@@ -1823,6 +1824,7 @@ async def analyze_site(
     return {
         "site_url": url,
         "analyzed_at": analyzed_at,
+        "advisor_run_id": advisor_run_id,
         "confidence": "high" if confidence >= 80 else ("medium" if confidence >= 50 else "low"),
         "confidence_score": confidence,
         "summary": summary,

@@ -25,7 +25,7 @@ export function AdvisorRoadmapTree({
   return (
     <div className="section-block" style={{ marginTop: "1.5rem" }}>
       <h3 className="section-title" style={{ display: "flex", alignItems: "center", gap: "6px", color: "var(--primary)" }}>
-        🗺️ Cây lộ trình hành động trực quan (Action Roadmap)
+        Cây lộ trình hành động trực quan (Action Roadmap)
       </h3>
       
       {roadmapSummary && (
@@ -33,7 +33,7 @@ export function AdvisorRoadmapTree({
           marginTop: "10px", 
           borderColor: "rgba(139, 92, 246, 0.3)", 
           background: "rgba(139, 92, 246, 0.05)", 
-          color: "#e9d5ff",
+          color: "var(--text-h)",
           padding: "12px",
           fontSize: "13px",
           lineHeight: "1.5",
@@ -60,7 +60,7 @@ export function AdvisorRoadmapTree({
             <div 
               key={stream.id} 
               style={{ 
-                background: "rgba(255, 255, 255, 0.01)", 
+                background: "var(--surface)", 
                 border: "1px solid var(--border)", 
                 borderRadius: "12px", 
                 overflow: "hidden" 
@@ -71,7 +71,7 @@ export function AdvisorRoadmapTree({
                 onClick={() => setCollapsedStreams(prev => ({ ...prev, [stream.id]: !isCollapsed }))}
                 style={{ 
                   padding: "14px 18px", 
-                  background: "rgba(255, 255, 255, 0.02)", 
+                  background: "var(--surface2)", 
                   display: "flex", 
                   justifyContent: "space-between", 
                   alignItems: "center", 
@@ -100,7 +100,7 @@ export function AdvisorRoadmapTree({
 
               {/* Stream Children Tasks Timeline */}
               {!isCollapsed && (
-                <div style={{ padding: "18px", background: "rgba(0,0,0,0.15)", borderTop: "1px solid var(--border)" }}>
+                <div style={{ padding: "18px", background: "var(--surface)", borderTop: "1px solid var(--border)" }}>
                   <div style={{ 
                     position: "relative", 
                     paddingLeft: "20px", 
@@ -124,14 +124,14 @@ export function AdvisorRoadmapTree({
                             width: "12px", 
                             height: "12px", 
                             borderRadius: "50%", 
-                            background: task.priority === "high" ? "#ef4444" : (task.priority === "medium" ? "#06b6d4" : "#8b5cf6"),
-                            border: "3px solid #090514",
-                            boxShadow: task.priority === "high" ? "0 0 8px #ef4444" : "0 0 8px #06b6d4"
+                            background: task.was_completed_before ? "#10b981" : (task.priority === "high" ? "#ef4444" : (task.priority === "medium" ? "#06b6d4" : "#8b5cf6")),
+                            border: "3px solid var(--surface)",
+                            boxShadow: task.was_completed_before ? "0 0 8px #10b981" : (task.priority === "high" ? "0 0 8px #ef4444" : "0 0 8px #06b6d4")
                           }} />
 
                           {/* Task Card Body */}
                           <div style={{ 
-                            background: "rgba(255, 255, 255, 0.02)", 
+                            background: "var(--surface2)", 
                             border: "1px solid var(--border)", 
                             borderRadius: "8px", 
                             padding: "14px" 
@@ -151,16 +151,19 @@ export function AdvisorRoadmapTree({
                               
                               <div style={{ display: "flex", gap: "4px", alignItems: "center", flexWrap: "wrap" }}>
                                 {task.is_recurring && (
-                                  <span className="issue-badge" style={{ background: "rgba(139, 92, 246, 0.15)", color: "#c4b5fd", border: "1px solid rgba(139, 92, 246, 0.2)", padding: "1px 5px", fontSize: "10px" }}>🔁 Lặp lại</span>
+                                  <span className="issue-badge" style={{ background: "rgba(139, 92, 246, 0.08)", color: "var(--primary)", border: "1px solid rgba(139, 92, 246, 0.25)", padding: "1px 5px", fontSize: "10px" }}>Lặp lại</span>
                                 )}
                                 {task.pending_before_count > 0 && (
-                                  <span className="issue-badge badge-critical" style={{ padding: "1px 5px", fontSize: "10px" }}>⏳ Tồn đọng ({task.pending_before_count} lần)</span>
+                                  <span className="issue-badge badge-critical" style={{ padding: "1px 5px", fontSize: "10px" }}>Tồn đọng ({task.pending_before_count} lần)</span>
                                 )}
                                 {task.pattern_related && (
-                                  <span className="issue-badge" style={{ background: "rgba(245, 158, 11, 0.15)", color: "#fcd34d", border: "1px solid rgba(245, 158, 11, 0.2)", padding: "1px 5px", fontSize: "10px" }}>💡 Mẫu: {task.pattern_label}</span>
+                                  <span className="issue-badge" style={{ background: "rgba(245, 158, 11, 0.08)", color: "var(--amber)", border: "1px solid rgba(245, 158, 11, 0.25)", padding: "1px 5px", fontSize: "10px" }}>Mẫu: {task.pattern_label}</span>
                                 )}
                                 {task.has_measured_delta_before && (
-                                  <span className="issue-badge badge-suggestion" style={{ padding: "1px 5px", fontSize: "10px" }}>📈 Đã có hiệu quả</span>
+                                  <span className="issue-badge badge-suggestion" style={{ padding: "1px 5px", fontSize: "10px" }}>Đã có hiệu quả</span>
+                                )}
+                                {task.was_completed_before && (
+                                  <span className="issue-badge badge-suggestion" style={{ padding: "1px 5px", fontSize: "10px", background: "rgba(16, 185, 129, 0.08)", color: "var(--green)", border: "1px solid rgba(16, 185, 129, 0.25)" }}>✓ Đã hoàn thành</span>
                                 )}
                                 {priorityLabel(task.priority)}
                               </div>
@@ -173,7 +176,7 @@ export function AdvisorRoadmapTree({
 
                             {/* Stream Group Reason explanation */}
                             <div style={{ fontSize: "11px", color: "var(--text-dim)", fontStyle: "italic", marginBottom: "6px" }}>
-                              🎯 {task.stream_reason}
+                              {task.stream_reason}
                             </div>
 
                             {/* Priority Reasons Bullet list */}
@@ -181,12 +184,12 @@ export function AdvisorRoadmapTree({
                               <div style={{ 
                                 marginTop: "8px", 
                                 padding: "8px 12px", 
-                                background: "rgba(0,0,0,0.1)", 
+                                background: "rgba(0,0,0,0.02)", 
                                 borderRadius: "6px", 
-                                border: "1px solid rgba(255, 255, 255, 0.03)" 
+                                border: "1px solid rgba(0, 0, 0, 0.05)" 
                               }}>
-                                <div style={{ fontSize: "11px", fontWeight: "700", color: "#a78bfa", marginBottom: "4px" }}>
-                                  🔍 Cơ sở xếp thứ tự ưu tiên:
+                                <div style={{ fontSize: "11px", fontWeight: "700", color: "var(--primary)", marginBottom: "4px" }}>
+                                  Cơ sở xếp thứ tự ưu tiên:
                                 </div>
                                 <ul style={{ margin: 0, paddingLeft: "16px", fontSize: "11px", color: "var(--text-dim)", lineHeight: "1.4" }}>
                                   {task.priority_reasons.map((reason, rIdx) => (
@@ -198,20 +201,20 @@ export function AdvisorRoadmapTree({
 
                             {/* Historical Context Notes */}
                             {(task.history_note || task.pattern_note || task.outcome_note) && (
-                              <div style={{ display: "flex", flexDirection: "column", gap: "4px", marginTop: "8px", borderTop: "1px solid rgba(255,255,255,0.05)", paddingTop: "8px" }}>
+                              <div style={{ display: "flex", flexDirection: "column", gap: "4px", marginTop: "8px", borderTop: "1px solid rgba(0,0,0,0.05)", paddingTop: "8px" }}>
                                 {task.history_note && (
-                                  <p style={{ fontSize: "11px", color: "#fcd34d", margin: 0 }}>
-                                    ⚠️ <strong>Lịch sử:</strong> {task.history_note}
+                                  <p style={{ fontSize: "11px", color: "var(--amber)", margin: 0 }}>
+                                    <strong>Lịch sử:</strong> {task.history_note}
                                   </p>
                                 )}
                                 {task.pattern_note && (
-                                  <p style={{ fontSize: "11px", color: "#c084fc", margin: 0 }}>
-                                    💡 <strong>Mẫu lặp:</strong> {task.pattern_note}
+                                  <p style={{ fontSize: "11px", color: "var(--primary)", margin: 0 }}>
+                                    <strong>Mẫu lặp:</strong> {task.pattern_note}
                                   </p>
                                 )}
                                 {task.outcome_note && (
-                                  <p style={{ fontSize: "11px", color: "#34d399", margin: 0 }}>
-                                    📈 <strong>Số liệu cũ:</strong> {task.outcome_note}
+                                  <p style={{ fontSize: "11px", color: "var(--green)", margin: 0 }}>
+                                    <strong>Số liệu cũ:</strong> {task.outcome_note}
                                   </p>
                                 )}
                               </div>

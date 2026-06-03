@@ -50,6 +50,7 @@ body {
   -webkit-font-smoothing: antialiased;
   min-height: 100dvh;
   overflow-x: hidden;
+  line-height: 1.5;
 }
 
 /* ── Scrollbar ──────────────────────────────────────────────────────────────── */
@@ -549,9 +550,13 @@ body {
   color: var(--text-h);
   font-family: "DM Sans", sans-serif;
   font-size: 14px;
-  padding: 11px 14px 11px 40px;
+  padding: 11px 14px;
   outline: none;
+  line-height: 1.5;
   transition: border-color 0.25s, box-shadow 0.25s, background 0.25s;
+}
+.input-wrap .text-input {
+  padding-left: 40px;
 }
 .text-input::placeholder { color: var(--text-dim); }
 .text-input:focus {
@@ -2471,17 +2476,18 @@ body {
 /* GEO: Code block */
 .geo-code-section { margin-top: 14px; }
 .geo-code-block {
-  background: #f0f4f0; border: 1px solid var(--border);
+  background: var(--sb-bg); border: 1px solid var(--sb-border);
   border-radius: var(--radius-sm); overflow: hidden; margin-top: 8px;
 }
 .geo-code-header {
   display: flex; justify-content: space-between; align-items: center;
-  padding: 8px 14px; background: rgba(139,92,246,0.08);
-  font-size: 12px; color: var(--text-dim); font-family: "JetBrains Mono", monospace;
+  padding: 8px 14px; background: rgba(0,0,0,0.25);
+  font-size: 12px; color: var(--sb-text-h); font-family: "JetBrains Mono", monospace;
+  border-bottom: 1px solid var(--sb-border);
 }
 .geo-code-pre {
   padding: 14px; font-size: 12px; line-height: 1.6; overflow-x: auto;
-  color: #86efac; font-family: "JetBrains Mono", monospace; margin: 0;
+  color: #a7f3d0; font-family: "JetBrains Mono", monospace; margin: 0;
   white-space: pre-wrap; word-break: break-word;
 }
 

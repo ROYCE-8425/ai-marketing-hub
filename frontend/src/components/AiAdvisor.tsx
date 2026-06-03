@@ -100,20 +100,92 @@ export function AiAdvisor() {
     }
   }, []);
 
-  const fetchOutcomes = useCallback(async (siteUrl: string) => {
+  const syncRecommendationsWithDb = useCallback(async (siteUrl: string) => {
     try {
-      const compRes = await authFetch(`${API_BASE}/dataset/recommendations?site_url=${encodeURIComponent(siteUrl)}&status=completed`);
-      if (compRes.ok) {
-        const compData = await compRes.json();
-        setCompletedRecs(compData.items || []);
-      }
-      const failRes = await authFetch(`${API_BASE}/dataset/recommendations?site_url=${encodeURIComponent(siteUrl)}&status=failed`);
-      if (failRes.ok) {
-        const failData = await failRes.json();
-        setFailedRecs(failData.items || []);
-      }
+      const res = await authFetch(`${API_BASE}/dataset/recommendations?site_url=${encodeURIComponent(siteUrl)}&limit=1000`);
+      if (!res.ok) return;
+      const data = await res.json();
+      const dbItems: PendingRecommendationItem[] = data.items || [];
+
+      // Create a map for quick lookup by recommendation_text
+      const dbTextMap = new Map<string, PendingRecommendationItem>();
+      dbItems.forEach(item => {
+        if (item.recommendation_text) {
+          dbTextMap.set(item.recommendation_text.trim(), item);
+        }
+      });
+
+      // Update local completed and failed recs
+      const comp = dbItems.filter(item => item.status === "completed");
+      const fail = dbItems.filter(item => item.status === "failed");
+      setCompletedRecs(comp);
+      setFailedRecs(fail);
+
+      setResult(prev => {
+        if (!prev) return null;
+        if (prev.site_url !== siteUrl) return prev;
+
+        // Sync pending and in_progress lists
+        const newPending = dbItems.filter(item => item.status === "pending" && (prev.pending_recommendations || []).some(r => r.recommendation_text === item.recommendation_text || r.id === item.id));
+        const newInProgress = dbItems.filter(item => item.status === "in_progress" && (prev.in_progress_recommendations || []).some(r => r.recommendation_text === item.recommendation_text || r.id === item.id));
+
+        // Update memory context counts
+        const pendingCount = dbItems.filter(item => item.status === "pending").length;
+        const newMemoryContext = prev.memory_context ? {
+          ...prev.memory_context,
+          pending_recommendations_count: pendingCount,
+          recommendation_outcomes: dbItems.length
+        } : null;
+
+        // Update outcome tracking context
+        const completedWithDelta = comp.filter(item => item.measured_delta_json && Object.keys(item.measured_delta_json).length > 0).length;
+        const newOutcomeContext: OutcomeTrackingContext = {
+          total_outcomes: dbItems.length,
+          pending_count: pendingCount,
+          in_progress_count: newInProgress.length,
+          completed_count: comp.length,
+          failed_count: fail.length,
+          completed_with_delta_count: completedWithDelta,
+          recent_completed_recommendations: comp.slice(0, 5),
+          recent_failed_recommendations: fail.slice(0, 5)
+        };
+
+        // Update roadmap tree tasks
+        let newRoadmapTree = prev.roadmap_tree;
+        if (newRoadmapTree && newRoadmapTree.streams) {
+          newRoadmapTree = {
+            ...newRoadmapTree,
+            streams: newRoadmapTree.streams.map(stream => ({
+              ...stream,
+              children: stream.children.map(task => {
+                const matched = dbTextMap.get(task.task.trim());
+                if (matched) {
+                  return {
+                    ...task,
+                    was_completed_before: matched.status === "completed",
+                    completed_before_count: matched.status === "completed" ? 1 : 0,
+                    failed_before_count: matched.status === "failed" ? 1 : 0,
+                    pending_before_count: matched.status === "pending" ? 1 : 0,
+                  };
+                }
+                return task;
+              })
+            }))
+          };
+        }
+
+        return {
+          ...prev,
+          pending_recommendations: newPending,
+          in_progress_recommendations: newInProgress,
+          memory_context: newMemoryContext,
+          outcome_tracking_context: newOutcomeContext,
+          roadmap_tree: newRoadmapTree
+        };
+      });
+
     } catch (err) {
-      console.error("Lỗi khi tải danh sách khuyến nghị đã hoàn thành/thất bại:", err);
+      console.error("Lỗi khi đồng bộ danh sách khuyến nghị với DB:", err);
     }
   }, []);
 
@@ -121,14 +193,59 @@ export function AiAdvisor() {
     loadSites();
   }, [loadSites]);
 
+  // Load saved state for selected site from localStorage
+  useEffect(() => {
+    if (!selectedSiteUrl) return;
+
+    const savedResult = localStorage.getItem(`ai_advisor_latest_result_${selectedSiteUrl}`);
+    if (savedResult) {
+      try {
+        setResult(JSON.parse(savedResult));
+      } catch (e) {
+        console.error("Lỗi khi khôi phục kết quả phân tích:", e);
+        setResult(null);
+      }
+    } else {
+      setResult(null);
+    }
+
+    const savedKeyword = localStorage.getItem(`ai_advisor_target_keyword_${selectedSiteUrl}`);
+    setTargetKeyword(savedKeyword || "");
+
+    const savedDays = localStorage.getItem(`ai_advisor_days_${selectedSiteUrl}`);
+    setDays(savedDays ? Number(savedDays) : 30);
+  }, [selectedSiteUrl]);
+
+  // Auto-persist result when it changes
+  useEffect(() => {
+    if (!selectedSiteUrl) return;
+    
+    if (result) {
+      localStorage.setItem(`ai_advisor_latest_result_${selectedSiteUrl}`, JSON.stringify(result));
+    } else {
+      localStorage.removeItem(`ai_advisor_latest_result_${selectedSiteUrl}`);
+    }
+  }, [result, selectedSiteUrl]);
+
+  // Persist form inputs on change
+  useEffect(() => {
+    if (!selectedSiteUrl) return;
+    localStorage.setItem(`ai_advisor_target_keyword_${selectedSiteUrl}`, targetKeyword);
+  }, [targetKeyword, selectedSiteUrl]);
+
+  useEffect(() => {
+    if (!selectedSiteUrl) return;
+    localStorage.setItem(`ai_advisor_days_${selectedSiteUrl}`, String(days));
+  }, [days, selectedSiteUrl]);
+
   useEffect(() => {
     if (result && result.site_url) {
-      fetchOutcomes(result.site_url);
+      syncRecommendationsWithDb(result.site_url);
     } else {
       setCompletedRecs([]);
       setFailedRecs([]);
     }
-  }, [result?.site_url, fetchOutcomes]);
+  }, [result?.site_url, syncRecommendationsWithDb]);
 
   // Handle Analysis submit
   const handleAnalyze = async (e: React.FormEvent) => {
@@ -398,14 +515,49 @@ export function AiAdvisor() {
           pending_recommendations_count: pendingCount,
         } : null;
 
+        let newRoadmapTree = prev.roadmap_tree;
+        if (newRoadmapTree && newRoadmapTree.streams) {
+          const recText = updatedItem.recommendation_text;
+          newRoadmapTree = {
+            ...newRoadmapTree,
+            streams: newRoadmapTree.streams.map((stream) => ({
+              ...stream,
+              children: stream.children.map((task) => {
+                if (task.task === recText) {
+                  return {
+                    ...task,
+                    was_completed_before: updatedItem.status === "completed",
+                    completed_before_count: updatedItem.status === "completed" 
+                      ? (task.completed_before_count || 0) + 1 
+                      : task.completed_before_count,
+                    failed_before_count: updatedItem.status === "failed"
+                      ? (task.failed_before_count || 0) + 1
+                      : task.failed_before_count,
+                    pending_before_count: updatedItem.status === "pending"
+                      ? (task.pending_before_count || 0) + 1
+                      : (updatedItem.status === "completed" ? 0 : task.pending_before_count),
+                  };
+                }
+                return task;
+              }),
+            })),
+          };
+        }
+
         return {
           ...prev,
           pending_recommendations: newPending,
           in_progress_recommendations: newInProgress,
           memory_context: newContext,
-          outcome_tracking_context: newTrackingContext
+          outcome_tracking_context: newTrackingContext,
+          roadmap_tree: newRoadmapTree
         };
       });
+
+      // Sync with DB
+      if (result && result.site_url) {
+        syncRecommendationsWithDb(result.site_url);
+      }
 
       // Clear edit panel state
       setUpdatingId(null);
@@ -430,11 +582,11 @@ export function AiAdvisor() {
   // Helper styles & icons
   const statusBadge = (status: string) => {
     const s = (status || "").toLowerCase();
-    if (s === "pending") return <span className="issue-badge badge-warning" style={{ padding: "2px 8px", background: "rgba(245, 158, 11, 0.15)", color: "#fbbf24", border: "1px solid rgba(245, 158, 11, 0.3)" }}>Chờ xử lý</span>;
-    if (s === "in_progress") return <span className="issue-badge badge-warning" style={{ padding: "2px 8px", background: "rgba(6, 182, 212, 0.15)", color: "#67e8f9", border: "1px solid rgba(6, 182, 212, 0.3)" }}>Đang thực hiện</span>;
-    if (s === "completed") return <span className="issue-badge badge-suggestion" style={{ padding: "2px 8px", background: "rgba(16, 185, 129, 0.15)", color: "#34d399", border: "1px solid rgba(16, 185, 129, 0.3)" }}>Hoàn thành</span>;
-    if (s === "failed") return <span className="issue-badge badge-critical" style={{ padding: "2px 8px", background: "rgba(239, 68, 68, 0.15)", color: "#f87171", border: "1px solid rgba(239, 68, 68, 0.3)" }}>Thất bại</span>;
-    return <span className="issue-badge" style={{ padding: "2px 8px", background: "rgba(255,255,255,0.1)", color: "var(--text)" }}>{status}</span>;
+    if (s === "pending") return <span className="issue-badge badge-warning" style={{ padding: "2px 8px", background: "rgba(245, 158, 11, 0.08)", color: "var(--amber)", border: "1px solid rgba(245, 158, 11, 0.25)" }}>Chờ xử lý</span>;
+    if (s === "in_progress") return <span className="issue-badge badge-warning" style={{ padding: "2px 8px", background: "rgba(6, 182, 212, 0.08)", color: "var(--cyan)", border: "1px solid rgba(6, 182, 212, 0.25)" }}>Đang thực hiện</span>;
+    if (s === "completed") return <span className="issue-badge badge-suggestion" style={{ padding: "2px 8px", background: "rgba(16, 185, 129, 0.08)", color: "var(--green)", border: "1px solid rgba(16, 185, 129, 0.25)" }}>Hoàn thành</span>;
+    if (s === "failed") return <span className="issue-badge badge-critical" style={{ padding: "2px 8px", background: "rgba(239, 68, 68, 0.08)", color: "var(--red)", border: "1px solid rgba(239, 68, 68, 0.25)" }}>Thất bại</span>;
+    return <span className="issue-badge" style={{ padding: "2px 8px", background: "var(--surface2)", color: "var(--text)", border: "1px solid var(--border)" }}>{status}</span>;
   };
 
   const renderRecommendationItem = (rec: PendingRecommendationItem, borderLeftColor: string) => {
@@ -458,34 +610,34 @@ export function AiAdvisor() {
         </p>
         
         {rec.page_url && (
-          <p style={{ fontSize: "11px", color: "#3b82f6", margin: "2px 0" }}>
-            🔗 <strong>Trang đích:</strong> <a href={rec.page_url} target="_blank" rel="noreferrer" style={{ color: "#60a5fa" }}>{rec.page_url}</a>
+          <p style={{ fontSize: "11px", color: "#2563eb", margin: "2px 0" }}>
+            <strong>Trang đích:</strong> <a href={rec.page_url} target="_blank" rel="noreferrer" style={{ color: "#2563eb" }}>{rec.page_url}</a>
           </p>
         )}
         {rec.keyword && (
-          <p style={{ fontSize: "11px", color: "#10b981", margin: "2px 0" }}>
-            🔑 <strong>Từ khóa mục tiêu:</strong> '{rec.keyword}'
+          <p style={{ fontSize: "11px", color: "var(--green)", margin: "2px 0" }}>
+            <strong>Từ khóa mục tiêu:</strong> '{rec.keyword}'
           </p>
         )}
         {rec.impact && (
           <p style={{ fontSize: "11px", color: "var(--text-dim)", margin: "2px 0" }}>
-            ⚡ <strong>Tác động dự kiến:</strong> {rec.impact}
+            <strong>Tác động dự kiến:</strong> {rec.impact}
           </p>
         )}
         {rec.execution_note && (
-          <p style={{ fontSize: "11px", color: "#e9d5ff", margin: "4px 0" }}>
-            📝 <strong>Ghi chú thực thi:</strong> {rec.execution_note}
+          <p style={{ fontSize: "11px", color: "var(--primary)", margin: "4px 0" }}>
+            <strong>Ghi chú thực thi:</strong> {rec.execution_note}
           </p>
         )}
         {rec.outcome && (
-          <p style={{ fontSize: "11px", color: "#67e8f9", margin: "4px 0" }}>
-            🎯 <strong>Kết quả:</strong> {rec.outcome}
+          <p style={{ fontSize: "11px", color: "var(--cyan)", margin: "4px 0" }}>
+            <strong>Kết quả:</strong> {rec.outcome}
           </p>
         )}
         
         {rec.measured_delta_json && Object.keys(rec.measured_delta_json).length > 0 && (
           <div style={{ marginTop: "6px", padding: "6px 10px", background: "rgba(255,255,255,0.02)", borderRadius: "4px", fontSize: "11px", border: "1px solid rgba(255,255,255,0.05)" }}>
-            <span style={{ color: "#34d399", fontWeight: "bold" }}>📈 Số liệu đo lường KPI:</span>
+            <span style={{ color: "var(--green)", fontWeight: "bold" }}>Số liệu đo lường KPI:</span>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(120px, 1fr))", gap: "6px", marginTop: "4px" }}>
               {rec.measured_delta_json.ctr_before !== undefined && <span>CTR trước: <strong>{rec.measured_delta_json.ctr_before}%</strong></span>}
               {rec.measured_delta_json.ctr_after !== undefined && <span>CTR sau: <strong>{rec.measured_delta_json.ctr_after}%</strong></span>}
@@ -498,8 +650,8 @@ export function AiAdvisor() {
         )}
 
         {updatingId === rec.id ? (
-          <div style={{ marginTop: "12px", padding: "12px", background: "rgba(255,255,255,0.02)", border: "1px solid var(--border)", borderRadius: "8px" }}>
-            <h4 style={{ fontSize: "12px", margin: "0 0 10px 0", color: "#a78bfa" }}>Cập nhật trạng thái khuyến nghị</h4>
+          <div style={{ marginTop: "12px", padding: "12px", background: "var(--surface2)", border: "1px solid var(--border)", borderRadius: "8px" }}>
+            <h4 style={{ fontSize: "12px", margin: "0 0 10px 0", color: "var(--primary)" }}>Cập nhật trạng thái khuyến nghị</h4>
             
             <div className="geo-schema-form" style={{ display: "grid", gridTemplateColumns: "1fr", gap: "8px" }}>
               <div className="input-group">
@@ -508,7 +660,7 @@ export function AiAdvisor() {
                   className="text-input"
                   value={updatingStatus}
                   onChange={(e) => setUpdatingStatus(e.target.value)}
-                  style={{ height: "32px", fontSize: "12px", background: "var(--surface)", color: "var(--text)" }}
+                  style={{ height: "32px", fontSize: "12px", background: "var(--surface)", color: "var(--text)", paddingLeft: "10px" }}
                 >
                   <option value="pending">Chờ xử lý (Pending)</option>
                   <option value="in_progress">Đang thực hiện (In Progress)</option>
@@ -536,7 +688,7 @@ export function AiAdvisor() {
                   value={updatingOutcome}
                   onChange={(e) => setUpdatingOutcome(e.target.value)}
                   placeholder="Ví dụ: Đạt mục tiêu, tăng CTR nhẹ..."
-                  style={{ height: "32px", fontSize: "12px" }}
+                  style={{ height: "32px", fontSize: "12px", paddingLeft: "10px" }}
                 />
               </div>
 
@@ -551,7 +703,7 @@ export function AiAdvisor() {
                       placeholder="Ví dụ: 1.2"
                       value={ctrBefore}
                       onChange={(e) => setCtrBefore(e.target.value)}
-                      style={{ height: "30px", fontSize: "12px" }}
+                      style={{ height: "30px", fontSize: "12px", paddingLeft: "10px" }}
                     />
                   </div>
                   <div className="input-group">
@@ -563,7 +715,7 @@ export function AiAdvisor() {
                       placeholder="Ví dụ: 2.1"
                       value={ctrAfter}
                       onChange={(e) => setCtrAfter(e.target.value)}
-                      style={{ height: "30px", fontSize: "12px" }}
+                      style={{ height: "30px", fontSize: "12px", paddingLeft: "10px" }}
                     />
                   </div>
                   <div className="input-group">
@@ -575,7 +727,7 @@ export function AiAdvisor() {
                       placeholder="Ví dụ: 8.5"
                       value={positionBefore}
                       onChange={(e) => setPositionBefore(e.target.value)}
-                      style={{ height: "30px", fontSize: "12px" }}
+                      style={{ height: "30px", fontSize: "12px", paddingLeft: "10px" }}
                     />
                   </div>
                   <div className="input-group">
@@ -587,7 +739,7 @@ export function AiAdvisor() {
                       placeholder="Ví dụ: 5.2"
                       value={positionAfter}
                       onChange={(e) => setPositionAfter(e.target.value)}
-                      style={{ height: "30px", fontSize: "12px" }}
+                      style={{ height: "30px", fontSize: "12px", paddingLeft: "10px" }}
                     />
                   </div>
                   <div className="input-group">
@@ -598,7 +750,7 @@ export function AiAdvisor() {
                       placeholder="+15"
                       value={clicksDelta}
                       onChange={(e) => setClicksDelta(e.target.value)}
-                      style={{ height: "30px", fontSize: "12px" }}
+                      style={{ height: "30px", fontSize: "12px", paddingLeft: "10px" }}
                     />
                   </div>
                   <div className="input-group">
@@ -609,7 +761,7 @@ export function AiAdvisor() {
                       placeholder="+150"
                       value={impressionsDelta}
                       onChange={(e) => setImpressionsDelta(e.target.value)}
-                      style={{ height: "30px", fontSize: "12px" }}
+                      style={{ height: "30px", fontSize: "12px", paddingLeft: "10px" }}
                     />
                   </div>
                 </div>
@@ -617,7 +769,7 @@ export function AiAdvisor() {
             </div>
 
             {updatingError && (
-              <div style={{ color: "#ef4444", fontSize: "11px", marginTop: "8px" }}>❌ {updatingError}</div>
+              <div style={{ color: "#ef4444", fontSize: "11px", marginTop: "8px" }}>Lỗi: {updatingError}</div>
             )}
 
             <div style={{ display: "flex", gap: "8px", marginTop: "12px", justifyContent: "flex-end" }}>
@@ -646,7 +798,7 @@ export function AiAdvisor() {
               type="button"
               onClick={() => startUpdating(rec)}
               className="rt-btn"
-              style={{ padding: "4px 12px", fontSize: "11px", background: "rgba(139, 92, 246, 0.1)", border: "1px solid rgba(139, 92, 246, 0.3)", color: "#c4b5fd" }}
+              style={{ padding: "4px 12px", fontSize: "11px", background: "var(--primary-dim)", border: "1px solid rgba(139, 92, 246, 0.25)", color: "var(--primary)" }}
             >
               Cập nhật tiến độ
             </button>
@@ -673,21 +825,21 @@ export function AiAdvisor() {
   const sourceStatusLabel = (status: string) => {
     const s = (status || "").toLowerCase();
     if (s === "ok" || s === "gsc_real" || s === "live_ga4" || s === "partial_live_ga4") {
-      return <span style={{ color: "#10b981", fontWeight: "bold" }}>● Hoạt động</span>;
+      return <span style={{ color: "var(--green)", fontWeight: "bold" }}>● Hoạt động</span>;
     }
     if (s === "disabled") {
-      return <span style={{ color: "#94a3b8", fontWeight: "bold" }}>○ Bị tắt</span>;
+      return <span style={{ color: "var(--text-dim)", fontWeight: "bold" }}>○ Bị tắt</span>;
     }
     if (s === "missing_credentials") {
-      return <span style={{ color: "#f59e0b", fontWeight: "bold" }}>⚠ Thiếu cấu hình</span>;
+      return <span style={{ color: "var(--amber)", fontWeight: "bold" }}>Thiếu cấu hình</span>;
     }
-    return <span style={{ color: "#ef4444", fontWeight: "bold" }}>✕ Lỗi/Không có dữ liệu</span>;
+    return <span style={{ color: "var(--red)", fontWeight: "bold" }}>Lỗi/Không có dữ liệu</span>;
   };
 
   return (
     <div className="geo-optimizer" style={{ paddingBottom: "3rem" }}>
       <div className="hint-box">
-        💡 <strong>AI Cố vấn website:</strong> Hợp nhất toàn bộ dữ liệu Marketing (GSC, GA4, Technical SEO, rank tracker, v.v.), tính toán deterministic insights trước, sau đó dùng AI của Groq LLaMA 3.3 để xây dựng kế hoạch bứt phá traffic.
+        <strong>AI Cố vấn website:</strong> Hợp nhất toàn bộ dữ liệu Marketing (GSC, GA4, Technical SEO, rank tracker, v.v.), tính toán deterministic insights trước, sau đó dùng AI của Groq LLaMA 3.3 để xây dựng kế hoạch bứt phá traffic.
       </div>
 
       {/* Inputs Form */}
@@ -701,7 +853,7 @@ export function AiAdvisor() {
               className="text-input"
               value={selectedSiteUrl}
               onChange={(e) => setSelectedSiteUrl(e.target.value)}
-              style={{ background: "var(--surface)", color: "var(--text)" }}
+              style={{ background: "var(--surface)", color: "var(--text)", paddingLeft: "10px" }}
             >
               {activeSite && <option value={activeSite.url}>{activeSite.name} (Active - {activeSite.url})</option>}
               {sites
@@ -735,7 +887,7 @@ export function AiAdvisor() {
               className="text-input"
               value={days}
               onChange={(e) => setDays(Number(e.target.value))}
-              style={{ background: "var(--surface)", color: "var(--text)" }}
+              style={{ background: "var(--surface)", color: "var(--text)", paddingLeft: "10px" }}
             >
               <option value={30}>30 ngày qua</option>
               <option value={60}>60 ngày qua</option>
@@ -748,7 +900,7 @@ export function AiAdvisor() {
         {/* Checkbox triggers */}
         <div style={{ marginTop: "1rem" }}>
           <label className="input-label" style={{ marginBottom: "6px" }}>Nguồn dữ liệu đưa vào cố vấn</label>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: "16px", padding: "10px", background: "rgba(255,255,255,0.03)", borderRadius: "8px", border: "1px solid var(--border)" }}>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "16px", padding: "10px", background: "var(--surface2)", borderRadius: "8px", border: "1px solid var(--border)" }}>
             <label style={{ display: "flex", alignItems: "center", gap: "6px", cursor: "pointer", fontSize: "13px" }}>
               <input type="checkbox" checked={includeGsc} onChange={(e) => setIncludeGsc(e.target.checked)} />
               Google Search Console
@@ -821,10 +973,10 @@ export function AiAdvisor() {
         <div style={{ marginTop: "1.5rem" }} className="result-wrapper">
 
           {/* Export Report Actions — Phase 9 */}
-          <div className="section-block" style={{ padding: "16px 20px", background: "rgba(255,255,255,0.02)", borderRadius: "12px", border: "1px solid var(--border)", marginBottom: "1rem" }}>
+          <div className="section-block" style={{ padding: "16px 20px", background: "var(--surface)", borderRadius: "12px", border: "1px solid var(--border)", marginBottom: "1rem" }}>
             <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: "12px" }}>
               <div style={{ fontSize: "14px", fontWeight: "600", color: "var(--text-h)" }}>
-                📥 Xuất báo cáo chẩn đoán SEO AI:
+                Xuất báo cáo chẩn đoán SEO AI:
               </div>
               <div style={{ display: "flex", gap: "8px" }}>
                 <button
@@ -832,7 +984,7 @@ export function AiAdvisor() {
                   className="rt-btn"
                   onClick={() => handleExportReport("json")}
                   disabled={exportLoading}
-                  style={{ padding: "6px 14px", fontSize: "12px", background: "rgba(139, 92, 246, 0.1)", border: "1px solid rgba(139, 92, 246, 0.3)", color: "#c4b5fd", cursor: "pointer" }}
+                  style={{ padding: "6px 14px", fontSize: "12px", background: "var(--primary-dim)", border: "1px solid rgba(139, 92, 246, 0.25)", color: "var(--primary)", cursor: "pointer" }}
                 >
                   Xuất JSON
                 </button>
@@ -841,7 +993,7 @@ export function AiAdvisor() {
                   className="rt-btn"
                   onClick={() => handleExportReport("markdown")}
                   disabled={exportLoading}
-                  style={{ padding: "6px 14px", fontSize: "12px", background: "rgba(6, 182, 212, 0.1)", border: "1px solid rgba(6, 182, 212, 0.3)", color: "#67e8f9", cursor: "pointer" }}
+                  style={{ padding: "6px 14px", fontSize: "12px", background: "rgba(6, 182, 212, 0.08)", border: "1px solid rgba(6, 182, 212, 0.25)", color: "var(--cyan)", cursor: "pointer" }}
                 >
                   Xuất Markdown
                 </button>
@@ -850,7 +1002,7 @@ export function AiAdvisor() {
                   className="rt-btn"
                   onClick={() => handleExportReport("html")}
                   disabled={exportLoading}
-                  style={{ padding: "6px 14px", fontSize: "12px", background: "rgba(16, 185, 129, 0.1)", border: "1px solid rgba(16, 185, 129, 0.3)", color: "#34d399", cursor: "pointer" }}
+                  style={{ padding: "6px 14px", fontSize: "12px", background: "rgba(16, 185, 129, 0.08)", border: "1px solid rgba(16, 185, 129, 0.25)", color: "var(--green)", cursor: "pointer" }}
                 >
                   Xuất HTML
                 </button>
@@ -864,17 +1016,17 @@ export function AiAdvisor() {
             )}
             {exportError && (
               <div style={{ color: "#ef4444", fontSize: "12px", marginTop: "10px" }}>
-                ❌ Lỗi xuất báo cáo: {exportError}
+                Lỗi xuất báo cáo: {exportError}
               </div>
             )}
           </div>
           
           {/* Executive Summary Card */}
 
-          <div className="section-block" style={{ padding: "20px", background: "rgba(255,255,255,0.02)", borderRadius: "12px", border: "1px solid var(--border)" }}>
-            <h3 style={{ display: "flex", alignItems: "center", gap: "8px", margin: "0 0 10px 0", color: "#8b5cf6", fontSize: "17px", fontWeight: "700" }}>
-              💎 Tóm tắt điều hành (Executive Summary)
-              <span style={{ fontSize: "10px", background: "rgba(139,92,246,0.15)", color: "#c4b5fd", padding: "2px 8px", borderRadius: "99px", marginLeft: "auto", border: "1px solid rgba(139,92,246,0.2)" }}>
+          <div className="section-block" style={{ padding: "20px", background: "var(--surface)", borderRadius: "12px", border: "1px solid var(--border)" }}>
+            <h3 style={{ display: "flex", alignItems: "center", gap: "8px", margin: "0 0 10px 0", color: "var(--primary)", fontSize: "17px", fontWeight: "700" }}>
+              Tóm tắt điều hành (Executive Summary)
+              <span style={{ fontSize: "10px", background: "var(--primary-dim)", color: "var(--primary)", padding: "2px 8px", borderRadius: "99px", marginLeft: "auto", border: "1px solid rgba(139,92,246,0.2)" }}>
                 AI: {result.ai_provider}
               </span>
             </h3>
@@ -885,27 +1037,27 @@ export function AiAdvisor() {
 
           {/* Bộ nhớ lịch sử SEO */}
           <div className="section-block" style={{ marginTop: "1.5rem" }}>
-            <h3 className="section-title" style={{ display: "flex", alignItems: "center", gap: "6px", color: "#c084fc" }}>
-              🧠 Bộ nhớ lịch sử SEO (SEO Memory)
+            <h3 className="section-title" style={{ display: "flex", alignItems: "center", gap: "6px", color: "var(--primary)" }}>
+              Bộ nhớ lịch sử SEO (SEO Memory)
             </h3>
             
             {/* 1 Summary Row with Counters */}
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "12px", marginTop: "12px" }}>
-              <div style={{ background: "rgba(139, 92, 246, 0.05)", padding: "12px 16px", borderRadius: "10px", border: "1px solid rgba(139, 92, 246, 0.15)" }}>
+              <div style={{ background: "rgba(139, 92, 246, 0.03)", padding: "12px 16px", borderRadius: "10px", border: "1px solid rgba(139, 92, 246, 0.15)" }}>
                 <div style={{ fontSize: "12px", color: "var(--text-dim)", marginBottom: "4px" }}>Cơ hội từ khóa đã lưu</div>
-                <div style={{ fontSize: "20px", fontWeight: "bold", color: "#c4b5fd" }}>
+                <div style={{ fontSize: "20px", fontWeight: "bold", color: "var(--primary)" }}>
                   {result.memory_context?.keyword_memory_records ?? 0} <span style={{ fontSize: "12px", fontWeight: "normal", color: "var(--text-dim)" }}>bản ghi</span>
                 </div>
               </div>
-              <div style={{ background: "rgba(6, 182, 212, 0.05)", padding: "12px 16px", borderRadius: "10px", border: "1px solid rgba(6, 182, 212, 0.15)" }}>
+              <div style={{ background: "rgba(6, 182, 212, 0.03)", padding: "12px 16px", borderRadius: "10px", border: "1px solid rgba(6, 182, 212, 0.15)" }}>
                 <div style={{ fontSize: "12px", color: "var(--text-dim)", marginBottom: "4px" }}>Tổng số đề xuất lịch sử</div>
-                <div style={{ fontSize: "20px", fontWeight: "bold", color: "#67e8f9" }}>
+                <div style={{ fontSize: "20px", fontWeight: "bold", color: "var(--cyan)" }}>
                   {result.memory_context?.recommendation_outcomes ?? 0} <span style={{ fontSize: "12px", fontWeight: "normal", color: "var(--text-dim)" }}>đề xuất</span>
                 </div>
               </div>
-              <div style={{ background: "rgba(245, 158, 11, 0.05)", padding: "12px 16px", borderRadius: "10px", border: "1px solid rgba(245, 158, 11, 0.15)" }}>
+              <div style={{ background: "rgba(245, 158, 11, 0.03)", padding: "12px 16px", borderRadius: "10px", border: "1px solid rgba(245, 158, 11, 0.15)" }}>
                 <div style={{ fontSize: "12px", color: "var(--text-dim)", marginBottom: "4px" }}>Đề xuất đang tồn đọng</div>
-                <div style={{ fontSize: "20px", fontWeight: "bold", color: "#fcd34d" }}>
+                <div style={{ fontSize: "20px", fontWeight: "bold", color: "var(--amber)" }}>
                   {result.memory_context?.pending_recommendations_count ?? 0} <span style={{ fontSize: "12px", fontWeight: "normal", color: "var(--text-dim)" }}>chờ xử lý</span>
                 </div>
               </div>
@@ -915,15 +1067,15 @@ export function AiAdvisor() {
             {result.new_vs_recurring_summary && (
               <div className="mock-warning-banner" style={{ 
                 marginTop: "12px", 
-                borderColor: "rgba(139, 92, 246, 0.3)", 
-                background: "rgba(139, 92, 246, 0.05)", 
-                color: "#e9d5ff",
+                borderColor: "rgba(139, 92, 246, 0.2)", 
+                background: "rgba(139, 92, 246, 0.03)", 
+                color: "var(--text-h)",
                 display: "flex",
                 alignItems: "flex-start",
                 gap: "10px",
                 padding: "12px"
               }}>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#c084fc" strokeWidth="2.5" style={{ flexShrink: 0, marginTop: "2px" }}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" strokeWidth="2.5" style={{ flexShrink: 0, marginTop: "2px" }}>
                   <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z" />
                   <path d="M12 16v-4" />
                   <path d="M12 8h.01" />
@@ -938,7 +1090,7 @@ export function AiAdvisor() {
             <div style={{ marginTop: "1rem", display: "flex", flexDirection: "column", gap: "10px" }}>
               
               {/* Section A: Cơ hội lặp lại */}
-              <div style={{ border: "1px solid var(--border)", borderRadius: "8px", overflow: "hidden", background: "rgba(255,255,255,0.01)" }}>
+              <div style={{ border: "1px solid var(--border)", borderRadius: "8px", overflow: "hidden", background: "var(--surface)" }}>
                 <button 
                   type="button" 
                   onClick={() => setShowRecurringOpportunities(!showRecurringOpportunities)}
@@ -948,7 +1100,7 @@ export function AiAdvisor() {
                     justifyContent: "space-between", 
                     alignItems: "center", 
                     padding: "12px 16px", 
-                    background: "rgba(255,255,255,0.02)", 
+                    background: "var(--surface2)", 
                     border: "none", 
                     cursor: "pointer", 
                     color: "var(--text-h)",
@@ -958,8 +1110,8 @@ export function AiAdvisor() {
                   }}
                 >
                   <span style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                    🔄 Cơ hội từ khóa lặp lại nhiều lần 
-                    <span className="issue-badge badge-suggestion" style={{ background: "rgba(192, 132, 252, 0.15)", color: "#c084fc" }}>
+                    Cơ hội từ khóa lặp lại nhiều lần 
+                    <span className="issue-badge badge-suggestion" style={{ background: "rgba(139, 92, 246, 0.08)", color: "var(--primary)", border: "1px solid rgba(139, 92, 246, 0.25)" }}>
                       {result.recurring_opportunities?.length ?? 0}
                     </span>
                   </span>
@@ -967,7 +1119,7 @@ export function AiAdvisor() {
                 </button>
                 
                 {showRecurringOpportunities && (
-                  <div style={{ padding: "16px", borderTop: "1px solid var(--border)", background: "rgba(0,0,0,0.1)" }}>
+                  <div style={{ padding: "16px", borderTop: "1px solid var(--border)", background: "var(--surface)" }}>
                     {!result.recurring_opportunities || result.recurring_opportunities.length === 0 ? (
                       <p style={{ color: "var(--text-dim)", fontSize: "13px", margin: 0, fontStyle: "italic" }}>
                         Chưa có dữ liệu lịch sử đủ để phát hiện cơ hội lặp lại.
@@ -975,10 +1127,10 @@ export function AiAdvisor() {
                     ) : (
                       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "10px" }}>
                         {result.recurring_opportunities.map((opp, index) => (
-                          <div key={index} className="geo-faq-item" style={{ borderLeft: "2px solid #c084fc", margin: 0 }}>
+                          <div key={index} className="geo-faq-item" style={{ borderLeft: "2px solid var(--primary)", margin: 0 }}>
                             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "8px" }}>
                               <strong style={{ color: "var(--text-h)", fontSize: "13px" }}>{opp.keyword}</strong>
-                              <span className="rt-tag-badge" style={{ background: "rgba(192,132,252,0.15)", color: "#c084fc", flexShrink: 0 }}>
+                              <span className="rt-tag-badge" style={{ background: "var(--primary-dim)", color: "var(--primary)", border: "1px solid rgba(139, 92, 246, 0.25)", flexShrink: 0 }}>
                                 Lặp {opp.occurrences} lần
                               </span>
                             </div>
@@ -997,7 +1149,7 @@ export function AiAdvisor() {
               </div>
 
               {/* Section B: Khuyến nghị đang tồn đọng */}
-              <div style={{ border: "1px solid var(--border)", borderRadius: "8px", overflow: "hidden", background: "rgba(255,255,255,0.01)" }}>
+              <div style={{ border: "1px solid var(--border)", borderRadius: "8px", overflow: "hidden", background: "var(--surface)" }}>
                 <button 
                   type="button" 
                   onClick={() => setShowPendingRecommendations(!showPendingRecommendations)}
@@ -1007,7 +1159,7 @@ export function AiAdvisor() {
                     justifyContent: "space-between", 
                     alignItems: "center", 
                     padding: "12px 16px", 
-                    background: "rgba(255,255,255,0.02)", 
+                    background: "var(--surface2)", 
                     border: "none", 
                     cursor: "pointer", 
                     color: "var(--text-h)",
@@ -1017,8 +1169,8 @@ export function AiAdvisor() {
                   }}
                 >
                   <span style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                    ⏳ Khuyến nghị tồn đọng (Chờ xử lý)
-                    <span className="issue-badge badge-critical" style={{ background: "rgba(239, 68, 68, 0.15)", color: "#ef4444" }}>
+                    Khuyến nghị tồn đọng (Chờ xử lý)
+                    <span className="issue-badge badge-critical" style={{ background: "rgba(239, 68, 68, 0.08)", color: "var(--red)" }}>
                       {result.pending_recommendations?.length ?? 0}
                     </span>
                   </span>
@@ -1026,7 +1178,7 @@ export function AiAdvisor() {
                 </button>
                 
                 {showPendingRecommendations && (
-                  <div style={{ padding: "16px", borderTop: "1px solid var(--border)", background: "rgba(0,0,0,0.1)" }}>
+                  <div style={{ padding: "16px", borderTop: "1px solid var(--border)", background: "var(--surface)" }}>
                     {!result.pending_recommendations || result.pending_recommendations.length === 0 ? (
                       <p style={{ color: "var(--text-dim)", fontSize: "13px", margin: 0, fontStyle: "italic" }}>
                         Chưa có khuyến nghị tồn đọng nào được ghi nhận.
@@ -1041,7 +1193,7 @@ export function AiAdvisor() {
               </div>
 
               {/* Section C: Khuyến nghị đang thực hiện */}
-              <div style={{ border: "1px solid var(--border)", borderRadius: "8px", overflow: "hidden", background: "rgba(255,255,255,0.01)" }}>
+              <div style={{ border: "1px solid var(--border)", borderRadius: "8px", overflow: "hidden", background: "var(--surface)" }}>
                 <button 
                   type="button" 
                   onClick={() => setShowInProgressRecommendations(!showInProgressRecommendations)}
@@ -1051,7 +1203,7 @@ export function AiAdvisor() {
                     justifyContent: "space-between", 
                     alignItems: "center", 
                     padding: "12px 16px", 
-                    background: "rgba(255,255,255,0.02)", 
+                    background: "var(--surface2)", 
                     border: "none", 
                     cursor: "pointer", 
                     color: "var(--text-h)",
@@ -1061,8 +1213,8 @@ export function AiAdvisor() {
                   }}
                 >
                   <span style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                    ⚙️ Khuyến nghị đang thực hiện (In Progress)
-                    <span className="issue-badge badge-warning" style={{ background: "rgba(6, 182, 212, 0.15)", color: "#06b6d4" }}>
+                    Khuyến nghị đang triển khai (In Progress)
+                    <span className="issue-badge badge-warning" style={{ background: "rgba(6, 182, 212, 0.08)", color: "var(--cyan)" }}>
                       {result.in_progress_recommendations?.length ?? 0}
                     </span>
                   </span>
@@ -1070,7 +1222,7 @@ export function AiAdvisor() {
                 </button>
                 
                 {showInProgressRecommendations && (
-                  <div style={{ padding: "16px", borderTop: "1px solid var(--border)", background: "rgba(0,0,0,0.1)" }}>
+                  <div style={{ padding: "16px", borderTop: "1px solid var(--border)", background: "var(--surface)" }}>
                     {!result.in_progress_recommendations || result.in_progress_recommendations.length === 0 ? (
                       <p style={{ color: "var(--text-dim)", fontSize: "13px", margin: 0, fontStyle: "italic" }}>
                         Không có khuyến nghị nào đang thực hiện.
@@ -1085,7 +1237,7 @@ export function AiAdvisor() {
               </div>
 
               {/* Section D: Khuyến nghị lặp lại */}
-              <div style={{ border: "1px solid var(--border)", borderRadius: "8px", overflow: "hidden", background: "rgba(255,255,255,0.01)" }}>
+              <div style={{ border: "1px solid var(--border)", borderRadius: "8px", overflow: "hidden", background: "var(--surface)" }}>
                 <button 
                   type="button" 
                   onClick={() => setShowRepeatedRecommendations(!showRepeatedRecommendations)}
@@ -1095,7 +1247,7 @@ export function AiAdvisor() {
                     justifyContent: "space-between", 
                     alignItems: "center", 
                     padding: "12px 16px", 
-                    background: "rgba(255,255,255,0.02)", 
+                    background: "var(--surface2)", 
                     border: "none", 
                     cursor: "pointer", 
                     color: "var(--text-h)",
@@ -1105,8 +1257,8 @@ export function AiAdvisor() {
                   }}
                 >
                   <span style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                    🔄 Khuyến nghị lặp lại (Xuất hiện nhiều lần)
-                    <span className="issue-badge badge-warning" style={{ background: "rgba(245, 158, 11, 0.15)", color: "#f59e0b" }}>
+                    Khuyến nghị lặp lại (Xuất hiện nhiều lần)
+                    <span className="issue-badge badge-warning" style={{ background: "rgba(245, 158, 11, 0.08)", color: "var(--amber)" }}>
                       {result.repeated_recommendations?.length ?? 0}
                     </span>
                   </span>
@@ -1114,7 +1266,7 @@ export function AiAdvisor() {
                 </button>
                 
                 {showRepeatedRecommendations && (
-                  <div style={{ padding: "16px", borderTop: "1px solid var(--border)", background: "rgba(0,0,0,0.1)" }}>
+                  <div style={{ padding: "16px", borderTop: "1px solid var(--border)", background: "var(--surface)" }}>
                     {!result.repeated_recommendations || result.repeated_recommendations.length === 0 ? (
                       <p style={{ color: "var(--text-dim)", fontSize: "13px", margin: 0, fontStyle: "italic" }}>
                         Chưa ghi nhận khuyến nghị lặp lại trong lịch sử.
@@ -1122,13 +1274,13 @@ export function AiAdvisor() {
                     ) : (
                       <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
                         {result.repeated_recommendations.map((rec, index) => (
-                          <div key={index} className="geo-faq-item" style={{ borderLeft: "2px solid #f59e0b", margin: 0 }}>
+                          <div key={index} className="geo-faq-item" style={{ borderLeft: "2px solid var(--amber)", margin: 0 }}>
                             <div style={{ display: "flex", justifyContent: "space-between", gap: "8px", flexWrap: "wrap", alignItems: "center" }}>
                               <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
-                                <span className="rt-tag-badge" style={{ background: "rgba(245, 158, 11, 0.15)", color: "#fbbf24" }}>{rec.recommendation_type}</span>
+                                <span className="rt-tag-badge" style={{ background: "rgba(245, 158, 11, 0.08)", color: "var(--amber)" }}>{rec.recommendation_type}</span>
                                 {rec.priority && priorityLabel(rec.priority as string)}
                               </div>
-                              <span className="rt-tag-badge" style={{ background: "rgba(245,158,11,0.15)", color: "#f59e0b", fontWeight: "bold" }}>
+                              <span className="rt-tag-badge" style={{ background: "rgba(245, 158, 11, 0.08)", color: "var(--amber)", fontWeight: "bold" }}>
                                 Đã thấy {rec.occurrences} lần
                               </span>
                             </div>
@@ -1137,7 +1289,7 @@ export function AiAdvisor() {
                             </p>
                             {rec.last_seen && (
                               <p style={{ fontSize: "11px", color: "var(--text-dim)", margin: 0 }}>
-                                📅 Lần cuối ghi nhận: {new Date(rec.last_seen).toLocaleDateString("vi-VN")}
+                                 Lần cuối ghi nhận: {new Date(rec.last_seen).toLocaleDateString("vi-VN")}
                               </p>
                             )}
                           </div>
@@ -1154,64 +1306,61 @@ export function AiAdvisor() {
           {/* Tiến độ xử lý khuyến nghị */}
           {result.outcome_tracking_context && (
             <div className="section-block" style={{ marginTop: "1.5rem" }}>
-              <h3 className="section-title" style={{ display: "flex", alignItems: "center", gap: "6px", color: "#06b6d4" }}>
-                🎯 Tiến độ xử lý khuyến nghị (Execution Tracker)
+              <h3 className="section-title" style={{ display: "flex", alignItems: "center", gap: "6px", color: "var(--cyan)" }}>
+                Tiến độ xử lý khuyến nghị (Execution Tracker)
               </h3>
               
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "12px", marginTop: "12px" }}>
-                <div style={{ background: "rgba(245, 158, 11, 0.05)", padding: "12px 16px", borderRadius: "10px", border: "1px solid rgba(245, 158, 11, 0.15)" }}>
-                  <div style={{ fontSize: "12px", color: "var(--text-dim)", marginBottom: "4px" }}>Chờ xử lý (Pending)</div>
-                  <div style={{ fontSize: "20px", fontWeight: "bold", color: "#fbbf24" }}>
-                    {result.outcome_tracking_context.pending_count ?? 0} <span style={{ fontSize: "12px", fontWeight: "normal", color: "var(--text-dim)" }}>đề xuất</span>
-                  </div>
-                </div>
-                <div style={{ background: "rgba(6, 182, 212, 0.05)", padding: "12px 16px", borderRadius: "10px", border: "1px solid rgba(6, 182, 212, 0.15)" }}>
-                  <div style={{ fontSize: "12px", color: "var(--text-dim)", marginBottom: "4px" }}>Đang thực hiện (In Progress)</div>
-                  <div style={{ fontSize: "20px", fontWeight: "bold", color: "#67e8f9" }}>
-                    {result.outcome_tracking_context.in_progress_count ?? 0} <span style={{ fontSize: "12px", fontWeight: "normal", color: "var(--text-dim)" }}>đề xuất</span>
-                  </div>
-                </div>
-                <div style={{ background: "rgba(16, 185, 129, 0.05)", padding: "12px 16px", borderRadius: "10px", border: "1px solid rgba(16, 185, 129, 0.15)" }}>
-                  <div style={{ fontSize: "12px", color: "var(--text-dim)", marginBottom: "4px" }}>Đã hoàn thành (Completed)</div>
-                  <div style={{ fontSize: "20px", fontWeight: "bold", color: "#34d399" }}>
-                    {result.outcome_tracking_context.completed_count ?? 0} <span style={{ fontSize: "12px", fontWeight: "normal", color: "var(--text-dim)" }}>đề xuất</span>
-                  </div>
-                  {result.outcome_tracking_context.completed_with_delta_count > 0 && (
-                    <div style={{ fontSize: "10px", color: "#a7f3d0", marginTop: "2px" }}>
-                      ({result.outcome_tracking_context.completed_with_delta_count} có đo lường KPI delta)
+                  <div style={{ background: "rgba(245, 158, 11, 0.03)", padding: "12px 16px", borderRadius: "10px", border: "1px solid rgba(245, 158, 11, 0.15)" }}>
+                    <div style={{ fontSize: "12px", color: "var(--text-dim)", marginBottom: "4px" }}>Chờ xử lý (Pending)</div>
+                    <div style={{ fontSize: "20px", fontWeight: "bold", color: "var(--amber)" }}>
+                      {result.outcome_tracking_context.pending_count ?? 0} <span style={{ fontSize: "12px", fontWeight: "normal", color: "var(--text-dim)" }}>đề xuất</span>
                     </div>
-                  )}
-                </div>
-                <div style={{ background: "rgba(220, 38, 38, 0.05)", padding: "12px 16px", borderRadius: "10px", border: "1px solid rgba(220, 38, 38, 0.15)" }}>
-                  <div style={{ fontSize: "12px", color: "var(--text-dim)", marginBottom: "4px" }}>Thất bại (Failed)</div>
-                  <div style={{ fontSize: "20px", fontWeight: "bold", color: "#fca5a5" }}>
-                    {result.outcome_tracking_context.failed_count ?? 0} <span style={{ fontSize: "12px", fontWeight: "normal", color: "var(--text-dim)" }}>đề xuất</span>
                   </div>
-                </div>
+                  <div style={{ background: "rgba(6, 182, 212, 0.03)", padding: "12px 16px", borderRadius: "10px", border: "1px solid rgba(6, 182, 212, 0.15)" }}>
+                    <div style={{ fontSize: "12px", color: "var(--text-dim)", marginBottom: "4px" }}>Đang thực hiện (In Progress)</div>
+                    <div style={{ fontSize: "20px", fontWeight: "bold", color: "var(--cyan)" }}>
+                      {result.outcome_tracking_context.in_progress_count ?? 0} <span style={{ fontSize: "12px", fontWeight: "normal", color: "var(--text-dim)" }}>đề xuất</span>
+                    </div>
+                  </div>
+                  <div style={{ background: "rgba(16, 185, 129, 0.03)", padding: "12px 16px", borderRadius: "10px", border: "1px solid rgba(16, 185, 129, 0.15)" }}>
+                    <div style={{ fontSize: "12px", color: "var(--text-dim)", marginBottom: "4px" }}>Đã hoàn thành (Completed)</div>
+                    <div style={{ fontSize: "20px", fontWeight: "bold", color: "var(--green)" }}>
+                      {result.outcome_tracking_context.completed_count ?? 0} <span style={{ fontSize: "12px", fontWeight: "normal", color: "var(--text-dim)" }}>đề xuất</span>
+                    </div>
+                    {result.outcome_tracking_context.completed_with_delta_count > 0 && (
+                      <div style={{ fontSize: "10px", color: "var(--green)", marginTop: "2px" }}>
+                        ({result.outcome_tracking_context.completed_with_delta_count} có đo lường KPI delta)
+                      </div>
+                    )}
+                  </div>
+                  <div style={{ background: "rgba(220, 38, 38, 0.03)", padding: "12px 16px", borderRadius: "10px", border: "1px solid rgba(220, 38, 38, 0.15)" }}>
+                    <div style={{ fontSize: "12px", color: "var(--text-dim)", marginBottom: "4px" }}>Thất bại (Failed)</div>
+                    <div style={{ fontSize: "20px", fontWeight: "bold", color: "var(--red)" }}>
+                      {result.outcome_tracking_context.failed_count ?? 0} <span style={{ fontSize: "12px", fontWeight: "normal", color: "var(--text-dim)" }}>đề xuất</span>
+                    </div>
+                  </div>
               </div>
 
               {/* Summaries from advisor */}
               {(result.effective_recommendation_summary || result.completed_recommendations_summary || result.failed_recommendations_summary) && (
                 <div style={{ marginTop: "1rem", display: "flex", flexDirection: "column", gap: "8px" }}>
                   {result.effective_recommendation_summary && (
-                    <div className="mock-warning-banner" style={{ borderColor: "rgba(16, 185, 129, 0.3)", background: "rgba(16, 185, 129, 0.03)", color: "#a7f3d0", display: "flex", gap: "8px", padding: "12px" }}>
-                      <span style={{ fontSize: "16px" }}>📈</span>
+                    <div className="mock-warning-banner" style={{ borderColor: "rgba(16, 185, 129, 0.2)", background: "rgba(16, 185, 129, 0.03)", color: "var(--green)", display: "flex", gap: "8px", padding: "12px" }}>
                       <div style={{ fontSize: "13px", lineHeight: "1.5" }}>
                         <strong>Đánh giá hiệu quả:</strong> {result.effective_recommendation_summary}
                       </div>
                     </div>
                   )}
                   {result.completed_recommendations_summary && (
-                    <div className="mock-warning-banner" style={{ borderColor: "rgba(59, 130, 246, 0.3)", background: "rgba(59, 130, 246, 0.03)", color: "#93c5fd", display: "flex", gap: "8px", padding: "12px" }}>
-                      <span style={{ fontSize: "16px" }}>✅</span>
+                    <div className="mock-warning-banner" style={{ borderColor: "rgba(139, 92, 246, 0.2)", background: "rgba(139, 92, 246, 0.03)", color: "var(--primary)", display: "flex", gap: "8px", padding: "12px" }}>
                       <div style={{ fontSize: "13px", lineHeight: "1.5" }}>
                         <strong>Thực thi hoàn thành:</strong> {result.completed_recommendations_summary}
                       </div>
                     </div>
                   )}
                   {result.failed_recommendations_summary && (
-                    <div className="mock-warning-banner" style={{ borderColor: "rgba(239, 68, 68, 0.3)", background: "rgba(239, 68, 68, 0.03)", color: "#fca5a5", display: "flex", gap: "8px", padding: "12px" }}>
-                      <span style={{ fontSize: "16px" }}>⚠️</span>
+                    <div className="mock-warning-banner" style={{ borderColor: "rgba(239, 68, 68, 0.2)", background: "rgba(239, 68, 68, 0.03)", color: "var(--red)", display: "flex", gap: "8px", padding: "12px" }}>
                       <div style={{ fontSize: "13px", lineHeight: "1.5" }}>
                         <strong>Khuyến nghị thất bại:</strong> {result.failed_recommendations_summary}
                       </div>
@@ -1224,7 +1373,7 @@ export function AiAdvisor() {
               <div style={{ marginTop: "1.5rem", display: "flex", flexDirection: "column", gap: "10px" }}>
                 
                 {/* Collapsible: Khuyến nghị đã hoàn thành */}
-                <div style={{ border: "1px solid var(--border)", borderRadius: "8px", overflow: "hidden", background: "rgba(255,255,255,0.01)" }}>
+                <div style={{ border: "1px solid var(--border)", borderRadius: "8px", overflow: "hidden", background: "var(--surface)" }}>
                   <button 
                     type="button" 
                     onClick={() => setShowCompletedRecs(!showCompletedRecs)}
@@ -1234,7 +1383,7 @@ export function AiAdvisor() {
                       justifyContent: "space-between", 
                       alignItems: "center", 
                       padding: "12px 16px", 
-                      background: "rgba(255,255,255,0.02)", 
+                      background: "var(--surface2)", 
                       border: "none", 
                       cursor: "pointer", 
                       color: "var(--text-h)",
@@ -1244,8 +1393,8 @@ export function AiAdvisor() {
                     }}
                   >
                     <span style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                      ✅ Khuyến nghị đã hoàn thành (Completed)
-                      <span className="issue-badge badge-suggestion" style={{ background: "rgba(16, 185, 129, 0.15)", color: "#10b981" }}>
+                      Khuyến nghị đã hoàn thành (Completed)
+                      <span className="issue-badge badge-suggestion" style={{ background: "rgba(16, 185, 129, 0.08)", color: "var(--green)" }}>
                         {completedRecs.length}
                       </span>
                     </span>
@@ -1253,14 +1402,14 @@ export function AiAdvisor() {
                   </button>
 
                   {showCompletedRecs && (
-                    <div style={{ padding: "16px", borderTop: "1px solid var(--border)", background: "rgba(0,0,0,0.1)" }}>
+                    <div style={{ padding: "16px", borderTop: "1px solid var(--border)", background: "var(--surface)" }}>
                       {completedRecs.length === 0 ? (
                         <p style={{ color: "var(--text-dim)", fontSize: "13px", margin: 0, fontStyle: "italic" }}>
                           Không có khuyến nghị đã hoàn thành nào được ghi nhận.
                         </p>
                       ) : (
                         <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-                          {completedRecs.map((rec) => renderRecommendationItem(rec, "#10b981"))}
+                          {completedRecs.map((rec) => renderRecommendationItem(rec, "#059669"))}
                         </div>
                       )}
                     </div>
@@ -1268,7 +1417,7 @@ export function AiAdvisor() {
                 </div>
 
                 {/* Collapsible: Khuyến nghị thất bại */}
-                <div style={{ border: "1px solid var(--border)", borderRadius: "8px", overflow: "hidden", background: "rgba(255,255,255,0.01)" }}>
+                <div style={{ border: "1px solid var(--border)", borderRadius: "8px", overflow: "hidden", background: "var(--surface)" }}>
                   <button 
                     type="button" 
                     onClick={() => setShowFailedRecs(!showFailedRecs)}
@@ -1278,7 +1427,7 @@ export function AiAdvisor() {
                       justifyContent: "space-between", 
                       alignItems: "center", 
                       padding: "12px 16px", 
-                      background: "rgba(255,255,255,0.02)", 
+                      background: "var(--surface2)", 
                       border: "none", 
                       cursor: "pointer", 
                       color: "var(--text-h)",
@@ -1288,8 +1437,8 @@ export function AiAdvisor() {
                     }}
                   >
                     <span style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                      ❌ Khuyến nghị thất bại (Failed)
-                      <span className="issue-badge badge-critical" style={{ background: "rgba(239, 68, 68, 0.15)", color: "#ef4444" }}>
+                      Khuyến nghị thất bại (Failed)
+                      <span className="issue-badge badge-critical" style={{ background: "rgba(239, 68, 68, 0.08)", color: "var(--red)" }}>
                         {failedRecs.length}
                       </span>
                     </span>
@@ -1297,14 +1446,14 @@ export function AiAdvisor() {
                   </button>
 
                   {showFailedRecs && (
-                    <div style={{ padding: "16px", borderTop: "1px solid var(--border)", background: "rgba(0,0,0,0.1)" }}>
+                    <div style={{ padding: "16px", borderTop: "1px solid var(--border)", background: "var(--surface)" }}>
                       {failedRecs.length === 0 ? (
                         <p style={{ color: "var(--text-dim)", fontSize: "13px", margin: 0, fontStyle: "italic" }}>
                           Không có khuyến nghị thất bại nào được ghi nhận.
                         </p>
                       ) : (
                         <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-                          {failedRecs.map((rec) => renderRecommendationItem(rec, "#ef4444"))}
+                          {failedRecs.map((rec) => renderRecommendationItem(rec, "#dc2626"))}
                         </div>
                       )}
                     </div>
@@ -1319,11 +1468,11 @@ export function AiAdvisor() {
           {result.top_issues && result.top_issues.length > 0 && (
             <div className="section-block" style={{ marginTop: "1rem" }}>
               <h3 className="section-title critical-title" style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                🔴 Các vấn đề cần ưu tiên xử lý hàng đầu
+                Các vấn đề cần ưu tiên xử lý hàng đầu
               </h3>
               <div style={{ display: "flex", flexDirection: "column", gap: "8px", marginTop: "10px" }}>
                 {result.top_issues.slice(0, 5).map((issue, idx) => (
-                  <div key={idx} className="geo-faq-item" style={{ borderLeft: "3px solid #ef4444" }}>
+                  <div key={idx} className="geo-faq-item" style={{ borderLeft: "3px solid #dc2626" }}>
                     <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
                       {severityBadge(issue.severity)}
                       <span className="rt-tag-badge">{issue.category}</span>
@@ -1331,8 +1480,8 @@ export function AiAdvisor() {
                     <p style={{ fontSize: "14px", color: "var(--text-h)", fontWeight: "600", margin: "8px 0 4px 0" }}>
                       {issue.message}
                     </p>
-                    <p style={{ fontSize: "12px", color: "#10b981", margin: 0 }}>
-                      👉 <strong>Khắc phục:</strong> {issue.fix}
+                    <p style={{ fontSize: "12px", color: "var(--green)", margin: 0 }}>
+                      <strong>Khắc phục:</strong> {issue.fix}
                     </p>
                   </div>
                 ))}
@@ -1343,8 +1492,8 @@ export function AiAdvisor() {
           {/* Quick Wins Table */}
           {result.quick_wins && result.quick_wins.length > 0 && (
             <div className="section-block" style={{ marginTop: "1.5rem" }}>
-              <h3 className="section-title" style={{ display: "flex", alignItems: "center", gap: "6px", color: "#06b6d4" }}>
-                🚀 Cơ hội thăng hạng nhanh (Quick Wins)
+              <h3 className="section-title" style={{ display: "flex", alignItems: "center", gap: "6px", color: "var(--cyan)" }}>
+                Cơ hội thăng hạng nhanh (Quick Wins)
               </h3>
               <div className="top-pages-table" style={{ marginTop: "10px" }}>
                 <table>
@@ -1359,8 +1508,8 @@ export function AiAdvisor() {
                   <tbody>
                     {result.quick_wins.map((qw, i) => (
                       <tr key={i}>
-                        <td style={{ fontWeight: "700", color: "#e2e8f0" }}>{qw.keyword}</td>
-                        <td style={{ color: "#3b82f6", fontWeight: "bold" }}>#{qw.current_position}</td>
+                        <td style={{ fontWeight: "700", color: "var(--text-h)" }}>{qw.keyword}</td>
+                        <td style={{ color: "var(--primary)", fontWeight: "bold" }}>#{qw.current_position}</td>
                         <td>{qw.impressions.toLocaleString()}</td>
                         <td style={{ fontSize: "12px", color: "var(--text-dim)" }}>{qw.action}</td>
                       </tr>
@@ -1374,15 +1523,15 @@ export function AiAdvisor() {
           {/* Technical Blockers & Core Web Vitals */}
           {result.technical_blockers && result.technical_blockers.length > 0 && (
             <div className="section-block" style={{ marginTop: "1.5rem" }}>
-              <h3 className="section-title warning-title" style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                ⚡ Rào cản kỹ thuật &amp; Core Web Vitals
-              </h3>
+                <h3 className="section-title warning-title" style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                  Rào cản kỹ thuật &amp; Core Web Vitals
+                </h3>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "10px", marginTop: "10px" }}>
                 {result.technical_blockers.slice(0, 6).map((blocker, idx) => (
-                  <div key={idx} className="geo-faq-item" style={{ borderLeft: "3px solid #f59e0b" }}>
-                    <span className="rt-tag-badge" style={{ background: "rgba(245,158,11,0.15)", color: "#f59e0b" }}>{blocker.category}</span>
+                  <div key={idx} className="geo-faq-item" style={{ borderLeft: "3px solid var(--amber)" }}>
+                    <span className="rt-tag-badge" style={{ background: "rgba(245,158,11,0.08)", color: "var(--amber)", border: "1px solid rgba(245,158,11,0.25)" }}>{blocker.category}</span>
                     <p style={{ fontSize: "13px", color: "var(--text-h)", fontWeight: "600", margin: "6px 0" }}>{blocker.message}</p>
-                    <p style={{ fontSize: "12px", color: "#10b981", margin: 0 }}>👉 {blocker.fix}</p>
+                    <p style={{ fontSize: "12px", color: "var(--green)", margin: 0 }}>Giải pháp: {blocker.fix}</p>
                   </div>
                 ))}
               </div>
@@ -1392,14 +1541,14 @@ export function AiAdvisor() {
           {/* Content Opportunities */}
           {result.content_opportunities && result.content_opportunities.length > 0 && (
             <div className="section-block" style={{ marginTop: "1.5rem" }}>
-              <h3 className="section-title" style={{ display: "flex", alignItems: "center", gap: "6px", color: "#ec4899" }}>
-                ✍️ Cơ hội mở rộng nội dung (Content Gaps)
-              </h3>
+                <h3 className="section-title" style={{ display: "flex", alignItems: "center", gap: "6px", color: "var(--primary)" }}>
+                  Cơ hội mở rộng nội dung (Content Gaps)
+                </h3>
               <div style={{ display: "flex", flexDirection: "column", gap: "8px", marginTop: "10px" }}>
                 {result.content_opportunities.map((opp, idx) => (
-                  <div key={idx} className="geo-faq-item" style={{ borderLeft: "3px solid #ec4899" }}>
+                  <div key={idx} className="geo-faq-item" style={{ borderLeft: "3px solid var(--primary)" }}>
                     <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
-                      <span className="rt-tag-badge" style={{ background: "rgba(236,72,153,0.15)", color: "#ec4899" }}>{opp.search_intent}</span>
+                      <span className="rt-tag-badge" style={{ background: "var(--primary-dim)", color: "var(--primary)", border: "1px solid rgba(139,92,246,0.25)" }}>{opp.search_intent}</span>
                     </div>
                     <p style={{ fontSize: "13px", color: "var(--text-h)", margin: "4px 0 0 0" }}>{opp.reason}</p>
                   </div>
@@ -1425,36 +1574,36 @@ export function AiAdvisor() {
 
             
             {/* 7 Days Plan */}
-            <div className="section-block" style={{ margin: 0 }}>
-              <h3 className="section-title" style={{ color: "#8b5cf6" }}>📅 Kế hoạch hành động 7 ngày tới</h3>
+            <div className="section-block" style={{ margin: 0, background: "var(--surface)" }}>
+              <h3 className="section-title" style={{ color: "var(--primary)" }}>Kế hoạch hành động 7 ngày tới</h3>
               <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginTop: "10px" }}>
                 {result.action_plan_7d.map((plan, i) => (
-                  <div key={i} className="geo-faq-item" style={{ borderLeft: "2px solid #8b5cf6", background: "rgba(255,255,255,0.01)" }}>
+                  <div key={i} className="geo-faq-item" style={{ borderLeft: "2px solid var(--primary)", background: "var(--surface2)" }}>
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "6px" }}>
-                      <strong style={{ color: "#c4b5fd", fontSize: "13px" }}>{plan.day || `Giai đoạn ${i+1}`}</strong>
+                      <strong style={{ color: "var(--primary)", fontSize: "13px" }}>{plan.day || `Giai đoạn ${i+1}`}</strong>
                       <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
                         {plan.pending_before_count !== undefined && plan.pending_before_count > 0 && (
                           <span className="issue-badge badge-critical" style={{ padding: "2px 6px", fontSize: "10px" }}>Tồn đọng ({plan.pending_before_count})</span>
                         )}
                         {plan.is_recurring && (
-                          <span className="issue-badge" style={{ padding: "2px 6px", fontSize: "10px", background: "rgba(139,92,246,0.15)", color: "#c4b5fd", border: "1px solid rgba(139,92,246,0.3)" }}>Lặp lại</span>
+                          <span className="issue-badge" style={{ padding: "2px 6px", fontSize: "10px", background: "rgba(139,92,246,0.08)", color: "var(--primary)", border: "1px solid rgba(139,92,246,0.25)" }}>Lặp lại</span>
                         )}
                         {priorityLabel(plan.priority)}
                       </div>
                     </div>
                     <p style={{ fontSize: "13px", color: "var(--text-h)", margin: "6px 0" }}>{plan.task}</p>
                     {plan.history_note && (
-                      <p style={{ fontSize: "11px", color: "#fcd34d", margin: "4px 0", fontStyle: "italic" }}>
-                        ⚠️ {plan.history_note}
+                      <p style={{ fontSize: "11px", color: "var(--amber)", margin: "4px 0", fontStyle: "italic" }}>
+                        Lịch sử: {plan.history_note}
                       </p>
                     )}
                     {plan.pattern_note && (
-                      <p style={{ fontSize: "11px", color: "#a78bfa", margin: "4px 0", fontStyle: "italic" }}>
-                        💡 {plan.pattern_note}
+                      <p style={{ fontSize: "11px", color: "var(--primary)", margin: "4px 0", fontStyle: "italic" }}>
+                        Mẫu tối ưu: {plan.pattern_note}
                       </p>
                     )}
                     <p style={{ fontSize: "11px", color: "var(--text-dim)", margin: 0 }}>
-                      ⚡ <strong>Tác động:</strong> {plan.impact}
+                      <strong>Tác động:</strong> {plan.impact}
                     </p>
                   </div>
                 ))}
@@ -1462,36 +1611,36 @@ export function AiAdvisor() {
             </div>
 
             {/* 30 Days Plan */}
-            <div className="section-block" style={{ margin: 0 }}>
-              <h3 className="section-title" style={{ color: "#06b6d4" }}>📅 Chiến lược tăng trưởng 30 ngày</h3>
+            <div className="section-block" style={{ margin: 0, background: "var(--surface)" }}>
+              <h3 className="section-title" style={{ color: "var(--cyan)" }}>Chiến lược tăng trưởng 30 ngày</h3>
               <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginTop: "10px" }}>
                 {result.action_plan_30d.map((plan, i) => (
-                  <div key={i} className="geo-faq-item" style={{ borderLeft: "2px solid #06b6d4", background: "rgba(255,255,255,0.01)" }}>
+                  <div key={i} className="geo-faq-item" style={{ borderLeft: "2px solid var(--cyan)", background: "var(--surface2)" }}>
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "6px" }}>
-                      <strong style={{ color: "#94a3b8", fontSize: "13px" }}>{plan.week || `Tuần ${i+1}`}</strong>
+                      <strong style={{ color: "var(--cyan)", fontSize: "13px" }}>{plan.week || `Tuần ${i+1}`}</strong>
                       <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
                         {plan.pending_before_count !== undefined && plan.pending_before_count > 0 && (
                           <span className="issue-badge badge-critical" style={{ padding: "2px 6px", fontSize: "10px" }}>Tồn đọng ({plan.pending_before_count})</span>
                         )}
                         {plan.is_recurring && (
-                          <span className="issue-badge" style={{ padding: "2px 6px", fontSize: "10px", background: "rgba(139,92,246,0.15)", color: "#c4b5fd", border: "1px solid rgba(139,92,246,0.3)" }}>Lặp lại</span>
+                          <span className="issue-badge" style={{ padding: "2px 6px", fontSize: "10px", background: "rgba(139,92,246,0.08)", color: "var(--primary)", border: "1px solid rgba(139,92,246,0.25)" }}>Lặp lại</span>
                         )}
                         {priorityLabel(plan.priority)}
                       </div>
                     </div>
                     <p style={{ fontSize: "13px", color: "var(--text-h)", margin: "6px 0" }}>{plan.task}</p>
                     {plan.history_note && (
-                      <p style={{ fontSize: "11px", color: "#fcd34d", margin: "4px 0", fontStyle: "italic" }}>
-                        ⚠️ {plan.history_note}
+                      <p style={{ fontSize: "11px", color: "var(--amber)", margin: "4px 0", fontStyle: "italic" }}>
+                        Lịch sử: {plan.history_note}
                       </p>
                     )}
                     {plan.pattern_note && (
-                      <p style={{ fontSize: "11px", color: "#a78bfa", margin: "4px 0", fontStyle: "italic" }}>
-                        💡 {plan.pattern_note}
+                      <p style={{ fontSize: "11px", color: "var(--primary)", margin: "4px 0", fontStyle: "italic" }}>
+                        Mẫu tối ưu: {plan.pattern_note}
                       </p>
                     )}
                     <p style={{ fontSize: "11px", color: "var(--text-dim)", margin: 0 }}>
-                      ⚡ <strong>Tác động:</strong> {plan.impact}
+                      <strong>Tác động:</strong> {plan.impact}
                     </p>
                   </div>
                 ))}
@@ -1502,8 +1651,8 @@ export function AiAdvisor() {
 
           {/* Sources and Data Coverage Status */}
           <div className="section-block" style={{ marginTop: "1.5rem" }}>
-            <h3 className="section-title" style={{ fontSize: "15px" }}>📊 Bản đồ phủ dữ liệu &amp; Mức độ tin cậy</h3>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px", background: "rgba(255,255,255,0.02)", borderRadius: "8px", border: "1px solid var(--border)", margin: "10px 0" }}>
+            <h3 className="section-title" style={{ fontSize: "15px" }}>Bản đồ phủ dữ liệu &amp; Mức độ tin cậy</h3>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px", background: "var(--surface2)", borderRadius: "8px", border: "1px solid var(--border)", margin: "10px 0" }}>
               <span style={{ fontSize: "13px" }}>Website chẩn đoán: <strong>{result.site_url}</strong></span>
               <span style={{ fontSize: "13px" }}>
                 Độ tin cậy cố vấn:{" "}
