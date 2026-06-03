@@ -1,6 +1,10 @@
 # AI ADVISOR SPEC - AI Marketing Hub
 <!-- Updated: 2026-06-02 -->
 
+> Ghi chu: File nay mo ta `AI Advisor` phase 1 / nen tang co ban.
+> Huong nang cap cho deep analysis, report export, va roadmap tree duoc ghi rieng tai:
+> `OpenSpec/AI_ADVISOR_V2_SPEC.md`
+
 ## 1. Muc tieu
 
 Them mot workspace moi de he thong co the doc du lieu hien tai cua website va dua ra de xuat hanh dong co uu tien.

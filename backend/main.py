@@ -21,6 +21,7 @@ from routers import api_satellite
 from routers import api_seo_tools
 from routers import api_content_writer
 from routers import api_advisor
+from routers import api_dataset_memory
 
 app = FastAPI(
     title="AI Marketing Hub — Backend",
@@ -147,6 +148,7 @@ app.include_router(api_satellite.router)
 app.include_router(api_seo_tools.router)
 app.include_router(api_content_writer.router)
 app.include_router(api_advisor.router)
+app.include_router(api_dataset_memory.router)
 
 
 @app.on_event("startup")

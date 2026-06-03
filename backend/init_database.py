@@ -14,7 +14,10 @@ from datetime import datetime, timedelta
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from core.database import engine, Base, SessionLocal
-from core.models import User, ManagedSite, TrackedKeyword, RankingHistory, ContentItem, AbTest
+from core.models import (
+    User, ManagedSite, TrackedKeyword, RankingHistory, ContentItem, AbTest,
+    SEOKeywordMemory, SEORecommendationOutcome, SEOPatternMemory
+)
 
 def log(msg: str):
     print(f"  ✅ {msg}")
@@ -36,6 +39,25 @@ def init_database():
     header("Tạo Database Schema...")
     Base.metadata.create_all(bind=engine)
     log("Đã tạo thành công tất cả các bảng từ models.py")
+
+    # SQLite column migration check for local development databases
+    if engine.name == "sqlite":
+        from sqlalchemy import text
+        try:
+            with engine.begin() as conn:
+                # Get table columns using SQLite specific pragma
+                pragma_res = conn.execute(text("PRAGMA table_info(seo_recommendation_outcomes)")).fetchall()
+                existing_cols = [row[1] for row in pragma_res]
+                
+                if "execution_note" not in existing_cols:
+                    conn.execute(text("ALTER TABLE seo_recommendation_outcomes ADD COLUMN execution_note TEXT"))
+                    log("Migration: Added column 'execution_note' to table 'seo_recommendation_outcomes'")
+                    
+                if "updated_at" not in existing_cols:
+                    conn.execute(text("ALTER TABLE seo_recommendation_outcomes ADD COLUMN updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP"))
+                    log("Migration: Added column 'updated_at' to table 'seo_recommendation_outcomes'")
+        except Exception as e:
+            warn(f"Lỗi khi thực hiện kiểm tra migration SQLite: {e}")
 
     db = SessionLocal()
     

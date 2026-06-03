@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Float, ForeignKey, Text, DateTime, Boolean, UniqueConstraint
+from sqlalchemy import Column, Integer, String, Float, ForeignKey, Text, DateTime, Boolean, UniqueConstraint, Index
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 import datetime
@@ -75,6 +75,9 @@ class ManagedSite(Base):
     advisor_runs = relationship("SEOAdvisorRun", back_populates="site", cascade="all, delete-orphan")
     derived_signals = relationship("SEODerivedSignal", back_populates="site", cascade="all, delete-orphan")
     recommendation_memories = relationship("SEORecommendationMemory", back_populates="site", cascade="all, delete-orphan")
+    keyword_memories = relationship("SEOKeywordMemory", back_populates="site", cascade="all, delete-orphan")
+    recommendation_outcomes = relationship("SEORecommendationOutcome", back_populates="site", cascade="all, delete-orphan")
+    pattern_memories = relationship("SEOPatternMemory", back_populates="site", cascade="all, delete-orphan")
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -266,6 +269,7 @@ class SEODerivedSignal(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     site_id = Column(Integer, ForeignKey("managed_sites.id", ondelete="CASCADE"), nullable=False, index=True)
+    advisor_run_id = Column(Integer, ForeignKey("seo_advisor_runs.id", ondelete="SET NULL"), nullable=True, index=True)
     signal_type = Column(String, nullable=False)  # quick_wins, ctr_opportunity, rank_drops, technical_blockers, schema_gaps, cwv_risks, content_gaps, geo_readiness
     entity_identifier = Column(String, nullable=False, index=True)  # query/keyword text or page URL
     signal_data = Column(Text, nullable=False)  # JSON string
@@ -273,9 +277,15 @@ class SEODerivedSignal(Base):
 
     # Relationships
     site = relationship("ManagedSite", back_populates="derived_signals")
+    advisor_run = relationship("SEOAdvisorRun")
 
 
 class SEORecommendationMemory(Base):
+    """
+    SEO Recommendation Strategic Catalog / Memory Layer (strategic level).
+    Tracks the catalog of general SEO rules/recommendations patterns 
+    offered to the user for the site, along with general user feedback/status (applied, rejected).
+    """
     __tablename__ = "seo_rec_memory"
 
     id = Column(Integer, primary_key=True, index=True)
@@ -288,3 +298,106 @@ class SEORecommendationMemory(Base):
 
     # Relationships
     site = relationship("ManagedSite", back_populates="recommendation_memories")
+
+
+class SEOKeywordMemory(Base):
+    """
+    SEO Keyword Intelligence Memory (observed queries level).
+    Stores high-value query opportunities observed or derived during site audits
+    and traces them back to the advisor run that analyzed them.
+    """
+    __tablename__ = "seo_keyword_memory"
+
+    id = Column(Integer, primary_key=True, index=True)
+    site_id = Column(Integer, ForeignKey("managed_sites.id", ondelete="CASCADE"), nullable=False, index=True)
+    advisor_run_id = Column(Integer, ForeignKey("seo_advisor_runs.id", ondelete="SET NULL"), nullable=True, index=True)
+    site_url = Column(String, nullable=False)
+    keyword = Column(String, nullable=False)
+    normalized_keyword = Column(String, nullable=False, index=True)
+    page_url = Column(String, nullable=True)
+    page_type = Column(String, nullable=True)
+    search_intent = Column(String, nullable=True)
+    source = Column(String, nullable=False)
+    clicks = Column(Integer, default=0)
+    impressions = Column(Integer, default=0)
+    ctr = Column(Float, default=0.0)
+    avg_position = Column(Float, default=0.0)
+    trend_direction = Column(String, nullable=True)
+    opportunity_type = Column(String, nullable=False)
+    confidence_score = Column(Float, default=100.0)
+    evidence_json = Column(Text, nullable=False)  # JSON string
+    observed_at = Column(DateTime(timezone=True), server_default=func.now())
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    # Composite Index for fast lookup and de-duplication queries
+    __table_args__ = (
+        Index('idx_kw_memory_lookup', 'site_id', 'normalized_keyword', 'opportunity_type'),
+    )
+
+    # Relationships
+    site = relationship("ManagedSite", back_populates="keyword_memories")
+    advisor_run = relationship("SEOAdvisorRun")
+
+
+class SEORecommendationOutcome(Base):
+    """
+    SEO Recommendation In-Run Execution Instances (instance level).
+    Stores individual execution instances of advisor recommendations generated
+    in a specific SEOAdvisorRun, capturing their priority, impact, specific page,
+    target keyword, current status (pending, in_progress, completed, failed), and measured deltas.
+    """
+    __tablename__ = "seo_recommendation_outcomes"
+
+    id = Column(Integer, primary_key=True, index=True)
+    site_id = Column(Integer, ForeignKey("managed_sites.id", ondelete="CASCADE"), nullable=False, index=True)
+    advisor_run_id = Column(Integer, ForeignKey("seo_advisor_runs.id", ondelete="SET NULL"), nullable=True, index=True)
+    recommendation_type = Column(String, nullable=False)
+    recommendation_text = Column(Text, nullable=False)
+    priority = Column(String, nullable=True, index=True)  # high, medium, low
+    impact = Column(String, nullable=True)
+    page_url = Column(String, nullable=True)
+    keyword = Column(String, nullable=True)
+    status = Column(String, default="pending")  # pending, in_progress, completed, failed
+    outcome = Column(String, nullable=True)
+    execution_note = Column(Text, nullable=True)
+    measured_delta_json = Column(Text, nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+    reviewed_at = Column(DateTime(timezone=True), nullable=True)
+
+    # Composite Index for reporting status by site
+    __table_args__ = (
+        Index('idx_rec_outcome_lookup', 'site_id', 'status'),
+    )
+
+    # Relationships
+    site = relationship("ManagedSite", back_populates="recommendation_outcomes")
+    advisor_run = relationship("SEOAdvisorRun")
+
+
+class SEOPatternMemory(Base):
+    """
+    SEO Pattern Memory Layer.
+    Stores observed high-value patterns (title structures, meta structures, 
+    schema combinations, content templates, local SEO templates, etc.) 
+    to be utilized by AI Advisor, Content Planner, GEO Optimizer, and reporting modules.
+    """
+    __tablename__ = "seo_pattern_memory"
+
+    id = Column(Integer, primary_key=True, index=True)
+    site_id = Column(Integer, ForeignKey("managed_sites.id", ondelete="CASCADE"), nullable=False, index=True)
+    advisor_run_id = Column(Integer, ForeignKey("seo_advisor_runs.id", ondelete="SET NULL"), nullable=True, index=True)
+    pattern_type = Column(String, nullable=False, index=True)  # title_pattern, meta_pattern, schema_pattern, content_structure_pattern, local_seo_pattern, cwv_pattern
+    pattern_label = Column(String, nullable=False, index=True)  # unique label for logic matching e.g., title_has_location_and_trust
+    page_type = Column(String, nullable=True, index=True)  # home, service, article, category
+    search_intent = Column(String, nullable=True, index=True)  # commercial, informational, transactional
+    source = Column(String, nullable=False)  # advisor, crawler, search_console, analytics
+    confidence_score = Column(Float, default=100.0)
+    outcome_score = Column(Float, nullable=True)
+    pattern_payload_json = Column(Text, nullable=False)  # JSON payload string containing attributes/metrics
+    observed_at = Column(DateTime(timezone=True), server_default=func.now())
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    # Relationships
+    site = relationship("ManagedSite", back_populates="pattern_memories")
+    advisor_run = relationship("SEOAdvisorRun")

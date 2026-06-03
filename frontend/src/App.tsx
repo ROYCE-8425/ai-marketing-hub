@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, lazy, Suspense } from "react";
 import { Routes, Route, NavLink, useLocation, useNavigate } from "react-router-dom";
 import SEOHead from "./components/SEO/SEOHead";
 import { SEO_CONFIG, getTabIdFromPath, getPathFromTabId } from "./components/SEO/seoConfig";
@@ -18,13 +18,14 @@ import { PublishModal } from "./components/PublishModal";
 import { ReportGenerator } from "./components/ReportGenerator";
 import { ContentCalendar } from "./components/ContentCalendarPanel";
 import { SiteManager } from "./components/SiteManager";
-import { AbTesting } from "./components/AbTesting";
-import FileConverter from "./components/FileConverter";
 import { SeoWorkspace } from "./components/SeoWorkspace";
-import { AiAdvisor } from "./components/AiAdvisor";
-import { KeywordHub } from "./components/KeywordHub";
-import { ContentStudio } from "./components/ContentStudio";
-import { SchemaGeo } from "./components/SchemaGeo";
+
+const AbTesting = lazy(() => import("./components/AbTesting").then(m => ({ default: m.AbTesting })));
+const FileConverter = lazy(() => import("./components/FileConverter"));
+const AiAdvisor = lazy(() => import("./components/AiAdvisor").then(m => ({ default: m.AiAdvisor })));
+const KeywordHub = lazy(() => import("./components/KeywordHub").then(m => ({ default: m.KeywordHub })));
+const ContentStudio = lazy(() => import("./components/ContentStudio").then(m => ({ default: m.ContentStudio })));
+const SchemaGeo = lazy(() => import("./components/SchemaGeo").then(m => ({ default: m.SchemaGeo })));
 import GoogleSetup from "./components/GoogleSetup";
 import AuthPage from "./components/AuthPage";
 import UserMenu from "./components/UserMenu";
@@ -822,7 +823,13 @@ export default function App() {
         {activeTab !== 'dashboard' && currentDesc && (
           <PageHeader icon={currentIcon} title={currentLabel} description={currentDesc} group={currentGroup} />
         )}
-        <Routes>
+        <Suspense fallback={
+          <div className="section-block" style={{ padding: "40px", textAlign: "center", color: "var(--primary)" }}>
+            <span className="btn-spinner" style={{ width: "24px", height: "24px", borderWidth: "3px", display: "inline-block", marginRight: "8px", verticalAlign: "middle" }} />
+            Đang tải dữ liệu trang...
+          </div>
+        }>
+          <Routes>
 
         {/* ── Admin: User Management ── */}
         <Route path="/admin/users" element={
@@ -1595,6 +1602,7 @@ export default function App() {
         <Route path="*" element={<ViewerGuard><DashboardOverview onNavigate={(tab) => navigate(getPathFromTabId(tab))} /></ViewerGuard>} />
 
         </Routes>
+        </Suspense>
       </main>
       </div>
 
