@@ -124,6 +124,32 @@ class SEOQualityRater:
         warnings = []
         suggestions = []
 
+        # Apply Relevance Penalty if primary_keyword is provided
+        if primary_keyword:
+            kw_lower = primary_keyword.lower()
+            kw_in_title = kw_lower in meta_title.lower() if meta_title else False
+            kw_in_h1 = structure.get('keyword_in_h1', False)
+            kw_count = content.lower().count(kw_lower) if content else 0
+
+            if not kw_in_title and not kw_in_h1 and kw_count == 0:
+                overall_score -= 35
+                keyword_score['score'] = 0
+                critical_issues.append(
+                    f'Lỗi từ khóa: Từ khóa chính "{primary_keyword}" hoàn toàn không xuất hiện ở bất kỳ đâu trên bài viết (Title, tiêu đề H1, hay nội dung).'
+                )
+            elif not kw_in_title and not kw_in_h1 and kw_count > 0:
+                overall_score -= 15
+                warnings.append(
+                    f'Từ khóa chính "{primary_keyword}" xuất hiện trong nội dung nhưng thiếu hoàn toàn trong cả Meta Title và tiêu đề H1.'
+                )
+            elif (kw_in_title or kw_in_h1) and kw_count == 0:
+                overall_score -= 15
+                warnings.append(
+                    f'Từ khóa chính "{primary_keyword}" xuất hiện trong tiêu đề nhưng không được đề cập bất kỳ lần nào trong phần nội dung bài viết.'
+                )
+
+        overall_score = max(0.0, overall_score)
+
         for category in [content_score, keyword_score, meta_score, structure_score, link_score, readability_score]:
             critical_issues.extend(category.get('critical', []))
             warnings.extend(category.get('warnings', []))
@@ -852,6 +878,38 @@ def rate_page_seo(
 
     # ── Overall ──────────────────────────────────────────────────────────
     overall = idx_score + meta_score + heading_score + content_score + kw_score + link_score + media_score + tech_score
+
+    # Apply Relevance Penalty if primary_keyword is provided
+    if primary_keyword:
+        kw_lower = primary_keyword.lower()
+        kw_in_title = kw_lower in features.meta_title.lower() if features.meta_title else False
+        kw_in_h1 = any(kw_lower in h.lower() for h in features.h1_texts) if features.h1_texts else False
+        kw_count = features.visible_text.lower().count(kw_lower) if features.visible_text else 0
+
+        if not kw_in_title and not kw_in_h1 and kw_count == 0:
+            # Complete absence penalty
+            relevance_penalty = 35
+            overall -= relevance_penalty
+            kw_score = 0
+            critical_issues.append(
+                f'Lỗi từ khóa: Từ khóa chính "{primary_keyword}" hoàn toàn không xuất hiện ở bất kỳ đâu trên trang (Title, H1, hay nội dung). Trang web này hoàn toàn không liên quan đến từ khóa được chọn.'
+            )
+        elif not kw_in_title and not kw_in_h1 and kw_count > 0:
+            # Present in body but missing in both title and H1
+            relevance_penalty = 15
+            overall -= relevance_penalty
+            warnings.append(
+                f'Từ khóa chính "{primary_keyword}" xuất hiện trong nội dung ({kw_count} lần) nhưng thiếu hoàn toàn trong cả Meta Title và tiêu đề H1.'
+            )
+        elif (kw_in_title or kw_in_h1) and kw_count == 0:
+            # Present in title/H1 but completely missing in content text
+            relevance_penalty = 15
+            overall -= relevance_penalty
+            warnings.append(
+                f'Từ khóa chính "{primary_keyword}" xuất hiện trong tiêu đề (Title/H1) nhưng không được đề cập bất kỳ lần nào trong phần nội dung văn bản chính.'
+            )
+
+    overall = max(0.0, overall)
 
     return {
         "overall_score": round(overall, 1),
