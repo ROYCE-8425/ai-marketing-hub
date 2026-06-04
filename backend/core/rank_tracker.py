@@ -405,14 +405,18 @@ async def sync_rankings_from_gsc(site_url: str) -> Dict[str, Any]:
         finally:
             db.close()
 
+        import urllib.parse
+        encoded_site = urllib.parse.quote_plus(gsc_site)
         synced_count = 0
+        errors = []
+        
         for kw in keywords:
             try:
                 resp = await client.post(
-                    f"https://www.googleapis.com/webmasters/v3/sites/{gsc_site}/searchAnalytics/query",
+                    f"https://www.googleapis.com/webmasters/v3/sites/{encoded_site}/searchAnalytics/query",
                     headers={"Authorization": f"Bearer {access_token}"},
                     json={
-                        "startDate": (datetime.utcnow() - timedelta(days=3)).strftime("%Y-%m-%d"),
+                        "startDate": (datetime.utcnow() - timedelta(days=10)).strftime("%Y-%m-%d"),
                         "endDate": datetime.utcnow().strftime("%Y-%m-%d"),
                         "dimensions": ["query"],
                         "dimensionFilterGroups": [{
@@ -443,7 +447,13 @@ async def sync_rankings_from_gsc(site_url: str) -> Dict[str, Any]:
                     else:
                         save_ranking(kw, site_url, 0, source="gsc_not_found")
                         synced_count += 1
-            except Exception:
+                else:
+                    errors.append(f"GSC API returned {resp.status_code}: {resp.text}")
+            except Exception as e:
+                errors.append(str(e))
                 continue
+
+        if synced_count == 0 and errors:
+            return {"error": f"Lỗi GSC: {errors[0]}", "synced": 0}
 
         return {"status": "ok", "synced": synced_count, "total_keywords": len(keywords)}

@@ -295,7 +295,7 @@ export function RankTracker() {
                   <td>{kw.ctr > 0 ? `${kw.ctr}%` : "—"}</td>
                   <td>
                     <span className={`rt-source-badge ${kw.source}`}>
-                      {kw.source === "gsc" ? "GSC" : kw.source === "pending" ? "Chờ" : kw.source}
+                      {kw.source === "gsc" ? "GSC" : kw.source === "gsc_not_found" ? "GSC (Trống)" : kw.source === "pending" ? "Chờ" : kw.source}
                     </span>
                   </td>
                   <td>
