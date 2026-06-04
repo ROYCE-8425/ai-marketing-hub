@@ -153,6 +153,15 @@ def _extract_links(soup: BeautifulSoup, base_url: str) -> List[Dict[str, str]]:
         href = tag["href"].strip()
         if _should_skip(href):
             continue
+        
+        # Skip resource hints (preconnect, dns-prefetch) as they point to hosts, not assets
+        rel_list = tag.get("rel", [])
+        if isinstance(rel_list, str):
+            rel_list = [rel_list]
+        rel_lower = [r.lower() for r in rel_list]
+        if "preconnect" in rel_lower or "dns-prefetch" in rel_lower:
+            continue
+
         links.append({
             "url": urljoin(base_url, href),
             "source_tag": "link",
